@@ -17,4 +17,4 @@ What will you get:
 - Contains sample Docker file
 - Contains shell script to create your own service based on this template
 
-https://github.com/mobiletoly/gokatana-samples/hexagonal
+https://github.com/mobiletoly/gokatana-samples/tree/main/hexagonal
