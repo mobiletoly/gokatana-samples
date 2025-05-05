@@ -1,0 +1,6 @@
+database:
+  migrations:
+    - service: sample
+      schema: sample
+      path: ../dbmigrate
+  sslmode: disable

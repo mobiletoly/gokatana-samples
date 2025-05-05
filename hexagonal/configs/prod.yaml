@@ -1,0 +1,4 @@
+database:
+  host: proddbhost:5432
+  name: postgres
+  sslmode: require

@@ -1,0 +1,13 @@
+database:
+  migrations:
+    - service: sample
+      schema: sample
+      path: ./dbmigrate
+  connectTimeout: 30
+  port: 5432
+  user: _
+  password: _
+server:
+  addr: 0.0.0.0
+  port: 8080
+  requestDecompression: disable

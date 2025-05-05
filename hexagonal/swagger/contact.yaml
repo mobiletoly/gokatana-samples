@@ -1,0 +1,93 @@
+swagger: '2.0'
+info:
+  version: '1.0.0'
+  title: 'gokatana-sample-hexagonal'
+  description: 'APIs for Sample/Hexagonal app'
+
+basePath: '/api/v1/sample'
+
+paths:
+  /version:
+    get:
+      summary: 'Get service version'
+      responses:
+        200:
+          description: 'Service version'
+          schema:
+            type: 'object'
+
+  /contacts/{id}:
+    get:
+      summary: 'Get contact by ID'
+      parameters:
+        - name: 'id'
+          in: 'path'
+          description: 'ID of the contact to get'
+          required: true
+          type: 'string'
+      responses:
+        200:
+          description: 'Successful response'
+          schema:
+            type: 'object'
+            $ref: '#/definitions/Contact'
+        404:
+          description: 'Cannot find contact with requested id'
+  /contacts:
+    get:
+      summary: 'Get all contacts'
+      responses:
+        200:
+          description: 'List of all contacts'
+          schema:
+            type: 'array'
+            items:
+              $ref: '#/definitions/Contact'
+    post:
+        summary: 'Add new contact'
+        parameters:
+            - name: 'contact'
+              in: 'body'
+              description: 'Contact to add'
+              required: true
+              schema:
+                  $ref: '#/definitions/AddContact'
+        responses:
+            201:
+              description: 'Contact added'
+              schema:
+                  type: 'object'
+                  $ref: '#/definitions/Contact'
+            400:
+              description: 'Invalid input'
+            409:
+              description: 'Contact already exists'
+
+definitions:
+  AddContact:
+    type: object
+    properties:
+      firstName:
+        type: 'string'
+        example: 'Joe'
+      lastName:
+        type: 'string'
+        example: 'Doe'
+    required:
+      - firstName
+      - lastName
+  Contact:
+    type: 'object'
+    properties:
+      id:
+        type: 'string'
+      firstName:
+        type: 'string'
+        example: 'Joe'
+      lastName:
+        type: 'string'
+        example: 'Doe'
+    required:
+      - id
+      - firstName
+      - lastName

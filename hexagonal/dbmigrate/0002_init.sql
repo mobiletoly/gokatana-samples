@@ -1,0 +1,1 @@
+ALTER TABLE sample.contact ADD COLUMN email VARCHAR(255) DEFAULT NULL;
