@@ -9,7 +9,7 @@ require (
 	github.com/go-openapi/validate v0.24.0
 	github.com/jackc/pgx/v5 v5.7.4
 	github.com/labstack/echo/v4 v4.13.3
-	github.com/mobiletoly/gokatana v0.0.0-20250505114310-65656ece55ff
+	github.com/mobiletoly/gokatana v0.0.1
 	github.com/samber/lo v1.50.0
 	github.com/samber/slog-echo v1.16.1
 	github.com/samber/slog-zap/v2 v2.6.2
