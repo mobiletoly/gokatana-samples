@@ -1,7 +1,14 @@
 package intgr_test
 
 import (
-	"github.com/mobiletoly/gokatana-samples/hexagonal/internal/adapters/apiserver"
+	// Pick one of the imports below, depending on which framework you use
+	// -- Option 1: Echo framework
+	apiserver "github.com/mobiletoly/gokatana-samples/hexagonal/internal/adapters/apiserver_echo"
+	// -- Option 2: Chi router
+	// apiserver "github.com/mobiletoly/gokatana-samples/hexagonal/internal/adapters/apiserver_chi"
+	// -- Option 3: Standard net/http
+	//apiserver "github.com/mobiletoly/gokatana-samples/hexagonal/internal/adapters/apiserver_std"
+
 	"github.com/mobiletoly/gokatana-samples/hexagonal/internal/core/app"
 	"github.com/mobiletoly/gokatana-samples/hexagonal/internal/core/model"
 	"github.com/mobiletoly/gokatana-samples/hexagonal/internal/infra"

@@ -38,7 +38,6 @@ fi
 # Copy current directory to output directory excluding .git and .idea directories
 rsync -a --exclude={.git,.idea} . "$OUTPUT_DIR"
 
-# In all files replace the string "github.com/mobiletoly/gokatana/samples/hexagonal" with the service name
 find "$OUTPUT_DIR" -type f -exec sed -i '' "s|github.com/mobiletoly/gokatana-samples/hexagonal|$PACKAGE|g" {} \;
 
 # In file internal/core/app/configload.go replace substring "HEXAGONAL" in quotes with the service name in uppercase and with removed dashes and underscores

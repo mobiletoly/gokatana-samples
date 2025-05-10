@@ -12,8 +12,8 @@ import (
 func main() {
 	katapp.CmdlineExecute(
 		"hexagonal",
-		"GoKatana/Hexagonal API server",
-		"GoKatana/Hexagonal API server - sample GoKatana service based on Hexagonal architecture",
+		"GoKatana/Hexagonal Echo API server",
+		"GoKatana/Hexagonal API server - sample GoKatana service based on Hexagonal architecture with Echo",
 		&katapp.CmdlineHandler{
 			Run: func(deployment string) {
 				infra.Start(deployment, nil, nil)

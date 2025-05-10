@@ -62,7 +62,25 @@ go run main.go run --deployment=local
 
 It will start the service, and you can access it at http://localhost:8080/api/v1/sample/version
 
-Feel free to explore other REST APIs that Hexagonal sample provides, by looking
+Note that Hexagonal service provides example of using multiple API server implementations:
+- `internal/adapters/apiserver_echo` package - implementation based on Echo framework
+- `internal/adapters/apiserver_std` package - implementation based on standard net/http library (ServeMux)
+- `internal/adapters/apiserver_chi` package - implementation based on Chi router
+
+You can switch between them by changing opening file `internal/infra/launcher.go` and
+commenting/uncommenting appropriate lines:
+
+```go
+// Option 1: Echo framework
+server := apiserver_echo.Start(ctx, uc)
+
+// Option 2: Standard net/http
+//server := apiserver_std.Start(ctx, uc)
+
+// Option 3: Chi router
+//server := apiserver_chi.Start(ctx, uc)
+```
+
 
 ## (Option 2) Create your own new service based on hexagonal template
 
@@ -71,7 +89,7 @@ provided in hexagonal sample directory and pass 3 parameters (service name, pack
 output directory), e.g.:
 
 ```shell
-./create-new-service.sh myservice github.com/somehandler/myservice ../../myservice 
+./create-new-service.sh myservice github.com/somehandler/myservice ../../myservice
 ```
 
 (replace **myservice** with the name of your new service, do not forget to replace the package name as well)
@@ -87,6 +105,10 @@ export MYSERVICE_DATABASE_USER=postgres
 export MYSERVICE_DATABASE_PASSWORD=postgres
 go run main.go run --deployment=local
 ```
+
+The service created contains multiple similar implementations for API server adapter,
+such as `apiserver_std`, `apiserver_chi`, `apiserver_echo`. You can
+remove the ones you do not need.
 
 # Swagger
 
@@ -113,9 +135,15 @@ myservice/
 ├── dbmigrate/                # Database migration files
 ├── internal/
 │   ├── adapters/             # Adapters (HTTP handlers, database repositories)
-│   │   ├── apiserver/        # HTTP API handlers
+│   │   ├── apiserver_chi/    # (1) HTTP API handlers implemented with net/http framework
 │   │   │   ├── apiserver.go  # HTTP API server launcher (and route registration)
-│   │   │   ├── contact.go    # HEEP API /contact route handlers
+│   │   │   └── contact.go    # HTTP API /contact route handlers
+│   │   ├── apiserver_echo/   # (2) HTTP API handlers implemented with Echo framework
+│   │   │   ├── apiserver.go  # ..
+│   │   │   ├── contact.go    # ..
+│   │   ├── apiserver_std/    # (3) HTTP API handlers implemented with net/http framework
+│   │   │   ├── apiserver.go  # ...
+│   │   │   └── contact.go    # ...
 │   │   └── persist/          # Database repositories
 │   │       ├── contact.go    # Contact repository adapter (contact table) to be called from business logic
 │   │       └── internal/     # (internal implementation details)

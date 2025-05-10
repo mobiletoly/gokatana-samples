@@ -1,4 +1,4 @@
-package apiserver
+package apiserver_echo
 
 import (
 	"context"
@@ -6,8 +6,10 @@ import (
 	"github.com/mobiletoly/gokatana-samples/hexagonal/internal/core/usecase"
 	"github.com/mobiletoly/gokatana/katapp"
 	"github.com/mobiletoly/gokatana/kathttp"
-	slogecho "github.com/samber/slog-echo"
+	"github.com/mobiletoly/gokatana/kathttp_echo"
+	"github.com/samber/slog-echo"
 	"net/http"
+	"time"
 )
 
 var AppTagVersion = "undefined"
@@ -19,20 +21,14 @@ var SampleVersionResponse = kathttp.Version{
 
 // You can set the version during compile time by passing ldflags to the go build command:
 //
-//	-ldflags "-X 'github.com/mobiletoly/gokatana-samples/hexagonal/internal/adapters/apiserver.AppTagVersion=1.0.0'"
-//
-// When code is deployed via Github Action - we take care of setting this version based on git tag.
+//	-ldflags "-X 'github.com/mobiletoly/gokatana-samples/hexagonal/internal/adapters/apiserver_echo.AppTagVersion=1.0.0'"
 func init() {
 	SampleVersionResponse.Version = AppTagVersion
 }
 
-func Start(
-	ctx context.Context,
-	uc *usecase.UseCases,
-	loaded chan struct{},
-) {
+func Start(ctx context.Context, uc *usecase.UseCases) *echo.Echo {
 	logger := katapp.Logger(ctx).Logger
-	kathttp.Run(
+	server := kathttp_echo.Start(
 		ctx,
 		&uc.Config.Server,
 		logger,
@@ -44,10 +40,15 @@ func Start(
 			}
 			e.Use(slogecho.NewWithConfig(logger, config))
 			apiRoutes(e, uc)
-			if loaded != nil { // needed for tests only
-				loaded <- struct{}{}
-			}
 		})
+	return server
+}
+
+// WaitForInterruptSignal waits for interrupt signal to gracefully shut down the server with a timeout.
+func WaitForInterruptSignal(ctx context.Context, server *echo.Echo, timeout time.Duration) {
+	katapp.WaitForInterruptSignal(ctx, timeout, func() error {
+		return server.Shutdown(ctx)
+	})
 }
 
 func apiRoutes(e *echo.Echo, uc *usecase.UseCases) {
