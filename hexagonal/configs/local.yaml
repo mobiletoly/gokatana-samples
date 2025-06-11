@@ -2,8 +2,3 @@ database:
   host: 127.0.0.1
   name: postgres
   sslmode: disable
-server:
-  acl:
-    apiKey:
-      admin: adminkey
-      ga: gakey
