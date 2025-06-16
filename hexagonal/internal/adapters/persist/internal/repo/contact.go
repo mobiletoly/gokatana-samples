@@ -7,7 +7,7 @@ import (
 	"github.com/mobiletoly/gokatana/katpg"
 )
 
-//go:generate gobetter -input $GOFILE
+//go:generate go tool gobetter -input $GOFILE
 
 type ContactRepo struct {
 	db *pgxpool.Pool
