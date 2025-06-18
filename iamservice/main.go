@@ -5,11 +5,8 @@ import (
 	"github.com/mobiletoly/gokatana/katapp"
 )
 
-//go:generate go tool swagger generate model --spec=swagger/contact.yaml --target=internal/core --model-package=swagger --keep-spec-order
 //go:generate go tool swagger generate model --spec=swagger/auth.yaml --target=internal/core --model-package=swagger --keep-spec-order
 //go:generate go tool swagger generate model --spec=swagger/user.yaml --target=internal/core --model-package=swagger --keep-spec-order
-//go:generate go tool gobetter -input=./internal/core/swagger/add_contact.go -generate-for=exported -receiver=pointer
-//go:generate go tool gobetter -input=./internal/core/swagger/contact.go -generate-for=exported -receiver=pointer
 //go:generate go tool gobetter -input=./internal/core/swagger/auth_response.go -generate-for=exported -receiver=pointer
 //go:generate go tool gobetter -input=./internal/core/swagger/message_response.go -generate-for=exported -receiver=pointer
 //go:generate go tool gobetter -input=./internal/core/swagger/refresh_request.go -generate-for=exported -receiver=pointer
