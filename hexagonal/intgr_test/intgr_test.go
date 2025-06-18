@@ -16,7 +16,6 @@ import (
 	"github.com/mobiletoly/gokatana/kathttp"
 	"github.com/mobiletoly/gokatana/kathttpc"
 	"github.com/mobiletoly/gokatana/katpg"
-	"github.com/mobiletoly/gokatana/kattest"
 	"log/slog"
 	"os"
 	"testing"
@@ -50,11 +49,11 @@ func TestAPIRoutes(t *testing.T) {
 		)
 	}()
 	<-started
-	kathttpc.WaitForURLToBecomeReady(ctx, &appConfig.Server, "api/v1/sample/version")
+	kathttpc.WaitForURLToBecomeReady(ctx, kathttpc.LocalURL(appConfig.Server.Port, "api/v1/sample/version"))
 
 	t.Run("API Routes", func(t *testing.T) {
 		t.Run("GET /version must succeed", func(t *testing.T) {
-			resp, _, err := kattest.LocalHttpJsonGetRequest[kathttp.Version](ctx, &appConfig.Server,
+			resp, _, err := kathttpc.LocalHttpJsonGetRequest[kathttp.Version](ctx, &appConfig.Server,
 				"api/v1/sample/version", nil)
 			assert.NoError(t, err)
 			assert.Equal(t, apiserver.SampleVersionResponse.Service, resp.Service)
@@ -63,8 +62,8 @@ func TestAPIRoutes(t *testing.T) {
 		})
 		t.Run("GET /contacts", func(t *testing.T) {
 			t.Run("must succeed", func(t *testing.T) {
-				resp, _, err := kattest.LocalHttpJsonGetRequest[[]model.Contact](ctx, &appConfig.Server,
-					"api/v1/sample/contacts", map[string]string{})
+				resp, _, err := kathttpc.LocalHttpJsonGetRequest[[]model.Contact](ctx, &appConfig.Server,
+					"api/v1/sample/contacts", nil)
 				assert.NoError(t, err)
 				assert.NotNil(t, resp)
 				assert.Equal(t, len(*resp), 6)
@@ -76,8 +75,8 @@ func TestAPIRoutes(t *testing.T) {
 		})
 		t.Run("GET /contacts/{id}", func(t *testing.T) {
 			t.Run("must succeed", func(t *testing.T) {
-				item, _, err := kattest.LocalHttpJsonGetRequest[model.Contact](ctx, &appConfig.Server,
-					"api/v1/sample/contacts/1", map[string]string{})
+				item, _, err := kathttpc.LocalHttpJsonGetRequest[model.Contact](ctx, &appConfig.Server,
+					"api/v1/sample/contacts/1", nil)
 				assert.NoError(t, err)
 				assert.EqualValues(t, lo.ToPtr("1"), item.ID)
 				assert.EqualValues(t, lo.ToPtr("John"), item.FirstName)
@@ -90,8 +89,8 @@ func TestAPIRoutes(t *testing.T) {
 				LastName:  lo.ToPtr("Doe"),
 			}
 			t.Run("must succeed", func(t *testing.T) {
-				item, _, err := kattest.LocalHttpJsonPostRequest[model.AddContact, model.Contact](
-					ctx, &appConfig.Server, "api/v1/sample/contacts", map[string]string{}, addContact)
+				item, _, err := kathttpc.LocalHttpJsonPostRequest[model.AddContact, model.Contact](
+					ctx, &appConfig.Server, "api/v1/sample/contacts", nil, addContact)
 				assert.NoError(t, err)
 				assert.NotNil(t, item)
 				assert.NotEmpty(t, item.ID)

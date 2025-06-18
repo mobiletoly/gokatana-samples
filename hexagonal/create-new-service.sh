@@ -43,6 +43,9 @@ find "$OUTPUT_DIR" -type f -exec sed -i '' "s|github.com/mobiletoly/gokatana-sam
 # In file internal/core/app/configload.go replace substring "HEXAGONAL" in quotes with the service name in uppercase and with removed dashes and underscores
 sed -i '' "s/\"HEXAGONAL\"/\"$(echo "$SERVICE_NAME" | tr '[:lower:]' '[:upper:]' | tr -d '-' | tr -d '_')\"/g" "$OUTPUT_DIR"/internal/core/app/configload.go
 
+# remove "replace github.com/mobiletoly/gokatana => ../../gokatana" string
+sed -i '' '/replace github\.com\/mobiletoly\/gokatana => \.\.\/\.\.\/gokatana/d' "$OUTPUT_DIR"/go.mod
+
 rm -rf "$OUTPUT_DIR"/.git
 rm "$OUTPUT_DIR"/README.md
 rm "$OUTPUT_DIR"/create-new-service.sh
