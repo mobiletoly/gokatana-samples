@@ -1,0 +1,155 @@
+/* Custom HTMX styles */
+.htmx-indicator {
+  display: none;
+}
+
+.htmx-request .htmx-indicator {
+  display: inline;
+}
+
+.htmx-request .htmx-indicator-hide {
+  display: none;
+}
+
+/* Custom animations */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Custom focus styles for better accessibility */
+.focus-ring:focus {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px #3b82f6;
+}
+
+/* Smooth transitions for interactive elements */
+.transition-all {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Custom hover effects */
+.hover-lift:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Loading state styles */
+.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Custom gradient backgrounds */
+.gradient-bg {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* Custom card styles */
+.card-hover {
+  transition: all 0.3s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Custom button styles */
+.btn-primary {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  border: none;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+/* Custom form styles */
+.form-input-custom {
+  transition: all 0.2s ease;
+  border: 2px solid #e5e7eb;
+}
+
+.form-input-custom:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  outline: none;
+}
+
+/* Custom navigation styles */
+.nav-link-custom {
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.nav-link-custom::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: #3b82f6;
+  transition: width 0.2s ease;
+}
+
+.nav-link-custom:hover::after {
+  width: 100%;
+}
+
+/* Custom alert styles */
+.alert-custom {
+  border-left: 4px solid;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin: 1rem 0;
+}
+
+.alert-success-custom {
+  background-color: #f0fdf4;
+  border-color: #22c55e;
+  color: #15803d;
+}
+
+.alert-error-custom {
+  background-color: #fef2f2;
+  border-color: #ef4444;
+  color: #dc2626;
+}
+
+/* Responsive utilities */
+@media (max-width: 640px) {
+  .mobile-stack {
+    flex-direction: column;
+  }
+  
+  .mobile-full {
+    width: 100%;
+  }
+}
+
+/* Dark mode support (if needed later) */
+@media (prefers-color-scheme: dark) {
+  .dark-mode-bg {
+    background-color: #1f2937;
+    color: #f9fafb;
+  }
+}

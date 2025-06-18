@@ -1,0 +1,4 @@
+database:
+  host: proddbhost:5432
+  name: iamservice
+  sslmode: require

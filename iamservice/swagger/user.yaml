@@ -1,0 +1,222 @@
+swagger: '2.0'
+info:
+  title: User Management API
+  description: API for user management operations
+  version: 1.0.0
+
+paths:
+  /api/v1/users/profile:
+    get:
+      summary: Get current user profile
+      description: Returns the profile information for the authenticated user
+      tags:
+        - Users
+      security:
+        - BearerAuth: []
+      responses:
+        200:
+          description: User profile retrieved successfully
+          schema:
+            $ref: '#/definitions/UserProfile'
+
+  /api/v1/users:
+    get:
+      summary: List all users (Admin only)
+      description: Returns a list of all users in the system. Requires admin role.
+      tags:
+        - Users
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          description: Page number for pagination
+          required: false
+          type: integer
+          minimum: 1
+          default: 1
+        - name: limit
+          in: query
+          description: Number of users per page
+          required: false
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 20
+      responses:
+        200:
+          description: Users retrieved successfully
+          schema:
+            $ref: '#/definitions/UserListResponse'
+
+  /api/v1/users/{userId}:
+    get:
+      summary: Get user by ID (Admin only)
+      description: Returns detailed information about a specific user. Requires admin role.
+      tags:
+        - Users
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: The ID of the user to retrieve
+          type: string
+      responses:
+        200:
+          description: User retrieved successfully
+          schema:
+            $ref: '#/definitions/UserProfile'
+
+  /api/v1/users/{userId}/roles:
+    get:
+      summary: Get user roles (Admin only)
+      description: Returns the roles assigned to a specific user. Requires admin role.
+      tags:
+        - Users
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: The ID of the user
+          type: string
+      responses:
+        200:
+          description: User roles retrieved successfully
+          schema:
+            $ref: '#/definitions/UserRolesResponse'
+
+    post:
+      summary: Assign role to user (Admin only)
+      description: Assigns a role to a user. Requires admin role.
+      tags:
+        - Users
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: The ID of the user
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/AssignRoleRequest'
+      responses:
+        200:
+          description: Role assigned successfully
+          schema:
+            $ref: '#/definitions/MessageResponse'
+
+definitions:
+  UserProfile:
+    type: object
+    description: 'User profile data from auth_user table (excluding sensitive fields)'
+    properties:
+      id:
+        type: string
+        example: 'uuid-123-456-789'
+        description: 'User unique identifier (primary key from auth_user table)'
+      email:
+        type: string
+        format: email
+        example: 'user@example.com'
+        description: 'User email address (unique in auth_user table)'
+      firstName:
+        type: string
+        example: 'John'
+        description: 'User first name'
+      lastName:
+        type: string
+        example: 'Doe'
+        description: 'User last name'
+      createdAt:
+        type: string
+        format: date-time
+        example: '2023-12-01T10:00:00Z'
+        description: 'Account creation timestamp'
+      updatedAt:
+        type: string
+        format: date-time
+        example: '2023-12-01T10:00:00Z'
+        description: 'Last profile update timestamp'
+    required:
+      - id
+      - email
+      - firstName
+      - lastName
+      - createdAt
+      - updatedAt
+
+  UserListResponse:
+    type: object
+    required:
+      - users
+      - pagination
+    properties:
+      users:
+        type: array
+        items:
+          $ref: '#/definitions/UserProfile'
+      pagination:
+        $ref: '#/definitions/PaginationInfo'
+
+  PaginationInfo:
+    type: object
+    required:
+      - page
+      - limit
+      - total
+      - totalPages
+    properties:
+      page:
+        type: integer
+        description: Current page number
+      limit:
+        type: integer
+        description: Number of items per page
+      total:
+        type: integer
+        description: Total number of items
+      totalPages:
+        type: integer
+        description: Total number of pages
+
+  UserRolesResponse:
+    type: object
+    required:
+      - userId
+      - roles
+    properties:
+      userId:
+        type: string
+      roles:
+        type: array
+        items:
+          type: string
+        description: List of role names assigned to the user
+
+  AssignRoleRequest:
+    type: object
+    required:
+      - roleName
+    properties:
+      roleName:
+        type: string
+        description: Name of the role to assign
+        enum: [user, admin, moderator]
+
+  MessageResponse:
+    type: object
+    properties:
+      message:
+        type: string
+        example: 'Operation completed successfully'
+        description: 'Response message'
+    required:
+      - message

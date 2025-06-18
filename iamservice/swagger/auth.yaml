@@ -1,0 +1,188 @@
+swagger: '2.0'
+info:
+  version: '1.0.0'
+  title: 'IAM Service User Authentication'
+  description: 'User authentication APIs for IAM Service application'
+
+basePath: '/api/v1/auth'
+
+paths:
+  /signup:
+    post:
+      summary: 'Sign up a new user'
+      description: 'Register a new user with email and password (local mode)'
+      parameters:
+        - name: 'signupRequest'
+          in: 'body'
+          description: 'User signup information'
+          required: true
+          schema:
+            $ref: '#/definitions/SignupRequest'
+      responses:
+        201:
+          description: 'User successfully created'
+          schema:
+            $ref: '#/definitions/AuthResponse'
+        400:
+          description: 'Invalid input data'
+        409:
+          description: 'User already exists'
+        500:
+          description: 'Internal server error'
+
+  /signin:
+    post:
+      summary: 'Sign in user'
+      description: 'Authenticate user with email and password (local mode)'
+      parameters:
+        - name: 'signinRequest'
+          in: 'body'
+          description: 'User signin credentials'
+          required: true
+          schema:
+            $ref: '#/definitions/SigninRequest'
+      responses:
+        200:
+          description: 'User successfully authenticated'
+          schema:
+            $ref: '#/definitions/AuthResponse'
+        400:
+          description: 'Invalid input data'
+        401:
+          description: 'Invalid credentials'
+        500:
+          description: 'Internal server error'
+
+  /signout:
+    post:
+      summary: 'Sign out user'
+      description: 'Sign out the current user and invalidate session/token'
+      security:
+        - BearerAuth: []
+      responses:
+        200:
+          description: 'User successfully signed out'
+          schema:
+            $ref: '#/definitions/MessageResponse'
+        401:
+          description: 'Unauthorized - invalid or missing token'
+
+
+
+  /refresh:
+    post:
+      summary: 'Refresh authentication token'
+      description: 'Refresh the authentication token using refresh token'
+      parameters:
+        - name: 'refreshRequest'
+          in: 'body'
+          description: 'Refresh token request'
+          required: true
+          schema:
+            $ref: '#/definitions/RefreshRequest'
+      responses:
+        200:
+          description: 'Token refreshed successfully'
+          schema:
+            $ref: '#/definitions/AuthResponse'
+        400:
+          description: 'Invalid refresh token'
+        401:
+          description: 'Refresh token expired or invalid'
+
+securityDefinitions:
+  BearerAuth:
+    type: apiKey
+    name: Authorization
+    in: header
+    description: 'Bearer token authentication. Format: Bearer {token}'
+
+definitions:
+  SignupRequest:
+    type: object
+    description: 'Request payload for creating new auth_user record'
+    properties:
+      email:
+        type: string
+        format: email
+        example: 'user@example.com'
+        description: 'User email address (must be unique in auth_user table)'
+      password:
+        type: string
+        minLength: 8
+        example: 'SecurePassword123!'
+        description: 'User password (minimum 8 characters, will be hashed)'
+      firstName:
+        type: string
+        example: 'John'
+        description: 'User first name'
+      lastName:
+        type: string
+        example: 'Doe'
+        description: 'User last name'
+    required:
+      - email
+      - password
+      - firstName
+      - lastName
+
+  SigninRequest:
+    type: object
+    properties:
+      email:
+        type: string
+        format: email
+        example: 'user@example.com'
+        description: 'User email address'
+      password:
+        type: string
+        example: 'SecurePassword123!'
+        description: 'User password'
+    required:
+      - email
+      - password
+
+  RefreshRequest:
+    type: object
+    properties:
+      refreshToken:
+        type: string
+        example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
+        description: 'Refresh token'
+    required:
+      - refreshToken
+
+  AuthResponse:
+    type: object
+    properties:
+      accessToken:
+        type: string
+        example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
+        description: 'JWT access token'
+      refreshToken:
+        type: string
+        example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
+        description: 'JWT refresh token'
+      tokenType:
+        type: string
+        example: 'Bearer'
+        description: 'Token type'
+      expiresIn:
+        type: integer
+        example: 3600
+        description: 'Token expiration time in seconds'
+    required:
+      - accessToken
+      - refreshToken
+      - tokenType
+      - expiresIn
+
+  MessageResponse:
+    type: object
+    properties:
+      message:
+        type: string
+        example: 'Operation completed successfully'
+        description: 'Response message'
+    required:
+      - message

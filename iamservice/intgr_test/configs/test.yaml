@@ -1,0 +1,8 @@
+database:
+  migrations:
+    - service: iamservice
+      schema: public
+      path: ../dbmigrate
+  sslmode: disable
+credentials:
+  secret: secret

@@ -1,0 +1,115 @@
+package templates
+
+templ UserForm() {
+	<div class="space-y-6">
+		@PageHeader("Add New User", BackButton("/web/admin/users", "Back to List"))
+
+		<div id="form-messages"></div>
+
+		@Card("p-6", UserFormContent())
+	</div>
+}
+
+templ UserFormContent() {
+	<form hx-post="/web/admin/users"
+		  hx-target="#form-messages"
+		  hx-swap="innerHTML"
+		  hx-indicator="#loading"
+		  class="space-y-6">
+
+		@FormField("email", "email", "email", "Email Address", "Enter email address", true, templ.Attributes{})
+
+		@FormField("password", "password", "password", "Password", "Enter password (min 8 characters)", true, templ.Attributes{"minlength": "8"})
+
+		@FormField("text", "firstName", "firstName", "First Name", "Enter first name", true, templ.Attributes{})
+
+		@FormField("text", "lastName", "lastName", "Last Name", "Enter last name", true, templ.Attributes{})
+
+		<div class="flex justify-end">
+			<button type="submit"
+					class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
+				@LoadingSpinner("Creating...")
+				<span class="htmx-indicator-hide">
+					@Icon("plus", "w-5 h-5 mr-2")
+					Create User
+				</span>
+			</button>
+		</div>
+	</form>
+}
+
+templ UserFormSuccess(userName string) {
+	@Alert("success", "Success!", "User \"" + userName + "\" has been created successfully.",
+		LinkButton("success", "sm", "/web/admin/users", "View All Users", ""))
+}
+
+templ UserFormError(message string) {
+	@Alert("error", "Error", message, nil)
+}
+
+templ UserRoles(userID string, roles []string) {
+	<div class="space-y-6">
+		<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+			<h2 class="text-2xl font-bold text-gray-900">User Roles</h2>
+			<a href="/web/admin/users"
+			   class="mt-4 sm:mt-0 inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+			   hx-get="/web/admin/users" hx-target="#content" hx-push-url="true">
+				<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+				</svg>
+				Back to Users
+			</a>
+		</div>
+
+		<div class="bg-white border border-gray-200 rounded-lg p-6">
+			<h3 class="text-lg font-medium text-gray-900 mb-4">Current Roles</h3>
+			
+			if len(roles) == 0 {
+				<p class="text-sm text-gray-500 mb-6">No roles assigned to this user.</p>
+			} else {
+				<div class="flex flex-wrap gap-2 mb-6">
+					for _, role := range roles {
+						<span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+							{ role }
+							<button class="ml-2 inline-flex items-center p-0.5 rounded-full text-blue-400 hover:text-blue-600 focus:outline-none focus:text-blue-600"
+									hx-delete={ "/web/admin/users/" + userID + "/roles/" + role }
+									hx-target="#content"
+									hx-confirm={ "Are you sure you want to remove the '" + role + "' role?" }>
+								<svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+									<path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+								</svg>
+							</button>
+						</span>
+					}
+				</div>
+			}
+
+			<div class="border-t border-gray-200 pt-6">
+				<h4 class="text-md font-medium text-gray-900 mb-4">Assign New Role</h4>
+				<form hx-post={ "/web/admin/users/" + userID + "/roles" }
+					  hx-target="#content"
+					  class="flex items-end space-x-3">
+					<div class="flex-1">
+						<label for="roleName" class="block text-sm font-medium text-gray-700 mb-1">
+							Role Name
+						</label>
+						<select id="roleName" name="roleName" required
+								class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+							<option value="">Select a role...</option>
+							<option value="user">User</option>
+							<option value="admin">Admin</option>
+							<option value="moderator">Moderator</option>
+						</select>
+					</div>
+					<button type="submit"
+							class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+						<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+						</svg>
+						Assign Role
+					</button>
+				</form>
+			</div>
+		</div>
+	</div>
+}
