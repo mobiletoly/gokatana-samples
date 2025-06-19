@@ -29,6 +29,7 @@ func WireDependencies(ctx context.Context, cfg *app.Config) *Dependencies {
 		},
 		Ports: &outport.Ports{
 			AuthPersist: persist.NewAuthUserAdapter(db),
+			Tx:          persist.NewTransactionAdapter(db),
 		},
 	}
 }

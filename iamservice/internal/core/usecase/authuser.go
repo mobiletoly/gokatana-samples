@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"errors"
 	"fmt"
+	"github.com/mobiletoly/gokatana-samples/iamservice/internal/core/model"
 	"strings"
 	"time"
 
@@ -17,15 +18,19 @@ import (
 
 // AuthUser provides authentication use cases
 type AuthUser struct {
-	authUserPort outport.AuthUserPersist
-	jwtSecret    []byte
+	authUserPersist outport.AuthUserPersist
+	tx              outport.Transaction
+	jwtSecret       []byte
 }
 
 // NewAuthUser creates a new AuthUser use case
-func NewAuthUser(authUserPort outport.AuthUserPersist, jwtSecret string) *AuthUser {
+func NewAuthUser(
+	authUserPersist outport.AuthUserPersist, tx outport.Transaction, jwtSecret string,
+) *AuthUser {
 	return &AuthUser{
-		authUserPort: authUserPort,
-		jwtSecret:    []byte(jwtSecret),
+		authUserPersist: authUserPersist,
+		tx:              tx,
+		jwtSecret:       []byte(jwtSecret),
 	}
 }
 
@@ -37,7 +42,7 @@ func (a *AuthUser) SignUp(ctx context.Context, req *swagger.SignupRequest) (*swa
 	}
 
 	// Check if user already exists
-	existingUser, err := a.authUserPort.GetUserByEmail(ctx, string(*req.Email))
+	existingUser, err := a.authUserPersist.GetUserByEmail(ctx, string(*req.Email))
 	if err != nil {
 		var appErr *katapp.Err
 		if errors.As(err, &appErr) && appErr.Scope == katapp.ErrNotFound {
@@ -64,17 +69,26 @@ func (a *AuthUser) SignUp(ctx context.Context, req *swagger.SignupRequest) (*swa
 		LastName:  req.LastName,
 	}
 
-	// Create user
-	user, err := a.authUserPort.CreateUser(ctx, signupReq)
-	if err != nil {
-		return nil, katapp.NewErr(katapp.ErrInternal, "failed to create user")
-	}
+	// Create user and assign role in a transaction
+	user, err := outport.TxWithResult(ctx, a.tx, func() (*model.AuthUser, error) {
+		// Create user
+		user, err := a.authUserPersist.CreateUser(ctx, signupReq)
+		if err != nil {
+			return nil, err // Return the original error to preserve error type (e.g., ErrDuplicate)
+		}
 
-	// Assign default 'user' role to new user
-	err = a.authUserPort.AssignUserRole(ctx, user.ID, "user", nil)
+		// Assign default 'user' role to new user
+		err = a.authUserPersist.AssignUserRole(ctx, user.ID, "user", nil)
+		if err != nil {
+			katapp.Logger(ctx).Warn("failed to assign default role to user", "userID", user.ID, "error", err)
+			return nil, katapp.NewErr(katapp.ErrInternal, "failed to assign default role")
+		}
+
+		return user, nil
+	})
+
 	if err != nil {
-		katapp.Logger(ctx).Warn("failed to assign default role to user", "userID", user.ID, "error", err)
-		// Don't fail the signup if role assignment fails, just log it
+		return nil, err // Return the transaction error immediately
 	}
 
 	// Generate tokens with roles
@@ -102,7 +116,7 @@ func (a *AuthUser) SignIn(ctx context.Context, req *swagger.SigninRequest) (*swa
 	}
 
 	// Get user with password hash
-	user, err := a.authUserPort.GetUserWithPasswordByEmail(ctx, string(*req.Email))
+	user, err := a.authUserPersist.GetUserWithPasswordByEmail(ctx, string(*req.Email))
 	if err != nil {
 		var appErr *katapp.Err
 		if errors.As(err, &appErr) && appErr.Scope == katapp.ErrNotFound {
@@ -294,7 +308,7 @@ func (a *AuthUser) generateTokensWithRoles(ctx context.Context, userID string) (
 	expiresIn = 3600 // 1 hour
 
 	// Get user roles
-	roles, err := a.authUserPort.GetUserRoles(ctx, userID)
+	roles, err := a.authUserPersist.GetUserRoles(ctx, userID)
 	if err != nil {
 		katapp.Logger(ctx).Warn("failed to get user roles for token generation", "userID", userID, "error", err)
 		// Continue without roles if we can't fetch them

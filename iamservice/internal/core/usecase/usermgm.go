@@ -15,12 +15,14 @@ import (
 // UserMgm handles user management use cases
 type UserMgm struct {
 	authUserPort outport.AuthUserPersist
+	tx           outport.Transaction
 }
 
 // NewUserMgm creates a new UserMgm use case
-func NewUserMgm(authUserPort outport.AuthUserPersist) *UserMgm {
+func NewUserMgm(authUserPort outport.AuthUserPersist, tx outport.Transaction) *UserMgm {
 	return &UserMgm{
 		authUserPort: authUserPort,
+		tx:           tx,
 	}
 }
 
@@ -125,25 +127,29 @@ func (u *UserMgm) GetUserRoles(ctx context.Context, userID string) (*swagger.Use
 		panic("userID cannot be empty - this should be validated at the HTTP handler level")
 	}
 
-	// Check if user exists
-	_, err := u.authUserPort.GetUserByID(ctx, userID)
-	if err != nil {
-		var appErr *katapp.Err
-		if errors.As(err, &appErr) && appErr.Scope == katapp.ErrNotFound {
-			return nil, err
+	result, err := outport.TxWithResult(ctx, u.tx, func() (*swagger.UserRolesResponse, error) {
+		// Check if user exists
+		_, err := u.authUserPort.GetUserByID(ctx, userID)
+		if err != nil {
+			var appErr *katapp.Err
+			if errors.As(err, &appErr) && appErr.Scope == katapp.ErrNotFound {
+				return nil, err
+			}
+			return nil, katapp.NewErr(katapp.ErrInternal, "failed to get user")
 		}
-		return nil, katapp.NewErr(katapp.ErrInternal, "failed to get user")
-	}
 
-	roles, err := u.authUserPort.GetUserRoles(ctx, userID)
-	if err != nil {
-		return nil, katapp.NewErr(katapp.ErrInternal, "failed to get user roles")
-	}
+		roles, err := u.authUserPort.GetUserRoles(ctx, userID)
+		if err != nil {
+			return nil, katapp.NewErr(katapp.ErrInternal, "failed to get user roles")
+		}
 
-	return swagger.NewUserRolesResponseBuilder().
-		UserID(&userID).
-		Roles(roles).
-		Build(), nil
+		return swagger.NewUserRolesResponseBuilder().
+			UserID(&userID).
+			Roles(roles).
+			Build(), nil
+	})
+
+	return result, err
 }
 
 // AssignUserRole assigns a role to a user (admin only)
@@ -156,32 +162,36 @@ func (u *UserMgm) AssignUserRole(ctx context.Context, userID string, roleName st
 		panic("roleName cannot be empty - this should be validated at the HTTP handler level")
 	}
 
-	// Check if user exists
-	_, err := u.authUserPort.GetUserByID(ctx, userID)
-	if err != nil {
-		var appErr *katapp.Err
-		if errors.As(err, &appErr) && appErr.Scope == katapp.ErrNotFound {
-			return nil, err
+	result, err := outport.TxWithResult(ctx, u.tx, func() (*swagger.MessageResponse, error) {
+		// Check if user exists
+		_, err := u.authUserPort.GetUserByID(ctx, userID)
+		if err != nil {
+			var appErr *katapp.Err
+			if errors.As(err, &appErr) && appErr.Scope == katapp.ErrNotFound {
+				return nil, err
+			}
+			return nil, katapp.NewErr(katapp.ErrInternal, "failed to get user")
 		}
-		return nil, katapp.NewErr(katapp.ErrInternal, "failed to get user")
-	}
 
-	err = u.authUserPort.AssignUserRole(ctx, userID, roleName, &requestingUserID)
-	if err != nil {
-		var appErr *katapp.Err
-		if errors.As(err, &appErr) && appErr.Scope == katapp.ErrDuplicate {
-			return nil, err
+		err = u.authUserPort.AssignUserRole(ctx, userID, roleName, &requestingUserID)
+		if err != nil {
+			var appErr *katapp.Err
+			if errors.As(err, &appErr) && appErr.Scope == katapp.ErrDuplicate {
+				return nil, err
+			}
+			if errors.As(err, &appErr) && appErr.Scope == katapp.ErrNotFound {
+				return nil, err
+			}
+			return nil, katapp.NewErr(katapp.ErrInternal, "failed to assign role")
 		}
-		if errors.As(err, &appErr) && appErr.Scope == katapp.ErrNotFound {
-			return nil, err
-		}
-		return nil, katapp.NewErr(katapp.ErrInternal, "failed to assign role")
-	}
 
-	message := "Role assigned successfully"
-	return swagger.NewMessageResponseBuilder().
-		Message(&message).
-		Build(), nil
+		message := "Role assigned successfully"
+		return swagger.NewMessageResponseBuilder().
+			Message(&message).
+			Build(), nil
+	})
+
+	return result, err
 }
 
 // DeleteUserRole removes a role from a user (admin only)
@@ -194,29 +204,33 @@ func (u *UserMgm) DeleteUserRole(ctx context.Context, userID string, roleName st
 		panic("roleName cannot be empty - this should be validated at the HTTP handler level")
 	}
 
-	// Check if user exists
-	_, err := u.authUserPort.GetUserByID(ctx, userID)
-	if err != nil {
-		var appErr *katapp.Err
-		if errors.As(err, &appErr) && appErr.Scope == katapp.ErrNotFound {
-			return nil, err
+	result, err := outport.TxWithResult(ctx, u.tx, func() (*swagger.MessageResponse, error) {
+		// Check if user exists
+		_, err := u.authUserPort.GetUserByID(ctx, userID)
+		if err != nil {
+			var appErr *katapp.Err
+			if errors.As(err, &appErr) && appErr.Scope == katapp.ErrNotFound {
+				return nil, err
+			}
+			return nil, katapp.NewErr(katapp.ErrInternal, "failed to get user")
 		}
-		return nil, katapp.NewErr(katapp.ErrInternal, "failed to get user")
-	}
 
-	err = u.authUserPort.DeleteUserRole(ctx, userID, roleName)
-	if err != nil {
-		var appErr *katapp.Err
-		if errors.As(err, &appErr) && appErr.Scope == katapp.ErrNotFound {
-			return nil, katapp.NewErr(katapp.ErrNotFound, "invalid role name or user doesn't have this role")
+		err = u.authUserPort.DeleteUserRole(ctx, userID, roleName)
+		if err != nil {
+			var appErr *katapp.Err
+			if errors.As(err, &appErr) && appErr.Scope == katapp.ErrNotFound {
+				return nil, katapp.NewErr(katapp.ErrNotFound, "invalid role name or user doesn't have this role")
+			}
+			return nil, katapp.NewErr(katapp.ErrInternal, "failed to remove role")
 		}
-		return nil, katapp.NewErr(katapp.ErrInternal, "failed to remove role")
-	}
 
-	message := "Role removed successfully"
-	return swagger.NewMessageResponseBuilder().
-		Message(&message).
-		Build(), nil
+		message := "Role removed successfully"
+		return swagger.NewMessageResponseBuilder().
+			Message(&message).
+			Build(), nil
+	})
+
+	return result, err
 }
 
 // DeleteUser deletes a user from the system (admin only)
@@ -226,25 +240,29 @@ func (u *UserMgm) DeleteUser(ctx context.Context, userID string) (*swagger.Messa
 		panic("userID cannot be empty - this should be validated at the HTTP handler level")
 	}
 
-	// Check if user exists
-	_, err := u.authUserPort.GetUserByID(ctx, userID)
-	if err != nil {
-		var appErr *katapp.Err
-		if errors.As(err, &appErr) && appErr.Scope == katapp.ErrNotFound {
-			return nil, err
+	result, err := outport.TxWithResult(ctx, u.tx, func() (*swagger.MessageResponse, error) {
+		// Check if user exists
+		_, err := u.authUserPort.GetUserByID(ctx, userID)
+		if err != nil {
+			var appErr *katapp.Err
+			if errors.As(err, &appErr) && appErr.Scope == katapp.ErrNotFound {
+				return nil, err
+			}
+			return nil, katapp.NewErr(katapp.ErrInternal, "failed to get user")
 		}
-		return nil, katapp.NewErr(katapp.ErrInternal, "failed to get user")
-	}
 
-	err = u.authUserPort.DeleteUser(ctx, userID)
-	if err != nil {
-		return nil, katapp.NewErr(katapp.ErrInternal, "failed to delete user")
-	}
+		err = u.authUserPort.DeleteUser(ctx, userID)
+		if err != nil {
+			return nil, katapp.NewErr(katapp.ErrInternal, "failed to delete user")
+		}
 
-	message := "User deleted successfully"
-	return swagger.NewMessageResponseBuilder().
-		Message(&message).
-		Build(), nil
+		message := "User deleted successfully"
+		return swagger.NewMessageResponseBuilder().
+			Message(&message).
+			Build(), nil
+	})
+
+	return result, err
 }
 
 // Helper methods
