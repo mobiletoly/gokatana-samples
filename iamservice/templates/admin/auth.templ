@@ -1,0 +1,44 @@
+package admin
+
+import "github.com/mobiletoly/gokatana-samples/iamservice/templates/common"
+
+templ SignInForm() {
+	<div class="space-y-6">
+		<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+			<h2 class="text-2xl font-bold text-gray-900">Sign In</h2>
+		</div>
+		<div id="form-messages"></div>
+		<div class="bg-white border border-gray-200 rounded-lg p-6 max-w-md mx-auto">
+			<form
+				hx-post="/web/admin/auth/signin"
+				hx-target="#form-messages"
+				hx-swap="innerHTML"
+				class="space-y-6"
+			>
+				<div>
+					<label for="tenantId" class="block text-sm font-medium text-gray-700 mb-1">
+						Tenant ID
+					</label>
+					<input
+						type="text"
+						id="tenantId"
+						name="tenantId"
+						required
+						value="default-tenant"
+						class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+						placeholder="Enter tenant ID"
+					/>
+				</div>
+				<div>
+					@common.FormField("email", "email", "email", "Email Address", "Enter your email", true, templ.Attributes{})
+				</div>
+				<div>
+					@common.FormField("password", "password", "password", "Password", "Enter your password", true, templ.Attributes{})
+				</div>
+				<div class="flex justify-end">
+					@common.LoadingSubmitButton("Sign In", "Signing In...", "primary", "md", "plus", true)
+				</div>
+			</form>
+		</div>
+	</div>
+}

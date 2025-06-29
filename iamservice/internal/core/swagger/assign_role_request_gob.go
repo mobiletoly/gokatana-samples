@@ -14,7 +14,7 @@ type AssignRoleRequest_Builder_GobFinalizer struct {
 	root *AssignRoleRequest
 }
 
-func (b AssignRoleRequest_Builder_RoleName) RoleName(arg *string) AssignRoleRequest_Builder_GobFinalizer {
+func (b AssignRoleRequest_Builder_RoleName) RoleName(arg string) AssignRoleRequest_Builder_GobFinalizer {
 	b.root.RoleName = arg
 	return AssignRoleRequest_Builder_GobFinalizer{root: b.root}
 }

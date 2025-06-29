@@ -2,5 +2,11 @@ database:
   host: 127.0.0.1
   name: iamservice
   sslmode: disable
+gcloud:
+  mock: false
+  serviceJson: _
+  email:
+    user: _
+    from: _
 credentials:
-  secret: secret
+  jwtSecret: _

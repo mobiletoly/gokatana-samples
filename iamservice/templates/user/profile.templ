@@ -1,0 +1,278 @@
+package user
+
+import (
+	"github.com/mobiletoly/gokatana-samples/iamservice/internal/core/swagger"
+	"github.com/mobiletoly/gokatana-samples/iamservice/templates/common"
+)
+
+templ EditProfile(profile *swagger.UserProfile) {
+	<div class="space-y-6">
+		<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+			<h2 class="text-2xl font-bold text-gray-900">Edit Profile</h2>
+			@common.BackButton("/web/user/account", "Back to Account")
+		</div>
+		<div id="form-messages"></div>
+		@ProfileFormFields(profile)
+	</div>
+}
+
+templ ProfileFormFields(profile *swagger.UserProfile) {
+	<div class="bg-white border border-gray-200 rounded-lg p-6 max-w-2xl">
+		<h3 class="text-lg font-medium text-gray-900 mb-6">Profile Information</h3>
+		<form
+			hx-put="/web/user/profile/update"
+			hx-target="#form-messages"
+			hx-swap="innerHTML"
+			class="space-y-6"
+			id="profile-form"
+			if profile == nil || profile.IsMetric {
+				data-units="metric"
+			} else {
+				data-units="imperial"
+			}
+			_="on convertMetric
+			     get #weight-lbs.value then put it as Float into lbs
+			     if lbs > 0 then put (lbs / 2.20462) into #weight-kg.value end
+			     get #height-feet.value then put it as Float or 0 into feet
+			     get #height-inches.value then put it as Float or 0 into inches
+			     if feet > 0 or inches > 0
+			       set totalInches to (feet * 12) + inches
+			       set cm to totalInches * 2.54
+			       put cm as Int into #height-cm.value
+			     end
+
+			     on convertImperial
+			     get #weight-kg.value then put it as Float into kg
+			     if kg > 0 then put (kg * 2.20462) into #weight-lbs.value end
+			     get #height-cm.value then put it as Float into cm
+			     if cm > 0
+			       set totalInches to cm / 2.54
+			       set feetFloat to totalInches / 12
+
+			       js(totalInches)
+			         var totalInchesRounded = Math.round(totalInches);
+			         var feet = Math.floor(totalInchesRounded / 12);
+			         var inches = totalInchesRounded % 12;
+			         return {feet: feet, inches: inches};
+			       end then put the result into heightResult
+			       put heightResult.feet as Int into #height-feet.value
+			       put heightResult.inches as Int into #height-inches.value
+			     end
+			     "
+		>
+			<!-- Unit Preferences Section -->
+			<div class="border-b border-gray-200 pb-6">
+				<h4 class="text-md font-medium text-gray-900 mb-4">Unit Preferences</h4>
+				<div class="space-y-2">
+					<label class="inline-flex items-center">
+						<input
+							type="radio"
+							name="isMetric"
+							value="true"
+							if profile == nil || profile.IsMetric {
+								checked
+							}
+							class="form-radio h-4 w-4 text-blue-600 transition duration-150 ease-in-out"
+							_="on change if me.checked then set @data-units of #profile-form to 'metric' then trigger convertMetric"
+						/>
+						<span class="ml-2 text-sm text-gray-700">Metric (kg, cm)</span>
+					</label>
+					<label class="inline-flex items-center">
+						<input
+							type="radio"
+							name="isMetric"
+							value="false"
+							if profile != nil && !profile.IsMetric {
+								checked
+							}
+							class="form-radio h-4 w-4 text-blue-600 transition duration-150 ease-in-out"
+							_="on change if me.checked then set @data-units of #profile-form to 'imperial' then trigger convertImperial"
+						/>
+						<span class="ml-2 text-sm text-gray-700">Imperial (lbs, ft/in)</span>
+					</label>
+				</div>
+			</div>
+			<div class="grid gap-6 md:grid-cols-2">
+				<div>
+					<!-- Metric height label -->
+					<label for="height-cm" class="block text-sm font-medium text-gray-700 mb-1 metric-label">
+						Height (cm)
+					</label>
+					<!-- Imperial height label -->
+					<label for="height-feet" class="block text-sm font-medium text-gray-700 mb-1 imperial-label">
+						Height (ft/in)
+					</label>
+					<!-- Metric height input (cm) -->
+					<div id="height-metric">
+						<input
+							type="number"
+							id="height-cm"
+							name="height"
+							min="50"
+							max="300"
+							if profile != nil && profile.Height != nil {
+								value={ formatHeightCm(*profile.Height) }
+							}
+							class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm metric-input"
+							placeholder="Enter height in cm"
+						/>
+					</div>
+					<!-- Imperial height inputs (ft/in) -->
+					<div id="height-imperial" class="flex space-x-2">
+						<input
+							type="number"
+							id="height-feet"
+							name="height-feet"
+							min="3"
+							max="8"
+							if profile != nil && profile.Height != nil {
+								value={ formatHeightFeet(*profile.Height) }
+							}
+							class="block w-1/2 px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm imperial-input"
+							placeholder="Feet"
+						/>
+						<input
+							type="number"
+							id="height-inches"
+							name="height-inches"
+							min="0"
+							max="11"
+							if profile != nil && profile.Height != nil {
+								value={ formatHeightInches(*profile.Height) }
+							}
+							class="block w-1/2 px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm imperial-input"
+							placeholder="Inches"
+						/>
+					</div>
+				</div>
+				<div>
+					<!-- Metric weight label and input -->
+					<label for="weight-kg" class="block text-sm font-medium text-gray-700 mb-1 metric-label">
+						Weight (kg)
+					</label>
+					<input
+						type="number"
+						id="weight-kg"
+						name="weight-kg"
+						if profile != nil && profile.Weight != nil {
+							value={ formatWeightFromGrams(*profile.Weight) }
+						}
+						placeholder="Enter weight in kg (e.g., 89.85)"
+						class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm metric-input"
+					/>
+					<!-- Imperial weight label and input -->
+					<label for="weight-lbs" class="block text-sm font-medium text-gray-700 mb-1 imperial-label">
+						Weight (lbs)
+					</label>
+					<input
+						type="number"
+						id="weight-lbs"
+						name="weight-lbs"
+						if profile != nil && profile.Weight != nil {
+							value={ formatWeightFromGramsToPounds(*profile.Weight) }
+						}
+						placeholder="Enter weight in lbs (e.g., 198.5)"
+						class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm imperial-input"
+					/>
+				</div>
+			</div>
+			<div class="grid gap-6 md:grid-cols-2">
+				<div>
+					<label for="gender" class="block text-sm font-medium text-gray-700 mb-1">
+						Gender
+					</label>
+					<select
+						id="gender"
+						name="gender"
+						class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+					>
+						<option value="">Select gender</option>
+						<option
+							value="male"
+							if profile != nil && profile.Gender != nil && (*profile.Gender == "male" || *profile.Gender == "Male") {
+								selected
+							}
+						>Male</option>
+						<option
+							value="female"
+							if profile != nil && profile.Gender != nil && (*profile.Gender == "female" || *profile.Gender == "Female") {
+								selected
+							}
+						>Female</option>
+						<option
+							value="other"
+							if profile != nil && profile.Gender != nil && (*profile.Gender == "other" || *profile.Gender == "Other") {
+								selected
+							}
+						>Other</option>
+					</select>
+				</div>
+				<div>
+					<label for="birthDate" class="block text-sm font-medium text-gray-700 mb-1">
+						Birth Date
+					</label>
+					<input
+						type="date"
+						id="birthDate"
+						name="birthDate"
+						if profile != nil && profile.BirthDate != nil {
+							value={ formatDateForInput(*profile.BirthDate) }
+						}
+						class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+					/>
+				</div>
+			</div>
+			<div class="flex justify-end space-x-3">
+			    @common.LoadingSubmitButton("Save Changes", "Saving...", "primary", "md", "save", false)
+				<button
+					type="button"
+					hx-get="/web/user/account"
+					hx-target="#content"
+					hx-push-url="true"
+					class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+				>
+					Cancel
+				</button>
+			</div>
+		</form>
+	</div>
+	<style>
+		/* Unit system visibility control via data attributes */
+
+		/* Default: Show metric, hide imperial */
+		#height-metric,
+		.metric-label,
+		.metric-input {
+			display: block;
+		}
+
+		#height-imperial,
+		.imperial-label,
+		.imperial-input {
+			display: none;
+		}
+
+		/* When imperial is selected: hide metric, show imperial */
+		[data-units="imperial"] #height-metric,
+		[data-units="imperial"] .metric-label,
+		[data-units="imperial"] .metric-input {
+			display: none;
+		}
+
+		[data-units="imperial"] #height-imperial,
+		[data-units="imperial"] .imperial-label,
+		[data-units="imperial"] .imperial-input {
+			display: block;
+		}
+
+		/* Ensure flex layout is preserved for imperial height inputs */
+		[data-units="imperial"] #height-imperial {
+			display: flex;
+		}
+	</style>
+}
+
+templ ProfileUpdateSuccess() {
+	@common.Alert("success", "Profile Updated Successfully!", "Your profile information has been updated.",
+		common.LinkButton("success", "sm", "/web/user/account", "View Account", ""))
+}

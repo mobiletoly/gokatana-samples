@@ -1,0 +1,145 @@
+package user
+
+import "github.com/mobiletoly/gokatana-samples/iamservice/templates/common"
+
+templ SignInForm() {
+	<div class="space-y-6">
+		<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+			<h2 class="text-2xl font-bold text-gray-900">Sign In</h2>
+		</div>
+		<div id="form-messages"></div>
+		<div class="bg-white border border-gray-200 rounded-lg p-6 max-w-md mx-auto">
+			<form
+				hx-post="/web/user/auth/signin"
+				hx-target="#form-messages"
+				hx-swap="innerHTML"
+				class="space-y-6"
+			>
+				<div>
+					<label for="tenantId" class="block text-sm font-medium text-gray-700 mb-1">
+						Tenant ID
+					</label>
+					<input
+						type="text"
+						id="tenantId"
+						name="tenantId"
+						required
+						value="default-tenant"
+						class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+						placeholder="Enter tenant ID"
+					/>
+				</div>
+				<div>
+					@common.FormField("email", "email", "email", "Email Address", "Enter your email", true, templ.Attributes{})
+				</div>
+				<div>
+					@common.FormField("password", "password", "password", "Password", "Enter your password", true, templ.Attributes{})
+				</div>
+				<div class="flex justify-end">
+					@common.LoadingSubmitButton("Sign In", "Signing In...", "primary", "md", "plus", true)
+				</div>
+			</form>
+		</div>
+	</div>
+}
+
+
+templ SignUpForm() {
+	<div class="space-y-6">
+		<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+			<h2 class="text-2xl font-bold text-gray-900">Create Account</h2>
+		</div>
+
+		<div id="form-messages"></div>
+
+		<div class="bg-white border border-gray-200 rounded-lg p-6 max-w-md mx-auto">
+			<form hx-post="/web/user/auth/signup"
+				  hx-target="#form-messages"
+				  hx-swap="innerHTML"
+				  class="space-y-6">
+				<div>
+					<label for="tenantId" class="block text-sm font-medium text-gray-700 mb-1">
+						Organization
+					</label>
+					<input type="text"
+						   id="tenantId"
+						   name="tenantId"
+						   required
+						   value="default-tenant"
+						   class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+						   placeholder="Enter your organization ID"/>
+				</div>
+
+				<div>
+					<label for="firstName" class="block text-sm font-medium text-gray-700 mb-1">
+						First Name
+					</label>
+					<input type="text"
+						   id="firstName"
+						   name="firstName"
+						   required
+						   class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+						   placeholder="Enter your first name"/>
+				</div>
+
+				<div>
+					<label for="lastName" class="block text-sm font-medium text-gray-700 mb-1">
+						Last Name
+					</label>
+					<input type="text"
+						   id="lastName"
+						   name="lastName"
+						   required
+						   class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+						   placeholder="Enter your last name"/>
+				</div>
+
+				<div>
+					<label for="email" class="block text-sm font-medium text-gray-700 mb-1">
+						Email Address
+					</label>
+					<input type="email"
+						   id="email"
+						   name="email"
+						   required
+						   class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+						   placeholder="Enter your email"/>
+				</div>
+
+				<div>
+					<label for="password" class="block text-sm font-medium text-gray-700 mb-1">
+						Password
+					</label>
+					<input type="password"
+						   id="password"
+						   name="password"
+						   required
+						   minlength="8"
+						   class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+						   placeholder="Enter your password (min 8 characters)"/>
+				</div>
+
+				<div class="flex justify-end">
+				    @common.LoadingSubmitButton("Create Account", "Creating...", "primary", "md", "save", false)
+				</div>
+
+				<div class="text-center">
+					<p class="text-sm text-gray-600">
+						Already have an account? 
+						<a href="/web/user/auth/signin" hx-get="/web/user/auth/signin" hx-target="#content" hx-push-url="true"
+						   class="font-medium text-blue-600 hover:text-blue-500">
+							Sign in here
+						</a>
+					</p>
+				</div>
+			</form>
+		</div>
+	</div>
+}
+
+templ SignUpSuccess() {
+	<div class="max-w-md mx-auto">
+		@common.Alert("info", "Account Created Successfully!", "Please check your email for a confirmation link to activate your account.",
+			common.LinkButton("primary", "sm", "/web/user/auth/signin", "Sign In", ""))
+	</div>
+}

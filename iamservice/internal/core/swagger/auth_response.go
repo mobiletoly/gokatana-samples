@@ -22,22 +22,27 @@ type AuthResponse struct {
 	// JWT access token
 	// Example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 	// Required: true
-	AccessToken *string `json:"accessToken"`
-
-	// JWT refresh token
-	// Example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-	// Required: true
-	RefreshToken *string `json:"refreshToken"`
-
-	// Token type
-	// Example: Bearer
-	// Required: true
-	TokenType *string `json:"tokenType"`
+	AccessToken string `json:"accessToken"`
 
 	// Token expiration time in seconds
 	// Example: 3600
 	// Required: true
-	ExpiresIn *int64 `json:"expiresIn"`
+	ExpiresIn int64 `json:"expiresIn"`
+
+	// JWT refresh token
+	// Example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+	// Required: true
+	RefreshToken string `json:"refreshToken"`
+
+	// Token type
+	// Example: Bearer
+	// Required: true
+	TokenType string `json:"tokenType"`
+
+	// User unique identifier
+	// Example: uuid-123-456-789
+	// Required: true
+	UserID string `json:"userId"`
 }
 
 // Validate validates this auth response
@@ -45,6 +50,10 @@ func (m *AuthResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateAccessToken(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateExpiresIn(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -56,7 +65,7 @@ func (m *AuthResponse) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateExpiresIn(formats); err != nil {
+	if err := m.validateUserID(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -68,25 +77,7 @@ func (m *AuthResponse) Validate(formats strfmt.Registry) error {
 
 func (m *AuthResponse) validateAccessToken(formats strfmt.Registry) error {
 
-	if err := validate.Required("accessToken", "body", m.AccessToken); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *AuthResponse) validateRefreshToken(formats strfmt.Registry) error {
-
-	if err := validate.Required("refreshToken", "body", m.RefreshToken); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *AuthResponse) validateTokenType(formats strfmt.Registry) error {
-
-	if err := validate.Required("tokenType", "body", m.TokenType); err != nil {
+	if err := validate.RequiredString("accessToken", "body", m.AccessToken); err != nil {
 		return err
 	}
 
@@ -95,7 +86,34 @@ func (m *AuthResponse) validateTokenType(formats strfmt.Registry) error {
 
 func (m *AuthResponse) validateExpiresIn(formats strfmt.Registry) error {
 
-	if err := validate.Required("expiresIn", "body", m.ExpiresIn); err != nil {
+	if err := validate.Required("expiresIn", "body", int64(m.ExpiresIn)); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *AuthResponse) validateRefreshToken(formats strfmt.Registry) error {
+
+	if err := validate.RequiredString("refreshToken", "body", m.RefreshToken); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *AuthResponse) validateTokenType(formats strfmt.Registry) error {
+
+	if err := validate.RequiredString("tokenType", "body", m.TokenType); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *AuthResponse) validateUserID(formats strfmt.Registry) error {
+
+	if err := validate.RequiredString("userId", "body", m.UserID); err != nil {
 		return err
 	}
 

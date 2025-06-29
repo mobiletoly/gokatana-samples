@@ -22,7 +22,7 @@ type RefreshRequest struct {
 	// Refresh token
 	// Example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 	// Required: true
-	RefreshToken *string `json:"refreshToken"`
+	RefreshToken string `json:"refreshToken"`
 }
 
 // Validate validates this refresh request
@@ -41,7 +41,7 @@ func (m *RefreshRequest) Validate(formats strfmt.Registry) error {
 
 func (m *RefreshRequest) validateRefreshToken(formats strfmt.Registry) error {
 
-	if err := validate.Required("refreshToken", "body", m.RefreshToken); err != nil {
+	if err := validate.RequiredString("refreshToken", "body", m.RefreshToken); err != nil {
 		return err
 	}
 

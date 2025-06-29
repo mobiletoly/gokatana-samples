@@ -23,12 +23,17 @@ type SigninRequest struct {
 	// Example: user@example.com
 	// Required: true
 	// Format: email
-	Email *strfmt.Email `json:"email"`
+	Email strfmt.Email `json:"email"`
 
 	// User password
 	// Example: SecurePassword123!
 	// Required: true
-	Password *string `json:"password"`
+	Password string `json:"password"`
+
+	// Tenant identifier for multi-tenant support
+	// Example: acme-corp
+	// Required: true
+	TenantID string `json:"tenantId"`
 }
 
 // Validate validates this signin request
@@ -43,6 +48,10 @@ func (m *SigninRequest) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
+	if err := m.validateTenantID(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
@@ -51,7 +60,7 @@ func (m *SigninRequest) Validate(formats strfmt.Registry) error {
 
 func (m *SigninRequest) validateEmail(formats strfmt.Registry) error {
 
-	if err := validate.Required("email", "body", m.Email); err != nil {
+	if err := validate.Required("email", "body", strfmt.Email(m.Email)); err != nil {
 		return err
 	}
 
@@ -64,7 +73,16 @@ func (m *SigninRequest) validateEmail(formats strfmt.Registry) error {
 
 func (m *SigninRequest) validatePassword(formats strfmt.Registry) error {
 
-	if err := validate.Required("password", "body", m.Password); err != nil {
+	if err := validate.RequiredString("password", "body", m.Password); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *SigninRequest) validateTenantID(formats strfmt.Registry) error {
+
+	if err := validate.RequiredString("tenantId", "body", m.TenantID); err != nil {
 		return err
 	}
 

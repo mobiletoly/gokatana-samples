@@ -1,0 +1,142 @@
+package admin
+
+import "github.com/mobiletoly/gokatana-samples/iamservice/templates/common"
+
+import "github.com/mobiletoly/gokatana-samples/iamservice/internal/core/swagger"
+
+templ TenantForm() {
+	<div class="space-y-6">
+		@common.PageHeader("Add New Tenant", common.BackButton("/web/admin/tenants", "Back to List"))
+		<div id="form-messages"></div>
+		@Card("p-6", TenantFormContent())
+	</div>
+}
+
+templ TenantFormContent() {
+	<form
+		hx-post="/web/admin/tenants"
+		hx-target="#form-messages"
+		hx-swap="innerHTML"
+		class="space-y-6"
+	>
+		<div>
+			@common.FormField("text", "id", "id", "Tenant ID *", "e.g., my-company (minimum 3 characters)", true, templ.Attributes{})
+			<p class="mt-1 text-sm text-gray-500">
+				Unique identifier for the tenant. Must be at least 3 characters long and URL-friendly.
+			</p>
+		</div>
+		<div>
+			@common.FormField("text", "name", "name", "Tenant Name *", "e.g., My Company Inc", true, templ.Attributes{})
+			<p class="mt-1 text-sm text-gray-500">
+				Human-readable name for the tenant.
+			</p>
+		</div>
+		<div>
+			<label for="description" class="block text-sm font-medium text-gray-700 mb-1">
+				Description
+			</label>
+			<textarea
+				id="description"
+				name="description"
+				rows="3"
+				class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+				placeholder="Optional description of the tenant"
+			></textarea>
+			<p class="mt-1 text-sm text-gray-500">
+				Optional description to help identify the tenant's purpose or organization.
+			</p>
+		</div>
+		<div class="flex justify-end">
+			@common.LoadingSubmitButton("Create Tenant", "Creating...", "primary", "md", "plus", false)
+		</div>
+	</form>
+}
+
+templ TenantEditForm(tenant *swagger.TenantResponse) {
+	<div class="space-y-6">
+		@common.PageHeader("Edit Tenant", common.BackButton("/web/admin/tenants", "Back to List"))
+		<div id="form-messages"></div>
+		@Card("p-6", TenantEditFormContent(tenant))
+	</div>
+}
+
+templ TenantEditFormContent(tenant *swagger.TenantResponse) {
+	<form
+		hx-put={ "/web/admin/tenants/" + tenant.ID }
+		hx-target="#form-messages"
+		hx-swap="innerHTML"
+		class="space-y-6"
+	>
+		<div>
+			<label for="id" class="block text-sm font-medium text-gray-700 mb-1">
+				Tenant ID
+			</label>
+			<input
+				type="text"
+				id="id"
+				name="id"
+				value={ tenant.ID }
+				disabled
+				class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-50 text-gray-500 sm:text-sm"
+				placeholder="Tenant ID cannot be changed"
+			/>
+			<p class="mt-1 text-sm text-gray-500">
+				Tenant ID cannot be modified after creation.
+			</p>
+		</div>
+		<div>
+			<label for="name" class="block text-sm font-medium text-gray-700 mb-1">
+				Tenant Name <span class="text-red-500">*</span>
+			</label>
+			<input
+				type="text"
+				id="name"
+				name="name"
+				value={ tenant.Name }
+				required
+				class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+				placeholder="e.g., My Company Inc"
+			/>
+			<p class="mt-1 text-sm text-gray-500">
+				Human-readable name for the tenant.
+			</p>
+		</div>
+		<div>
+			<label for="description" class="block text-sm font-medium text-gray-700 mb-1">
+				Description
+			</label>
+			<textarea
+				id="description"
+				name="description"
+				rows="3"
+				class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+				placeholder="Optional description of the tenant"
+			>{ tenant.Description }</textarea>
+			<p class="mt-1 text-sm text-gray-500">
+				Optional description to help identify the tenant's purpose or organization.
+			</p>
+		</div>
+		<div class="flex justify-end space-x-3">
+			@common.LoadingSubmitButton("Update Tenant", "Updating...", "primary", "md", "save", false)
+			<a
+				href={ templ.URL("/web/admin/tenants/" + tenant.ID) }
+				class="inline-flex items-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+				hx-get={ "/web/admin/tenants/" + tenant.ID }
+				hx-target="#content"
+				hx-push-url="true"
+			>
+				Cancel
+			</a>
+		</div>
+	</form>
+}
+
+templ TenantFormSuccess(tenantName string) {
+	@common.Alert("success", "Success!", "Tenant \""+tenantName+"\" has been created successfully.",
+		common.LinkButton("success", "sm", "/web/admin/tenants", "View All Tenants", ""))
+}
+
+templ TenantUpdateSuccess(tenantName string) {
+	@common.Alert("success", "Success!", "Tenant \""+tenantName+"\" has been updated successfully.",
+		common.LinkButton("success", "sm", "/web/admin/tenants", "View All Tenants", ""))
+}

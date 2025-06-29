@@ -10,12 +10,21 @@ type AuthResponse_Builder_AccessToken struct {
 	root *AuthResponse
 }
 
+type AuthResponse_Builder_ExpiresIn struct {
+	root *AuthResponse
+}
+
+func (b AuthResponse_Builder_AccessToken) AccessToken(arg string) AuthResponse_Builder_ExpiresIn {
+	b.root.AccessToken = arg
+	return AuthResponse_Builder_ExpiresIn{root: b.root}
+}
+
 type AuthResponse_Builder_RefreshToken struct {
 	root *AuthResponse
 }
 
-func (b AuthResponse_Builder_AccessToken) AccessToken(arg *string) AuthResponse_Builder_RefreshToken {
-	b.root.AccessToken = arg
+func (b AuthResponse_Builder_ExpiresIn) ExpiresIn(arg int64) AuthResponse_Builder_RefreshToken {
+	b.root.ExpiresIn = arg
 	return AuthResponse_Builder_RefreshToken{root: b.root}
 }
 
@@ -23,26 +32,26 @@ type AuthResponse_Builder_TokenType struct {
 	root *AuthResponse
 }
 
-func (b AuthResponse_Builder_RefreshToken) RefreshToken(arg *string) AuthResponse_Builder_TokenType {
+func (b AuthResponse_Builder_RefreshToken) RefreshToken(arg string) AuthResponse_Builder_TokenType {
 	b.root.RefreshToken = arg
 	return AuthResponse_Builder_TokenType{root: b.root}
 }
 
-type AuthResponse_Builder_ExpiresIn struct {
+type AuthResponse_Builder_UserID struct {
 	root *AuthResponse
 }
 
-func (b AuthResponse_Builder_TokenType) TokenType(arg *string) AuthResponse_Builder_ExpiresIn {
+func (b AuthResponse_Builder_TokenType) TokenType(arg string) AuthResponse_Builder_UserID {
 	b.root.TokenType = arg
-	return AuthResponse_Builder_ExpiresIn{root: b.root}
+	return AuthResponse_Builder_UserID{root: b.root}
 }
 
 type AuthResponse_Builder_GobFinalizer struct {
 	root *AuthResponse
 }
 
-func (b AuthResponse_Builder_ExpiresIn) ExpiresIn(arg *int64) AuthResponse_Builder_GobFinalizer {
-	b.root.ExpiresIn = arg
+func (b AuthResponse_Builder_UserID) UserID(arg string) AuthResponse_Builder_GobFinalizer {
+	b.root.UserID = arg
 	return AuthResponse_Builder_GobFinalizer{root: b.root}
 }
 

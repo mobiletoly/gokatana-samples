@@ -19,24 +19,24 @@ import (
 // swagger:model UserRolesResponse
 type UserRolesResponse struct {
 
-	// user Id
-	// Required: true
-	UserID *string `json:"userId"`
-
 	// List of role names assigned to the user
 	// Required: true
 	Roles []string `json:"roles"`
+
+	// user Id
+	// Required: true
+	UserID *string `json:"userId"`
 }
 
 // Validate validates this user roles response
 func (m *UserRolesResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateUserID(formats); err != nil {
+	if err := m.validateRoles(formats); err != nil {
 		res = append(res, err)
 	}
 
-	if err := m.validateRoles(formats); err != nil {
+	if err := m.validateUserID(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -46,18 +46,18 @@ func (m *UserRolesResponse) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *UserRolesResponse) validateUserID(formats strfmt.Registry) error {
+func (m *UserRolesResponse) validateRoles(formats strfmt.Registry) error {
 
-	if err := validate.Required("userId", "body", m.UserID); err != nil {
+	if err := validate.Required("roles", "body", m.Roles); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (m *UserRolesResponse) validateRoles(formats strfmt.Registry) error {
+func (m *UserRolesResponse) validateUserID(formats strfmt.Registry) error {
 
-	if err := validate.Required("roles", "body", m.Roles); err != nil {
+	if err := validate.Required("userId", "body", m.UserID); err != nil {
 		return err
 	}
 

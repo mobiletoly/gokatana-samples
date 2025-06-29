@@ -7,19 +7,19 @@ import (
 	"github.com/mobiletoly/gokatana/katpg"
 )
 
-type TransactionAdapter struct {
+type TxAdapter struct {
 	db *katpg.DBLink
 }
 
-// NewTransactionAdapter creates a new DbAdapter
-func NewTransactionAdapter(db *katpg.DBLink) outport.Transaction {
-	return &TransactionAdapter{
+// NewTxAdapter creates a new DbAdapter
+func NewTxAdapter(db *katpg.DBLink) outport.TxPort {
+	return &TxAdapter{
 		db: db,
 	}
 }
 
-func (d TransactionAdapter) Run(ctx context.Context, f func() error) error {
-	return pgx.BeginFunc(ctx, d.db, func(tx pgx.Tx) error {
-		return f()
+func (d TxAdapter) Run(ctx context.Context, f func(tx pgx.Tx) error) error {
+	return pgx.BeginFunc(ctx, d.db.Pool, func(tx pgx.Tx) error {
+		return f(tx)
 	})
 }

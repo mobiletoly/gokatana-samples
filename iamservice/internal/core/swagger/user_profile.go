@@ -7,6 +7,7 @@ package swagger
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/strfmt"
@@ -14,62 +15,62 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// UserProfile User profile data from auth_user table (excluding sensitive fields)
+// UserProfile User profile data from user_profile table
 //
 // swagger:model UserProfile
 type UserProfile struct {
 
-	// User unique identifier (primary key from auth_user table)
-	// Example: uuid-123-456-789
-	// Required: true
-	ID *string `json:"id"`
+	// User birth date
+	// Example: 1990-01-15
+	// Format: date
+	BirthDate *strfmt.Date `json:"birthDate,omitempty"`
 
-	// User email address (unique in auth_user table)
-	// Example: user@example.com
-	// Required: true
-	// Format: email
-	Email *strfmt.Email `json:"email"`
-
-	// User first name
-	// Example: John
-	// Required: true
-	FirstName *string `json:"firstName"`
-
-	// User last name
-	// Example: Doe
-	// Required: true
-	LastName *string `json:"lastName"`
-
-	// Account creation timestamp
+	// Profile creation timestamp
 	// Example: 2023-12-01T10:00:00Z
 	// Required: true
 	// Format: date-time
-	CreatedAt *strfmt.DateTime `json:"createdAt"`
+	CreatedAt strfmt.DateTime `json:"createdAt"`
+
+	// User gender (male/female/other)
+	// Example: male
+	// Enum: ["male","female","other"]
+	Gender *string `json:"gender,omitempty"`
+
+	// User height in centimeters
+	// Example: 175
+	Height *int64 `json:"height,omitempty"`
+
+	// Profile unique identifier (primary key from user_profile table)
+	// Example: 1
+	// Required: true
+	ID int64 `json:"id"`
+
+	// Whether to use metric units (true) or imperial units (false)
+	// Example: true
+	// Required: true
+	IsMetric bool `json:"isMetric"`
 
 	// Last profile update timestamp
 	// Example: 2023-12-01T10:00:00Z
 	// Required: true
 	// Format: date-time
-	UpdatedAt *strfmt.DateTime `json:"updatedAt"`
+	UpdatedAt strfmt.DateTime `json:"updatedAt"`
+
+	// User unique identifier (foreign key to auth_user table)
+	// Example: uuid-123-456-789
+	// Required: true
+	UserID string `json:"userId"`
+
+	// User weight in grams
+	// Example: 70000
+	Weight *int64 `json:"weight,omitempty"`
 }
 
 // Validate validates this user profile
 func (m *UserProfile) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateID(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateEmail(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateFirstName(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateLastName(formats); err != nil {
+	if err := m.validateBirthDate(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -77,7 +78,23 @@ func (m *UserProfile) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
+	if err := m.validateGender(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateID(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateIsMetric(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateUpdatedAt(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateUserID(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -87,40 +104,12 @@ func (m *UserProfile) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *UserProfile) validateID(formats strfmt.Registry) error {
-
-	if err := validate.Required("id", "body", m.ID); err != nil {
-		return err
+func (m *UserProfile) validateBirthDate(formats strfmt.Registry) error {
+	if swag.IsZero(m.BirthDate) { // not required
+		return nil
 	}
 
-	return nil
-}
-
-func (m *UserProfile) validateEmail(formats strfmt.Registry) error {
-
-	if err := validate.Required("email", "body", m.Email); err != nil {
-		return err
-	}
-
-	if err := validate.FormatOf("email", "body", "email", m.Email.String(), formats); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *UserProfile) validateFirstName(formats strfmt.Registry) error {
-
-	if err := validate.Required("firstName", "body", m.FirstName); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *UserProfile) validateLastName(formats strfmt.Registry) error {
-
-	if err := validate.Required("lastName", "body", m.LastName); err != nil {
+	if err := validate.FormatOf("birthDate", "body", "date", m.BirthDate.String(), formats); err != nil {
 		return err
 	}
 
@@ -129,7 +118,7 @@ func (m *UserProfile) validateLastName(formats strfmt.Registry) error {
 
 func (m *UserProfile) validateCreatedAt(formats strfmt.Registry) error {
 
-	if err := validate.Required("createdAt", "body", m.CreatedAt); err != nil {
+	if err := validate.Required("createdAt", "body", strfmt.DateTime(m.CreatedAt)); err != nil {
 		return err
 	}
 
@@ -140,13 +129,85 @@ func (m *UserProfile) validateCreatedAt(formats strfmt.Registry) error {
 	return nil
 }
 
+var userProfileTypeGenderPropEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["male","female","other"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		userProfileTypeGenderPropEnum = append(userProfileTypeGenderPropEnum, v)
+	}
+}
+
+const (
+
+	// UserProfileGenderMale captures enum value "male"
+	UserProfileGenderMale string = "male"
+
+	// UserProfileGenderFemale captures enum value "female"
+	UserProfileGenderFemale string = "female"
+
+	// UserProfileGenderOther captures enum value "other"
+	UserProfileGenderOther string = "other"
+)
+
+// prop value enum
+func (m *UserProfile) validateGenderEnum(path, location string, value string) error {
+	if err := validate.EnumCase(path, location, value, userProfileTypeGenderPropEnum, true); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *UserProfile) validateGender(formats strfmt.Registry) error {
+	if swag.IsZero(m.Gender) { // not required
+		return nil
+	}
+
+	// value enum
+	if err := m.validateGenderEnum("gender", "body", *m.Gender); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *UserProfile) validateID(formats strfmt.Registry) error {
+
+	if err := validate.Required("id", "body", int64(m.ID)); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *UserProfile) validateIsMetric(formats strfmt.Registry) error {
+
+	if err := validate.Required("isMetric", "body", bool(m.IsMetric)); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (m *UserProfile) validateUpdatedAt(formats strfmt.Registry) error {
 
-	if err := validate.Required("updatedAt", "body", m.UpdatedAt); err != nil {
+	if err := validate.Required("updatedAt", "body", strfmt.DateTime(m.UpdatedAt)); err != nil {
 		return err
 	}
 
 	if err := validate.FormatOf("updatedAt", "body", "date-time", m.UpdatedAt.String(), formats); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *UserProfile) validateUserID(formats strfmt.Registry) error {
+
+	if err := validate.RequiredString("userId", "body", m.UserID); err != nil {
 		return err
 	}
 

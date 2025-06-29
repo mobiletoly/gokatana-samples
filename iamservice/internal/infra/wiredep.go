@@ -2,6 +2,7 @@ package infra
 
 import (
 	"context"
+	"github.com/mobiletoly/gokatana-samples/iamservice/internal/adapters/mailer"
 	"github.com/mobiletoly/gokatana-samples/iamservice/internal/adapters/persist"
 	"github.com/mobiletoly/gokatana-samples/iamservice/internal/core/app"
 	"github.com/mobiletoly/gokatana-samples/iamservice/internal/core/outport"
@@ -27,9 +28,11 @@ func WireDependencies(ctx context.Context, cfg *app.Config) *Dependencies {
 			katapp.Logger(ctx).Info("performing cleanup of all dependency objects")
 			db.Close()
 		},
-		Ports: &outport.Ports{
-			AuthPersist: persist.NewAuthUserAdapter(db),
-			Tx:          persist.NewTransactionAdapter(db),
-		},
+		Ports: outport.NewPortsBuilder().
+			AuthUserPersist(persist.NewAuthUserAdapter(db)).
+			UserProfilePersist(persist.NewUserProfileAdapter(db)).
+			Tx(persist.NewTxAdapter(db)).
+			Mailer(mailer.NewMailer(ctx, &cfg.GCloud)).
+			Build(),
 	}
 }

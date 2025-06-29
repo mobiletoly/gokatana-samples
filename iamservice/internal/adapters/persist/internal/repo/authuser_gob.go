@@ -50,12 +50,21 @@ func (b AuthUserEntity_Builder_FirstName) FirstName(arg string) AuthUserEntity_B
 	return AuthUserEntity_Builder_LastName{root: b.root}
 }
 
+type AuthUserEntity_Builder_TenantID struct {
+	root *AuthUserEntity
+}
+
+func (b AuthUserEntity_Builder_LastName) LastName(arg string) AuthUserEntity_Builder_TenantID {
+	b.root.LastName = arg
+	return AuthUserEntity_Builder_TenantID{root: b.root}
+}
+
 type AuthUserEntity_Builder_IsActive struct {
 	root *AuthUserEntity
 }
 
-func (b AuthUserEntity_Builder_LastName) LastName(arg string) AuthUserEntity_Builder_IsActive {
-	b.root.LastName = arg
+func (b AuthUserEntity_Builder_TenantID) TenantID(arg string) AuthUserEntity_Builder_IsActive {
+	b.root.TenantID = arg
 	return AuthUserEntity_Builder_IsActive{root: b.root}
 }
 
@@ -81,7 +90,7 @@ type AuthUserEntity_Builder_UpdatedAt struct {
 	root *AuthUserEntity
 }
 
-func (b AuthUserEntity_Builder_CreatedAt) CreatedAt(arg *time.Time) AuthUserEntity_Builder_UpdatedAt {
+func (b AuthUserEntity_Builder_CreatedAt) CreatedAt(arg time.Time) AuthUserEntity_Builder_UpdatedAt {
 	b.root.CreatedAt = arg
 	return AuthUserEntity_Builder_UpdatedAt{root: b.root}
 }
@@ -90,7 +99,7 @@ type AuthUserEntity_Builder_GobFinalizer struct {
 	root *AuthUserEntity
 }
 
-func (b AuthUserEntity_Builder_UpdatedAt) UpdatedAt(arg *time.Time) AuthUserEntity_Builder_GobFinalizer {
+func (b AuthUserEntity_Builder_UpdatedAt) UpdatedAt(arg time.Time) AuthUserEntity_Builder_GobFinalizer {
 	b.root.UpdatedAt = arg
 	return AuthUserEntity_Builder_GobFinalizer{root: b.root}
 }
@@ -125,30 +134,12 @@ func (b AuthRoleEntity_Builder_Name) Name(arg string) AuthRoleEntity_Builder_Des
 	return AuthRoleEntity_Builder_Description{root: b.root}
 }
 
-type AuthRoleEntity_Builder_CreatedAt struct {
-	root *AuthRoleEntity
-}
-
-func (b AuthRoleEntity_Builder_Description) Description(arg *string) AuthRoleEntity_Builder_CreatedAt {
-	b.root.Description = arg
-	return AuthRoleEntity_Builder_CreatedAt{root: b.root}
-}
-
-type AuthRoleEntity_Builder_UpdatedAt struct {
-	root *AuthRoleEntity
-}
-
-func (b AuthRoleEntity_Builder_CreatedAt) CreatedAt(arg *time.Time) AuthRoleEntity_Builder_UpdatedAt {
-	b.root.CreatedAt = arg
-	return AuthRoleEntity_Builder_UpdatedAt{root: b.root}
-}
-
 type AuthRoleEntity_Builder_GobFinalizer struct {
 	root *AuthRoleEntity
 }
 
-func (b AuthRoleEntity_Builder_UpdatedAt) UpdatedAt(arg *time.Time) AuthRoleEntity_Builder_GobFinalizer {
-	b.root.UpdatedAt = arg
+func (b AuthRoleEntity_Builder_Description) Description(arg *string) AuthRoleEntity_Builder_GobFinalizer {
+	b.root.Description = arg
 	return AuthRoleEntity_Builder_GobFinalizer{root: b.root}
 }
 
@@ -173,33 +164,165 @@ func (b AuthUserRoleEntity_Builder_UserID) UserID(arg string) AuthUserRoleEntity
 	return AuthUserRoleEntity_Builder_RoleID{root: b.root}
 }
 
-type AuthUserRoleEntity_Builder_AssignedAt struct {
-	root *AuthUserRoleEntity
-}
-
-func (b AuthUserRoleEntity_Builder_RoleID) RoleID(arg int) AuthUserRoleEntity_Builder_AssignedAt {
-	b.root.RoleID = arg
-	return AuthUserRoleEntity_Builder_AssignedAt{root: b.root}
-}
-
-type AuthUserRoleEntity_Builder_AssignedBy struct {
-	root *AuthUserRoleEntity
-}
-
-func (b AuthUserRoleEntity_Builder_AssignedAt) AssignedAt(arg *time.Time) AuthUserRoleEntity_Builder_AssignedBy {
-	b.root.AssignedAt = arg
-	return AuthUserRoleEntity_Builder_AssignedBy{root: b.root}
-}
-
 type AuthUserRoleEntity_Builder_GobFinalizer struct {
 	root *AuthUserRoleEntity
 }
 
-func (b AuthUserRoleEntity_Builder_AssignedBy) AssignedBy(arg *string) AuthUserRoleEntity_Builder_GobFinalizer {
-	b.root.AssignedBy = arg
+func (b AuthUserRoleEntity_Builder_RoleID) RoleID(arg int) AuthUserRoleEntity_Builder_GobFinalizer {
+	b.root.RoleID = arg
 	return AuthUserRoleEntity_Builder_GobFinalizer{root: b.root}
 }
 
 func (b AuthUserRoleEntity_Builder_GobFinalizer) Build() *AuthUserRoleEntity {
+	return b.root
+}
+
+func NewTenantEntityBuilder() TenantEntity_Builder_ID {
+	return TenantEntity_Builder_ID{root: &TenantEntity{}}
+}
+
+type TenantEntity_Builder_ID struct {
+	root *TenantEntity
+}
+
+type TenantEntity_Builder_Name struct {
+	root *TenantEntity
+}
+
+func (b TenantEntity_Builder_ID) ID(arg string) TenantEntity_Builder_Name {
+	b.root.ID = arg
+	return TenantEntity_Builder_Name{root: b.root}
+}
+
+type TenantEntity_Builder_Description struct {
+	root *TenantEntity
+}
+
+func (b TenantEntity_Builder_Name) Name(arg string) TenantEntity_Builder_Description {
+	b.root.Name = arg
+	return TenantEntity_Builder_Description{root: b.root}
+}
+
+type TenantEntity_Builder_CreatedAt struct {
+	root *TenantEntity
+}
+
+func (b TenantEntity_Builder_Description) Description(arg string) TenantEntity_Builder_CreatedAt {
+	b.root.Description = arg
+	return TenantEntity_Builder_CreatedAt{root: b.root}
+}
+
+type TenantEntity_Builder_UpdatedAt struct {
+	root *TenantEntity
+}
+
+func (b TenantEntity_Builder_CreatedAt) CreatedAt(arg time.Time) TenantEntity_Builder_UpdatedAt {
+	b.root.CreatedAt = arg
+	return TenantEntity_Builder_UpdatedAt{root: b.root}
+}
+
+type TenantEntity_Builder_GobFinalizer struct {
+	root *TenantEntity
+}
+
+func (b TenantEntity_Builder_UpdatedAt) UpdatedAt(arg time.Time) TenantEntity_Builder_GobFinalizer {
+	b.root.UpdatedAt = arg
+	return TenantEntity_Builder_GobFinalizer{root: b.root}
+}
+
+func (b TenantEntity_Builder_GobFinalizer) Build() *TenantEntity {
+	return b.root
+}
+
+func NewUserProfileEntityBuilder() UserProfileEntity_Builder_ID {
+	return UserProfileEntity_Builder_ID{root: &UserProfileEntity{}}
+}
+
+type UserProfileEntity_Builder_ID struct {
+	root *UserProfileEntity
+}
+
+type UserProfileEntity_Builder_UserID struct {
+	root *UserProfileEntity
+}
+
+func (b UserProfileEntity_Builder_ID) ID(arg *int) UserProfileEntity_Builder_UserID {
+	b.root.ID = arg
+	return UserProfileEntity_Builder_UserID{root: b.root}
+}
+
+type UserProfileEntity_Builder_Height struct {
+	root *UserProfileEntity
+}
+
+func (b UserProfileEntity_Builder_UserID) UserID(arg string) UserProfileEntity_Builder_Height {
+	b.root.UserID = arg
+	return UserProfileEntity_Builder_Height{root: b.root}
+}
+
+type UserProfileEntity_Builder_Weight struct {
+	root *UserProfileEntity
+}
+
+func (b UserProfileEntity_Builder_Height) Height(arg *int) UserProfileEntity_Builder_Weight {
+	b.root.Height = arg
+	return UserProfileEntity_Builder_Weight{root: b.root}
+}
+
+type UserProfileEntity_Builder_Gender struct {
+	root *UserProfileEntity
+}
+
+func (b UserProfileEntity_Builder_Weight) Weight(arg *int) UserProfileEntity_Builder_Gender {
+	b.root.Weight = arg
+	return UserProfileEntity_Builder_Gender{root: b.root}
+}
+
+type UserProfileEntity_Builder_BirthDate struct {
+	root *UserProfileEntity
+}
+
+func (b UserProfileEntity_Builder_Gender) Gender(arg *string) UserProfileEntity_Builder_BirthDate {
+	b.root.Gender = arg
+	return UserProfileEntity_Builder_BirthDate{root: b.root}
+}
+
+type UserProfileEntity_Builder_IsMetric struct {
+	root *UserProfileEntity
+}
+
+func (b UserProfileEntity_Builder_BirthDate) BirthDate(arg *time.Time) UserProfileEntity_Builder_IsMetric {
+	b.root.BirthDate = arg
+	return UserProfileEntity_Builder_IsMetric{root: b.root}
+}
+
+type UserProfileEntity_Builder_CreatedAt struct {
+	root *UserProfileEntity
+}
+
+func (b UserProfileEntity_Builder_IsMetric) IsMetric(arg bool) UserProfileEntity_Builder_CreatedAt {
+	b.root.IsMetric = arg
+	return UserProfileEntity_Builder_CreatedAt{root: b.root}
+}
+
+type UserProfileEntity_Builder_UpdatedAt struct {
+	root *UserProfileEntity
+}
+
+func (b UserProfileEntity_Builder_CreatedAt) CreatedAt(arg time.Time) UserProfileEntity_Builder_UpdatedAt {
+	b.root.CreatedAt = arg
+	return UserProfileEntity_Builder_UpdatedAt{root: b.root}
+}
+
+type UserProfileEntity_Builder_GobFinalizer struct {
+	root *UserProfileEntity
+}
+
+func (b UserProfileEntity_Builder_UpdatedAt) UpdatedAt(arg time.Time) UserProfileEntity_Builder_GobFinalizer {
+	b.root.UpdatedAt = arg
+	return UserProfileEntity_Builder_GobFinalizer{root: b.root}
+}
+
+func (b UserProfileEntity_Builder_GobFinalizer) Build() *UserProfileEntity {
 	return b.root
 }

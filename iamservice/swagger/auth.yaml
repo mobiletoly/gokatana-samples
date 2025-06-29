@@ -1,14 +1,15 @@
 swagger: '2.0'
 info:
   version: '1.0.0'
-  title: 'IAM Service User Authentication'
-  description: 'User authentication APIs for IAM Service application'
+  title: 'IAMService User Authentication'
+  description: 'User authentication APIs for IAMService application using auth_user table'
 
 basePath: '/api/v1/auth'
 
 paths:
   /signup:
     post:
+      operationId: signUp
       summary: 'Sign up a new user'
       description: 'Register a new user with email and password (local mode)'
       parameters:
@@ -20,9 +21,9 @@ paths:
             $ref: '#/definitions/SignupRequest'
       responses:
         201:
-          description: 'User successfully created'
+          description: 'User successfully created, email confirmation required'
           schema:
-            $ref: '#/definitions/AuthResponse'
+            $ref: '#/definitions/SignupResponse'
         400:
           description: 'Invalid input data'
         409:
@@ -32,6 +33,7 @@ paths:
 
   /signin:
     post:
+      operationId: signIn
       summary: 'Sign in user'
       description: 'Authenticate user with email and password (local mode)'
       parameters:
@@ -55,6 +57,7 @@ paths:
 
   /signout:
     post:
+      operationId: signOut
       summary: 'Sign out user'
       description: 'Sign out the current user and invalidate session/token'
       security:
@@ -62,15 +65,12 @@ paths:
       responses:
         200:
           description: 'User successfully signed out'
-          schema:
-            $ref: '#/definitions/MessageResponse'
         401:
           description: 'Unauthorized - invalid or missing token'
 
-
-
   /refresh:
     post:
+      operationId: refreshToken
       summary: 'Refresh authentication token'
       description: 'Refresh the authentication token using refresh token'
       parameters:
@@ -90,6 +90,34 @@ paths:
         401:
           description: 'Refresh token expired or invalid'
 
+  /confirm-email:
+    get:
+      operationId: confirmEmail
+      summary: 'Confirm user email address'
+      description: 'Confirm user email address using the confirmation code sent via email'
+      parameters:
+        - name: 'userId'
+          in: 'query'
+          description: 'User ID to confirm email for'
+          required: true
+          type: string
+        - name: 'code'
+          in: 'query'
+          description: 'Email confirmation code (6-digit for mobile, long token for web)'
+          required: true
+          type: string
+      responses:
+        200:
+          description: 'Email confirmed successfully'
+          schema:
+            $ref: '#/definitions/EmailConfirmationResponse'
+        400:
+          description: 'Invalid or expired code'
+        404:
+          description: 'Code not found'
+        500:
+          description: 'Internal server error'
+
 securityDefinitions:
   BearerAuth:
     type: apiKey
@@ -105,84 +133,145 @@ definitions:
       email:
         type: string
         format: email
+        x-nullable: false
         example: 'user@example.com'
-        description: 'User email address (must be unique in auth_user table)'
+        description: 'User email address (must be unique within tenant)'
       password:
         type: string
+        x-nullable: false
         minLength: 8
         example: 'SecurePassword123!'
         description: 'User password (minimum 8 characters, will be hashed)'
       firstName:
         type: string
+        x-nullable: false
         example: 'John'
         description: 'User first name'
       lastName:
         type: string
+        x-nullable: false
         example: 'Doe'
         description: 'User last name'
+      tenantId:
+        type: string
+        x-nullable: false
+        example: 'acme-corp'
+        description: 'Tenant identifier for multi-tenant support'
+      source:
+        type: string
+        x-nullable: false
+        enum: ['web', 'android', 'ios']
+        example: 'web'
+        description: 'Platform source for customized email confirmation experience'
     required:
       - email
       - password
       - firstName
       - lastName
+      - tenantId
+      - source
 
   SigninRequest:
     type: object
     properties:
       email:
         type: string
+        x-nullable: false
         format: email
         example: 'user@example.com'
         description: 'User email address'
       password:
         type: string
+        x-nullable: false
         example: 'SecurePassword123!'
         description: 'User password'
+      tenantId:
+        type: string
+        x-nullable: false
+        example: 'acme-corp'
+        description: 'Tenant identifier for multi-tenant support'
     required:
       - email
       - password
+      - tenantId
 
   RefreshRequest:
     type: object
     properties:
       refreshToken:
         type: string
+        x-nullable: false
         example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
         description: 'Refresh token'
     required:
       - refreshToken
+
+  SignupResponse:
+    type: object
+    description: 'Response after successful user signup indicating email confirmation is required'
+    properties:
+      message:
+        type: string
+        x-nullable: false
+        description: 'Success message'
+        example: 'User account created successfully. Please check your email to confirm your account.'
+      email:
+        type: string
+        x-nullable: false
+        format: email
+        description: 'Email address where confirmation was sent'
+      userId:
+        type: string
+        x-nullable: false
+        description: 'ID of the created user'
+    required:
+      - message
+      - email
+      - userId
+
+  EmailConfirmationResponse:
+    type: object
+    description: 'Response after successful email confirmation'
+    properties:
+      message:
+        type: string
+        x-nullable: false
+        description: 'Success message'
+        example: 'Email confirmed successfully'
+    required:
+      - message
 
   AuthResponse:
     type: object
     properties:
       accessToken:
         type: string
+        x-nullable: false
         example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
         description: 'JWT access token'
       refreshToken:
         type: string
+        x-nullable: false
         example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
         description: 'JWT refresh token'
       tokenType:
         type: string
+        x-nullable: false
         example: 'Bearer'
         description: 'Token type'
       expiresIn:
         type: integer
+        x-nullable: false
         example: 3600
         description: 'Token expiration time in seconds'
+      userId:
+        type: string
+        x-nullable: false
+        example: 'uuid-123-456-789'
+        description: 'User unique identifier'
     required:
       - accessToken
       - refreshToken
       - tokenType
       - expiresIn
-
-  MessageResponse:
-    type: object
-    properties:
-      message:
-        type: string
-        example: 'Operation completed successfully'
-        description: 'Response message'
-    required:
-      - message
+      - userId

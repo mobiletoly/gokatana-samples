@@ -1,0 +1,264 @@
+swagger: '2.0'
+info:
+  title: Tenant Management API
+  description: API for tenant management operations
+  version: 1.0.0
+
+paths:
+  /api/v1/tenants:
+    get:
+      operationId: getAllTenants
+      summary: List all tenants (Sysadmin only)
+      description: Returns a list of all tenants in the system. Requires sysadmin role.
+      tags:
+        - Tenants
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          description: Page number for pagination
+          required: false
+          type: integer
+          minimum: 1
+          default: 1
+        - name: limit
+          in: query
+          description: Number of tenants per page
+          required: false
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 20
+        - name: active
+          in: query
+          description: Filter by active status
+          required: false
+          type: boolean
+      responses:
+        200:
+          description: Tenants retrieved successfully
+          schema:
+            $ref: '#/definitions/TenantListResponse'
+        401:
+          description: Unauthorized
+        403:
+          description: Forbidden - requires sysadmin role
+        500:
+          description: Internal server error
+
+    post:
+      operationId: createTenant
+      summary: Create a new tenant (Sysadmin only)
+      description: Creates a new tenant in the system. Requires sysadmin role.
+      tags:
+        - Tenants
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: tenantRequest
+          in: body
+          description: Tenant creation information
+          required: true
+          schema:
+            $ref: '#/definitions/TenantCreateRequest'
+      responses:
+        201:
+          description: Tenant successfully created
+          schema:
+            $ref: '#/definitions/TenantResponse'
+        400:
+          description: Invalid input data
+        401:
+          description: Unauthorized
+        403:
+          description: Forbidden - requires sysadmin role
+        409:
+          description: Tenant already exists (duplicate ID)
+        500:
+          description: Internal server error
+
+  /api/v1/tenants/{tenantId}:
+    get:
+      operationId: getTenantById
+      summary: Get tenant by ID (Sysadmin only)
+      description: Returns detailed information about a specific tenant. Requires sysadmin role.
+      tags:
+        - Tenants
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          description: The ID of the tenant to retrieve
+          type: string
+      responses:
+        200:
+          description: Tenant retrieved successfully
+          schema:
+            $ref: '#/definitions/TenantResponse'
+        401:
+          description: Unauthorized
+        403:
+          description: Forbidden - requires sysadmin role
+        404:
+          description: Tenant not found
+        500:
+          description: Internal server error
+
+    put:
+      operationId: updateTenantById
+      summary: Update tenant (Sysadmin only)
+      description: Updates an existing tenant. Requires sysadmin role.
+      tags:
+        - Tenants
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          description: The ID of the tenant to update
+          type: string
+        - name: tenantRequest
+          in: body
+          description: Tenant update information
+          required: true
+          schema:
+            $ref: '#/definitions/TenantUpdateRequest'
+      responses:
+        200:
+          description: Tenant successfully updated
+          schema:
+            $ref: '#/definitions/TenantResponse'
+        400:
+          description: Invalid input data
+        401:
+          description: Unauthorized
+        403:
+          description: Forbidden - requires sysadmin role
+        404:
+          description: Tenant not found
+        500:
+          description: Internal server error
+
+    delete:
+      operationId: deleteTenantById
+      summary: Delete tenant (Sysadmin only)
+      description: Deletes a tenant from the system. This will also delete all associated users. Requires sysadmin role.
+      tags:
+        - Tenants
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          description: The ID of the tenant to delete
+          type: string
+      responses:
+        200:
+          description: Tenant successfully deleted
+        401:
+          description: Unauthorized
+        403:
+          description: Forbidden - requires sysadmin role
+        404:
+          description: Tenant not found
+        500:
+          description: Internal server error
+
+definitions:
+  TenantCreateRequest:
+    type: object
+    description: 'Request payload for creating a new tenant'
+    properties:
+      id:
+        type: string
+        x-nullable: false
+        example: 'acme-corp'
+        description: 'Unique tenant identifier'
+      name:
+        type: string
+        x-nullable: false
+        example: 'Acme Corporation'
+        description: 'Human-readable tenant name'
+      description:
+        type: string
+        x-nullable: false
+        example: 'Acme Corporation tenant for enterprise customers'
+        description: 'Optional description of the tenant'
+    required:
+      - id
+      - name
+      - description
+
+  TenantUpdateRequest:
+    type: object
+    description: 'Request payload for updating a tenant'
+    properties:
+      name:
+        type: string
+        x-nullable: false
+        example: 'Acme Corporation Updated'
+        description: 'Human-readable tenant name'
+      description:
+        type: string
+        x-nullable: false
+        example: 'Updated description for Acme Corporation'
+        description: 'Optional description of the tenant'
+    required:
+      - name
+      - description
+
+  TenantResponse:
+    type: object
+    description: 'Tenant information response'
+    properties:
+      id:
+        type: string
+        x-nullable: false
+        example: 'acme-corp'
+        description: 'Unique tenant identifier'
+      name:
+        type: string
+        x-nullable: false
+        example: 'Acme Corporation'
+        description: 'Human-readable tenant name'
+      description:
+        type: string
+        x-nullable: false
+        example: 'Acme Corporation tenant for enterprise customers'
+        description: 'Optional description of the tenant'
+      createdAt:
+        type: string
+        x-nullable: false
+        format: date-time
+        example: '2023-12-01T10:00:00Z'
+        description: 'Tenant creation timestamp'
+      updatedAt:
+        type: string
+        x-nullable: false
+        format: date-time
+        example: '2023-12-01T10:00:00Z'
+        description: 'Last tenant update timestamp'
+    required:
+      - id
+      - name
+      - description
+      - createdAt
+      - updatedAt
+
+  TenantListResponse:
+    type: object
+    required:
+      - tenants
+      - pagination
+    properties:
+      tenants:
+        type: array
+        items:
+          $ref: '#/definitions/TenantResponse'
+      pagination:
+        $ref: 'common.yaml#/definitions/PaginationInfo'

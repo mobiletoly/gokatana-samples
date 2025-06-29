@@ -19,32 +19,32 @@ import (
 // swagger:model PaginationInfo
 type PaginationInfo struct {
 
-	// Current page number
-	// Required: true
-	Page *int64 `json:"page"`
-
 	// Number of items per page
 	// Required: true
-	Limit *int64 `json:"limit"`
+	Limit int64 `json:"limit"`
+
+	// Current page number
+	// Required: true
+	Page int64 `json:"page"`
 
 	// Total number of items
 	// Required: true
-	Total *int64 `json:"total"`
+	Total int64 `json:"total"`
 
 	// Total number of pages
 	// Required: true
-	TotalPages *int64 `json:"totalPages"`
+	TotalPages int64 `json:"totalPages"`
 }
 
 // Validate validates this pagination info
 func (m *PaginationInfo) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validatePage(formats); err != nil {
+	if err := m.validateLimit(formats); err != nil {
 		res = append(res, err)
 	}
 
-	if err := m.validateLimit(formats); err != nil {
+	if err := m.validatePage(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -62,18 +62,18 @@ func (m *PaginationInfo) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *PaginationInfo) validatePage(formats strfmt.Registry) error {
+func (m *PaginationInfo) validateLimit(formats strfmt.Registry) error {
 
-	if err := validate.Required("page", "body", m.Page); err != nil {
+	if err := validate.Required("limit", "body", int64(m.Limit)); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (m *PaginationInfo) validateLimit(formats strfmt.Registry) error {
+func (m *PaginationInfo) validatePage(formats strfmt.Registry) error {
 
-	if err := validate.Required("limit", "body", m.Limit); err != nil {
+	if err := validate.Required("page", "body", int64(m.Page)); err != nil {
 		return err
 	}
 
@@ -82,7 +82,7 @@ func (m *PaginationInfo) validateLimit(formats strfmt.Registry) error {
 
 func (m *PaginationInfo) validateTotal(formats strfmt.Registry) error {
 
-	if err := validate.Required("total", "body", m.Total); err != nil {
+	if err := validate.Required("total", "body", int64(m.Total)); err != nil {
 		return err
 	}
 
@@ -91,7 +91,7 @@ func (m *PaginationInfo) validateTotal(formats strfmt.Registry) error {
 
 func (m *PaginationInfo) validateTotalPages(formats strfmt.Registry) error {
 
-	if err := validate.Required("totalPages", "body", m.TotalPages); err != nil {
+	if err := validate.Required("totalPages", "body", int64(m.TotalPages)); err != nil {
 		return err
 	}
 

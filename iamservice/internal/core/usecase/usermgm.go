@@ -3,6 +3,8 @@ package usecase
 import (
 	"context"
 	"errors"
+	"github.com/jackc/pgx/v5"
+	"github.com/mobiletoly/gokatana-samples/iamservice/internal/core/usecase/internal"
 	"time"
 
 	"github.com/go-openapi/strfmt"
@@ -15,284 +17,436 @@ import (
 // UserMgm handles user management use cases
 type UserMgm struct {
 	authUserPort outport.AuthUserPersist
-	tx           outport.Transaction
+	txPort       outport.TxPort
 }
 
 // NewUserMgm creates a new UserMgm use case
-func NewUserMgm(authUserPort outport.AuthUserPersist, tx outport.Transaction) *UserMgm {
+func NewUserMgm(authUserPort outport.AuthUserPersist, databasePort outport.TxPort) *UserMgm {
 	return &UserMgm{
 		authUserPort: authUserPort,
-		tx:           tx,
+		txPort:       databasePort,
 	}
 }
 
-// GetCurrentUserProfile returns the profile of the authenticated user
-func (u *UserMgm) GetCurrentUserProfile(ctx context.Context, userID string) (*swagger.UserProfile, error) {
-	// userID should never be empty - this is a programming error if it happens
+// LoadUserByID returns a user by ID (admin only)
+func (u *UserMgm) LoadUserByID(
+	ctx context.Context, principal *UserPrincipal, userID string,
+) (*swagger.AuthUserResponse, error) {
+	katapp.Logger(ctx).Info("loading user by ID", "userID", userID)
 	if userID == "" {
-		panic("userID cannot be empty - this should be validated at the HTTP handler level")
+		msg := "user id cannot be empty"
+		katapp.Logger(ctx).Error(msg, "principal", principal.String(), "userID", userID)
+		return nil, katapp.NewErr(katapp.ErrInvalidInput, msg)
 	}
 
-	user, err := u.authUserPort.GetUserByID(ctx, userID)
+	user, err := outport.TxWithResult(ctx, u.txPort, func(tx pgx.Tx) (*model.AuthUser, error) {
+		return u.authUserPort.GetUserByID(ctx, tx, userID)
+	})
 	if err != nil {
-		var appErr *katapp.Err
-		if errors.As(err, &appErr) && appErr.Scope == katapp.ErrNotFound {
-			return nil, err
-		}
-		return nil, katapp.NewErr(katapp.ErrInternal, "failed to get user profile")
-	}
-
-	return u.authUserToUserProfile(user), nil
-}
-
-// GetUserByID returns a user by ID (admin only)
-func (u *UserMgm) GetUserByID(ctx context.Context, userID string) (*swagger.UserProfile, error) {
-	if userID == "" {
-		panic("userID cannot be empty - this should be validated at the HTTP handler level")
-	}
-
-	user, err := u.authUserPort.GetUserByID(ctx, userID)
-	if err != nil {
-		var appErr *katapp.Err
-		if errors.As(err, &appErr) && appErr.Scope == katapp.ErrNotFound {
-			return nil, err
-		}
 		return nil, katapp.NewErr(katapp.ErrInternal, "failed to get user")
 	}
-
-	return u.authUserToUserProfile(user), nil
+	if !principal.CanFetchUser(userID, user.TenantID) {
+		msg := "insufficient permissions to fetch user profile"
+		katapp.Logger(ctx).Warn(msg,
+			"principal", principal.String(),
+			"targetUserID", userID,
+		)
+		return nil, katapp.NewErr(katapp.ErrNoPermissions, msg)
+	}
+	return authUserToAuthUserResponse(user), nil
 }
 
-// ListUsers returns a paginated list of users (admin only)
-func (u *UserMgm) ListUsers(ctx context.Context, page, limit int) (*swagger.UserListResponse, error) {
-	// Validate pagination parameters
+// ListAllUsersByTenant returns a paginated list of users within principal's tenant (admin role only)
+// if userPrincipal is user role only, then only the user's own profile is returned
+func (u *UserMgm) ListAllUsersByTenant(
+	ctx context.Context, userPrincipal *UserPrincipal, tenantID string, page, limit int,
+) (*swagger.UserListResponse, error) {
+	katapp.Logger(ctx).Info("listing users by tenant",
+		"principal", userPrincipal.String(),
+		"tenantID", tenantID,
+		"page", page,
+		"limit", limit,
+	)
+
+	if tenantID == "" {
+		msg := "tenant id cannot be empty"
+		katapp.Logger(ctx).Error(msg, "principal", userPrincipal.String(), "tenantID", tenantID)
+		return nil, katapp.NewErr(katapp.ErrInvalidInput, msg)
+	}
+
 	if page < 1 {
 		page = 1
 	}
 	if limit < 1 || limit > 100 {
-		limit = 20
+		limit = 100
 	}
 
-	// For now, we'll implement a simple version without pagination in the persist layer
+	users, err := outport.TxWithResult(ctx, u.txPort, func(tx pgx.Tx) ([]*model.AuthUser, error) {
+		if userPrincipal.CanListUsersForTenant(tenantID) {
+			return u.authUserPort.GetAllUsersByTenantID(ctx, tx, tenantID)
+		} else {
+			var user *model.AuthUser
+			user, err := u.authUserPort.GetUserByID(ctx, tx, userPrincipal.UserID)
+			if err != nil {
+				return nil, err
+			}
+			return []*model.AuthUser{user}, nil
+		}
+	})
+	if err != nil {
+		return nil, katapp.NewErr(katapp.ErrInternal, "failed to get users")
+	}
+
+	// TODO For now, we'll implement a simple version without pagination in the persist layer
 	// In a real system, you'd add pagination support to the persist layer
-	users, err := u.authUserPort.GetAllUsers(ctx)
+
+	// Convert to swagger models
+	userResponses := make([]*swagger.AuthUserResponse, len(users))
+	for i, user := range users {
+		userResponses[i] = authUserToAuthUserResponse(user)
+	}
+
+	paginatedUsers, pagination := internal.Paginate(userResponses, page, limit)
+	return swagger.NewUserListResponseBuilder().
+		Pagination(pagination).
+		Users(paginatedUsers).
+		Build(), nil
+}
+
+// ListAllUsers returns a paginated list of all users in the system (sysadmin role only)
+func (u *UserMgm) ListAllUsers(
+	ctx context.Context, principal *UserPrincipal, page, limit int,
+) (*swagger.UserListResponse, error) {
+	katapp.Logger(ctx).Info("listing all users",
+		"principal", principal.String(),
+		"page", page,
+		"limit", limit)
+
+	if !principal.IsSysAdmin() {
+		msg := "insufficient permissions to list all users"
+		katapp.Logger(ctx).Warn(msg, "principal", principal.String())
+		return nil, katapp.NewErr(katapp.ErrNoPermissions, msg)
+	}
+
+	if page < 1 {
+		page = 1
+	}
+	if limit < 1 || limit > 100 {
+		limit = 100
+	}
+
+	users, err := outport.TxWithResult(ctx, u.txPort, func(tx pgx.Tx) ([]*model.AuthUser, error) {
+		return u.authUserPort.GetAllUsers(ctx, tx)
+	})
 	if err != nil {
 		return nil, katapp.NewErr(katapp.ErrInternal, "failed to get users")
 	}
 
 	// Convert to swagger models
-	userProfiles := make([]*swagger.UserProfile, len(users))
+	userResponses := make([]*swagger.AuthUserResponse, len(users))
 	for i, user := range users {
-		userProfiles[i] = u.authUserToUserProfile(user)
+		userResponses[i] = authUserToAuthUserResponse(user)
 	}
 
-	// Simple pagination logic (in production, this should be done in the database)
-	total := len(userProfiles)
-	totalPages := (total + limit - 1) / limit
-
-	start := (page - 1) * limit
-	end := start + limit
-	if end > total {
-		end = total
-	}
-	if start > total {
-		start = total
-	}
-
-	paginatedUsers := userProfiles[start:end]
-
-	// Convert to int64 for swagger models
-	pageInt64 := int64(page)
-	limitInt64 := int64(limit)
-	totalInt64 := int64(total)
-	totalPagesInt64 := int64(totalPages)
-
-	pagination := swagger.NewPaginationInfoBuilder().
-		Page(&pageInt64).
-		Limit(&limitInt64).
-		Total(&totalInt64).
-		TotalPages(&totalPagesInt64).
-		Build()
-
+	paginatedUsers, pagination := internal.Paginate(userResponses, page, limit)
 	return swagger.NewUserListResponseBuilder().
-		Users(paginatedUsers).
 		Pagination(pagination).
+		Users(paginatedUsers).
 		Build(), nil
 }
 
-// GetUserRoles returns the roles assigned to a user (admin only)
-func (u *UserMgm) GetUserRoles(ctx context.Context, userID string) (*swagger.UserRolesResponse, error) {
-	// userID should never be empty - this is a programming error if it happens
+// GetUserRoles returns the roles assigned to a user
+func (u *UserMgm) GetUserRoles(
+	ctx context.Context, principal *UserPrincipal, userID string,
+) (*swagger.UserRolesResponse, error) {
+	katapp.Logger(ctx).Info("getting user roles",
+		"principal", principal.String(),
+		"userID", userID,
+	)
 	if userID == "" {
-		panic("userID cannot be empty - this should be validated at the HTTP handler level")
+		msg := "userID cannot be empty"
+		katapp.Logger(ctx).Error(msg, "principal", principal.String(), "userID", userID)
+		return nil, katapp.NewErr(katapp.ErrInvalidInput, msg)
 	}
 
-	result, err := outport.TxWithResult(ctx, u.tx, func() (*swagger.UserRolesResponse, error) {
-		// Check if user exists
-		_, err := u.authUserPort.GetUserByID(ctx, userID)
+	roles, err := outport.TxWithResult(ctx, u.txPort, func(tx pgx.Tx) ([]string, error) {
+		user, err := internal.GetExistingUserById(ctx, u.authUserPort, tx, userID)
 		if err != nil {
-			var appErr *katapp.Err
-			if errors.As(err, &appErr) && appErr.Scope == katapp.ErrNotFound {
-				return nil, err
-			}
 			return nil, katapp.NewErr(katapp.ErrInternal, "failed to get user")
 		}
 
-		roles, err := u.authUserPort.GetUserRoles(ctx, userID)
+		if !principal.CanFetchUser(userID, user.TenantID) {
+			msg := "insufficient permissions to get user roles"
+			katapp.Logger(ctx).Warn(msg, "principal", principal.String(), "targetUserID", userID)
+			return nil, katapp.NewErr(katapp.ErrNoPermissions, msg)
+		}
+
+		roles, err := u.authUserPort.GetUserRoles(ctx, tx, userID)
 		if err != nil {
 			return nil, katapp.NewErr(katapp.ErrInternal, "failed to get user roles")
 		}
-
-		return swagger.NewUserRolesResponseBuilder().
-			UserID(&userID).
-			Roles(roles).
-			Build(), nil
+		return roles, nil
 	})
+	if err != nil {
+		return nil, err
+	}
 
-	return result, err
+	return swagger.NewUserRolesResponseBuilder().
+		Roles(roles).
+		UserID(&userID).
+		Build(), nil
 }
 
 // AssignUserRole assigns a role to a user (admin only)
-func (u *UserMgm) AssignUserRole(ctx context.Context, userID string, roleName string, requestingUserID string) (*swagger.MessageResponse, error) {
-	// These should never be empty - programming errors if they happen
+func (u *UserMgm) AssignUserRole(ctx context.Context, principal *UserPrincipal, userID string, roleName string) error {
+	katapp.Logger(ctx).Info("assigning role to user",
+		"principal", principal.String(),
+		"userID", userID,
+		"roleName", roleName,
+	)
 	if userID == "" {
-		panic("userID cannot be empty - this should be validated at the HTTP handler level")
+		msg := "user id cannot be empty"
+		katapp.Logger(ctx).Error(msg, "principal", principal.String(), "userID", userID, "roleName", roleName)
+		return katapp.NewErr(katapp.ErrInvalidInput, msg)
 	}
 	if roleName == "" {
-		panic("roleName cannot be empty - this should be validated at the HTTP handler level")
+		msg := "role name cannot be empty"
+		katapp.Logger(ctx).Error(msg, "principal", principal.String(), "userID", userID, "roleName", roleName)
+		return katapp.NewErr(katapp.ErrInvalidInput, msg)
 	}
 
-	result, err := outport.TxWithResult(ctx, u.tx, func() (*swagger.MessageResponse, error) {
-		// Check if user exists
-		_, err := u.authUserPort.GetUserByID(ctx, userID)
+	return u.txPort.Run(ctx, func(tx pgx.Tx) error {
+		user, err := internal.GetExistingUserById(ctx, u.authUserPort, tx, userID)
 		if err != nil {
-			var appErr *katapp.Err
-			if errors.As(err, &appErr) && appErr.Scope == katapp.ErrNotFound {
-				return nil, err
-			}
-			return nil, katapp.NewErr(katapp.ErrInternal, "failed to get user")
+			return err
+		}
+		if !principal.CanManageUser(user.TenantID) {
+			msg := "insufficient permissions to assign roles"
+			katapp.Logger(ctx).Warn(msg, "principal", principal.String(), "userID", userID)
+			return katapp.NewErr(katapp.ErrNoPermissions, msg)
 		}
 
-		err = u.authUserPort.AssignUserRole(ctx, userID, roleName, &requestingUserID)
-		if err != nil {
-			var appErr *katapp.Err
-			if errors.As(err, &appErr) && appErr.Scope == katapp.ErrDuplicate {
-				return nil, err
-			}
-			if errors.As(err, &appErr) && appErr.Scope == katapp.ErrNotFound {
-				return nil, err
-			}
-			return nil, katapp.NewErr(katapp.ErrInternal, "failed to assign role")
+		if roleName == "sysadmin" {
+			msg := "cannot assign sysadmin role"
+			katapp.Logger(ctx).Warn(msg, "principal", principal.String(), "userID", userID)
+			return katapp.NewErr(katapp.ErrNoPermissions, msg)
 		}
 
-		message := "Role assigned successfully"
-		return swagger.NewMessageResponseBuilder().
-			Message(&message).
-			Build(), nil
+		err = u.authUserPort.AssignUserRole(ctx, tx, userID, roleName)
+		if err != nil {
+			var appErr *katapp.Err
+			if errors.As(err, &appErr) && (appErr.Scope == katapp.ErrDuplicate || appErr.Scope == katapp.ErrNotFound) {
+				return err
+			}
+			return katapp.NewErr(katapp.ErrInternal, "failed to assign role")
+		}
+		return nil
 	})
-
-	return result, err
 }
 
 // DeleteUserRole removes a role from a user (admin only)
-func (u *UserMgm) DeleteUserRole(ctx context.Context, userID string, roleName string) (*swagger.MessageResponse, error) {
-	// These should never be empty - programming errors if they happen
+func (u *UserMgm) DeleteUserRole(ctx context.Context, principal *UserPrincipal, userID string, roleName string) error {
+	katapp.Logger(ctx).Info("removing role from user",
+		"principal", principal.String(),
+		"userID", userID,
+		"roleName", roleName,
+	)
+
 	if userID == "" {
-		panic("userID cannot be empty - this should be validated at the HTTP handler level")
+		msg := "user id cannot be empty"
+		katapp.Logger(ctx).Error(msg, "principal", principal.String(), "userID", userID, "roleName", roleName)
+		return katapp.NewErr(katapp.ErrInvalidInput, msg)
 	}
 	if roleName == "" {
-		panic("roleName cannot be empty - this should be validated at the HTTP handler level")
+		msg := "role name cannot be empty"
+		katapp.Logger(ctx).Error(msg, "principal", principal.String(), "userID", userID, "roleName", roleName)
+		return katapp.NewErr(katapp.ErrInvalidInput, msg)
 	}
 
-	result, err := outport.TxWithResult(ctx, u.tx, func() (*swagger.MessageResponse, error) {
-		// Check if user exists
-		_, err := u.authUserPort.GetUserByID(ctx, userID)
+	return u.txPort.Run(ctx, func(tx pgx.Tx) error {
+		user, err := internal.GetExistingUserById(ctx, u.authUserPort, tx, userID)
+		if err != nil {
+			return err
+		}
+		if !principal.CanManageUser(user.TenantID) {
+			msg := "insufficient permissions to assign roles"
+			katapp.Logger(ctx).Warn(msg, "principal", principal.String(), "userID", userID)
+			return katapp.NewErr(katapp.ErrNoPermissions, msg)
+		}
+
+		err = u.authUserPort.DeleteUserRole(ctx, tx, userID, roleName)
 		if err != nil {
 			var appErr *katapp.Err
 			if errors.As(err, &appErr) && appErr.Scope == katapp.ErrNotFound {
-				return nil, err
+				return katapp.NewErr(katapp.ErrNotFound, "invalid role name or user doesn't have this role")
 			}
-			return nil, katapp.NewErr(katapp.ErrInternal, "failed to get user")
+			return katapp.NewErr(katapp.ErrInternal, "failed to remove role")
 		}
 
-		err = u.authUserPort.DeleteUserRole(ctx, userID, roleName)
-		if err != nil {
-			var appErr *katapp.Err
-			if errors.As(err, &appErr) && appErr.Scope == katapp.ErrNotFound {
-				return nil, katapp.NewErr(katapp.ErrNotFound, "invalid role name or user doesn't have this role")
-			}
-			return nil, katapp.NewErr(katapp.ErrInternal, "failed to remove role")
-		}
-
-		message := "Role removed successfully"
-		return swagger.NewMessageResponseBuilder().
-			Message(&message).
-			Build(), nil
+		return nil
 	})
-
-	return result, err
 }
 
 // DeleteUser deletes a user from the system (admin only)
-func (u *UserMgm) DeleteUser(ctx context.Context, userID string) (*swagger.MessageResponse, error) {
-	// userID should never be empty - programming error if it happens
+func (u *UserMgm) DeleteUser(
+	ctx context.Context, principal *UserPrincipal, userID string,
+) error {
+	katapp.Logger(ctx).Info("deleting user",
+		"principal", principal.String(),
+		"userID", userID,
+	)
 	if userID == "" {
-		panic("userID cannot be empty - this should be validated at the HTTP handler level")
+		msg := "user id cannot be empty"
+		katapp.Logger(ctx).Error(msg, "userID", userID)
+		return katapp.NewErr(katapp.ErrInvalidInput, msg)
 	}
 
-	result, err := outport.TxWithResult(ctx, u.tx, func() (*swagger.MessageResponse, error) {
-		// Check if user exists
-		_, err := u.authUserPort.GetUserByID(ctx, userID)
+	err := u.txPort.Run(ctx, func(tx pgx.Tx) error {
+		user, err := internal.GetExistingUserById(ctx, u.authUserPort, tx, userID)
 		if err != nil {
-			var appErr *katapp.Err
-			if errors.As(err, &appErr) && appErr.Scope == katapp.ErrNotFound {
-				return nil, err
-			}
-			return nil, katapp.NewErr(katapp.ErrInternal, "failed to get user")
+			return err
 		}
 
-		err = u.authUserPort.DeleteUser(ctx, userID)
-		if err != nil {
-			return nil, katapp.NewErr(katapp.ErrInternal, "failed to delete user")
+		if !principal.CanManageUser(user.TenantID) {
+			msg := "insufficient permissions to delete user"
+			katapp.Logger(ctx).Warn(msg, "principal", principal.String(), "userID", userID)
+			return katapp.NewErr(katapp.ErrNoPermissions, msg)
 		}
 
-		message := "User deleted successfully"
-		return swagger.NewMessageResponseBuilder().
-			Message(&message).
-			Build(), nil
+		err = u.authUserPort.DeleteUser(ctx, tx, userID)
+		if err != nil {
+			return katapp.NewErr(katapp.ErrInternal, "failed to delete user")
+		}
+		return nil
+	})
+	return err
+}
+
+// UpdateUserDetails updates user's details
+func (u *UserMgm) UpdateUserDetails(
+	ctx context.Context, principal *UserPrincipal, userID string, firstName, lastName string,
+) error {
+	katapp.Logger(ctx).Info("updating user details",
+		"principal", principal.String(),
+		"userID", userID,
+		"firstName", firstName,
+		"lastName", lastName,
+	)
+
+	if userID == "" {
+		msg := "user id cannot be empty"
+		katapp.Logger(ctx).Error(msg, "principal", principal.String(), "userID", userID)
+		return katapp.NewErr(katapp.ErrInvalidInput, msg)
+	}
+
+	if firstName == "" || lastName == "" {
+		msg := "all fields are required"
+		katapp.Logger(ctx).Error(msg, "principal", principal.String(), "userID", userID)
+		return katapp.NewErr(katapp.ErrInvalidInput, msg)
+	}
+
+	err := u.txPort.Run(ctx, func(tx pgx.Tx) error {
+		// Check if user exists and get their details for authorization
+		user, err := internal.GetExistingUserById(ctx, u.authUserPort, tx, userID)
+		if err != nil {
+			return err
+		}
+
+		// Check if the principal can manage this user
+		if !principal.CanUpdateUserDetails(userID, user.TenantID) {
+			msg := "insufficient permissions to update user details"
+			katapp.Logger(ctx).Warn(msg, "principal", principal.String(), "userID", userID)
+			return katapp.NewErr(katapp.ErrNoPermissions, msg)
+		}
+
+		// Prepare updates map
+		updates := map[string]interface{}{
+			"first_name": firstName,
+			"last_name":  lastName,
+			"updated_at": time.Now(),
+		}
+
+		_, err = u.authUserPort.UpdateUser(ctx, tx, userID, updates)
+		if err != nil {
+			return katapp.NewErr(katapp.ErrInternal, "failed to update user details")
+		}
+		return nil
 	})
 
-	return result, err
+	return err
+}
+
+// ChangeUserPassword changes a user's password (admin only)
+func (u *UserMgm) ChangeUserPassword(
+	ctx context.Context, principal *UserPrincipal, userID string, newPassword string,
+) error {
+	katapp.Logger(ctx).Info("changing user password",
+		"principal", principal.String(),
+		"userID", userID)
+
+	if userID == "" {
+		msg := "user id cannot be empty"
+		katapp.Logger(ctx).Error(msg, "principal", principal.String(), "userID", userID)
+		return katapp.NewErr(katapp.ErrInvalidInput, msg)
+	}
+
+	if newPassword == "" {
+		msg := "new password cannot be empty"
+		katapp.Logger(ctx).Error(msg, "principal", principal.String(), "userID", userID)
+		return katapp.NewErr(katapp.ErrInvalidInput, msg)
+	}
+
+	err := u.txPort.Run(ctx, func(tx pgx.Tx) error {
+		user, err := internal.GetExistingUserById(ctx, u.authUserPort, tx, userID)
+		if err != nil {
+			return err
+		}
+
+		if !principal.CanUpdateUserDetails(userID, user.TenantID) {
+			msg := "insufficient permissions to change user password"
+			katapp.Logger(ctx).Warn(msg, "principal", principal.String(), "userID", userID)
+			return katapp.NewErr(katapp.ErrNoPermissions, msg)
+		}
+
+		// Hash the new password
+		hashedPassword, err := internal.HashPassword(newPassword)
+		if err != nil {
+			return katapp.NewErr(katapp.ErrInternal, "failed to hash password")
+		}
+
+		// Prepare updates map
+		updates := map[string]interface{}{
+			"password_hash": hashedPassword,
+			"updated_at":    time.Now(),
+		}
+
+		_, err = u.authUserPort.UpdateUser(ctx, tx, userID, updates)
+		if err != nil {
+			return katapp.NewErr(katapp.ErrInternal, "failed to update password")
+		}
+		return nil
+	})
+
+	return err
 }
 
 // Helper methods
 
-// authUserToUserProfile converts model.AuthUser to swagger.UserProfile
-func (u *UserMgm) authUserToUserProfile(user *model.AuthUser) *swagger.UserProfile {
-	// Convert types to match swagger expectations
+// authUserToAuthUserResponse converts model.AuthUser to swagger.AuthUserResponse
+func authUserToAuthUserResponse(user *model.AuthUser) *swagger.AuthUserResponse {
 	email := strfmt.Email(user.Email)
 
-	// Parse time strings to proper DateTime format
-	createdAtTime, err := time.Parse(time.RFC3339, user.CreatedAt)
-	if err != nil {
-		// Fallback to current time if parsing fails
-		createdAtTime = time.Now()
-	}
-	updatedAtTime, err := time.Parse(time.RFC3339, user.UpdatedAt)
-	if err != nil {
-		// Fallback to current time if parsing fails
-		updatedAtTime = time.Now()
-	}
+	// Convert time.Time to strfmt.DateTime directly
+	createdAt := strfmt.DateTime(user.CreatedAt)
+	updatedAt := strfmt.DateTime(user.UpdatedAt)
 
-	createdAt := strfmt.DateTime(createdAtTime)
-	updatedAt := strfmt.DateTime(updatedAtTime)
-
-	return swagger.NewUserProfileBuilder().
-		ID(&user.ID).
-		Email(&email).
-		FirstName(&user.FirstName).
-		LastName(&user.LastName).
-		CreatedAt(&createdAt).
-		UpdatedAt(&updatedAt).
+	return swagger.NewAuthUserResponseBuilder().
+		CreatedAt(createdAt).
+		Email(email).
+		FirstName(user.FirstName).
+		ID(user.ID).
+		LastName(user.LastName).
+		TenantID(user.TenantID).
+		UpdatedAt(updatedAt).
 		Build()
 }

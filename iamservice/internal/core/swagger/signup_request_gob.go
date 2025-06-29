@@ -14,21 +14,12 @@ type SignupRequest_Builder_Email struct {
 	root *SignupRequest
 }
 
-type SignupRequest_Builder_Password struct {
-	root *SignupRequest
-}
-
-func (b SignupRequest_Builder_Email) Email(arg *strfmt.Email) SignupRequest_Builder_Password {
-	b.root.Email = arg
-	return SignupRequest_Builder_Password{root: b.root}
-}
-
 type SignupRequest_Builder_FirstName struct {
 	root *SignupRequest
 }
 
-func (b SignupRequest_Builder_Password) Password(arg *string) SignupRequest_Builder_FirstName {
-	b.root.Password = arg
+func (b SignupRequest_Builder_Email) Email(arg strfmt.Email) SignupRequest_Builder_FirstName {
+	b.root.Email = arg
 	return SignupRequest_Builder_FirstName{root: b.root}
 }
 
@@ -36,17 +27,44 @@ type SignupRequest_Builder_LastName struct {
 	root *SignupRequest
 }
 
-func (b SignupRequest_Builder_FirstName) FirstName(arg *string) SignupRequest_Builder_LastName {
+func (b SignupRequest_Builder_FirstName) FirstName(arg string) SignupRequest_Builder_LastName {
 	b.root.FirstName = arg
 	return SignupRequest_Builder_LastName{root: b.root}
+}
+
+type SignupRequest_Builder_Password struct {
+	root *SignupRequest
+}
+
+func (b SignupRequest_Builder_LastName) LastName(arg string) SignupRequest_Builder_Password {
+	b.root.LastName = arg
+	return SignupRequest_Builder_Password{root: b.root}
+}
+
+type SignupRequest_Builder_Source struct {
+	root *SignupRequest
+}
+
+func (b SignupRequest_Builder_Password) Password(arg string) SignupRequest_Builder_Source {
+	b.root.Password = arg
+	return SignupRequest_Builder_Source{root: b.root}
+}
+
+type SignupRequest_Builder_TenantID struct {
+	root *SignupRequest
+}
+
+func (b SignupRequest_Builder_Source) Source(arg string) SignupRequest_Builder_TenantID {
+	b.root.Source = arg
+	return SignupRequest_Builder_TenantID{root: b.root}
 }
 
 type SignupRequest_Builder_GobFinalizer struct {
 	root *SignupRequest
 }
 
-func (b SignupRequest_Builder_LastName) LastName(arg *string) SignupRequest_Builder_GobFinalizer {
-	b.root.LastName = arg
+func (b SignupRequest_Builder_TenantID) TenantID(arg string) SignupRequest_Builder_GobFinalizer {
+	b.root.TenantID = arg
 	return SignupRequest_Builder_GobFinalizer{root: b.root}
 }
 

@@ -18,5 +18,8 @@ Tech stack:
 1. install `air` (https://github.com/air-verse/air)
 2. launch:
    ```shell
-   IAMSERVICE_DATABASE_PASSWORD=postgres IAMSERVICE_DATABASE_USER=postgres air run --deployment=local
+   IAMSERVICE_DATABASE_PASSWORD=postgres \
+   IAMSERVICE_DATABASE_USER=postgres \
+   
+   air run --deployment=local
     ```

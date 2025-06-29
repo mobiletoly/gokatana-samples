@@ -7,6 +7,7 @@ package swagger
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/strfmt"
@@ -19,27 +20,38 @@ import (
 // swagger:model SignupRequest
 type SignupRequest struct {
 
-	// User email address (must be unique in auth_user table)
+	// User email address (must be unique within tenant)
 	// Example: user@example.com
 	// Required: true
 	// Format: email
-	Email *strfmt.Email `json:"email"`
+	Email strfmt.Email `json:"email"`
+
+	// User first name
+	// Example: John
+	// Required: true
+	FirstName string `json:"firstName"`
+
+	// User last name
+	// Example: Doe
+	// Required: true
+	LastName string `json:"lastName"`
 
 	// User password (minimum 8 characters, will be hashed)
 	// Example: SecurePassword123!
 	// Required: true
 	// Min Length: 8
-	Password *string `json:"password"`
+	Password string `json:"password"`
 
-	// User first name
-	// Example: John
+	// Platform source for customized email confirmation experience
+	// Example: web
 	// Required: true
-	FirstName *string `json:"firstName"`
+	// Enum: ["web","android","ios"]
+	Source string `json:"source"`
 
-	// User last name
-	// Example: Doe
+	// Tenant identifier for multi-tenant support
+	// Example: acme-corp
 	// Required: true
-	LastName *string `json:"lastName"`
+	TenantID string `json:"tenantId"`
 }
 
 // Validate validates this signup request
@@ -47,10 +59,6 @@ func (m *SignupRequest) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateEmail(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validatePassword(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -62,6 +70,18 @@ func (m *SignupRequest) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
+	if err := m.validatePassword(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateSource(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateTenantID(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
@@ -70,7 +90,7 @@ func (m *SignupRequest) Validate(formats strfmt.Registry) error {
 
 func (m *SignupRequest) validateEmail(formats strfmt.Registry) error {
 
-	if err := validate.Required("email", "body", m.Email); err != nil {
+	if err := validate.Required("email", "body", strfmt.Email(m.Email)); err != nil {
 		return err
 	}
 
@@ -81,22 +101,9 @@ func (m *SignupRequest) validateEmail(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *SignupRequest) validatePassword(formats strfmt.Registry) error {
-
-	if err := validate.Required("password", "body", m.Password); err != nil {
-		return err
-	}
-
-	if err := validate.MinLength("password", "body", *m.Password, 8); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func (m *SignupRequest) validateFirstName(formats strfmt.Registry) error {
 
-	if err := validate.Required("firstName", "body", m.FirstName); err != nil {
+	if err := validate.RequiredString("firstName", "body", m.FirstName); err != nil {
 		return err
 	}
 
@@ -105,7 +112,75 @@ func (m *SignupRequest) validateFirstName(formats strfmt.Registry) error {
 
 func (m *SignupRequest) validateLastName(formats strfmt.Registry) error {
 
-	if err := validate.Required("lastName", "body", m.LastName); err != nil {
+	if err := validate.RequiredString("lastName", "body", m.LastName); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *SignupRequest) validatePassword(formats strfmt.Registry) error {
+
+	if err := validate.RequiredString("password", "body", m.Password); err != nil {
+		return err
+	}
+
+	if err := validate.MinLength("password", "body", m.Password, 8); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+var signupRequestTypeSourcePropEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["web","android","ios"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		signupRequestTypeSourcePropEnum = append(signupRequestTypeSourcePropEnum, v)
+	}
+}
+
+const (
+
+	// SignupRequestSourceWeb captures enum value "web"
+	SignupRequestSourceWeb string = "web"
+
+	// SignupRequestSourceAndroid captures enum value "android"
+	SignupRequestSourceAndroid string = "android"
+
+	// SignupRequestSourceIos captures enum value "ios"
+	SignupRequestSourceIos string = "ios"
+)
+
+// prop value enum
+func (m *SignupRequest) validateSourceEnum(path, location string, value string) error {
+	if err := validate.EnumCase(path, location, value, signupRequestTypeSourcePropEnum, true); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *SignupRequest) validateSource(formats strfmt.Registry) error {
+
+	if err := validate.RequiredString("source", "body", m.Source); err != nil {
+		return err
+	}
+
+	// value enum
+	if err := m.validateSourceEnum("source", "body", m.Source); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *SignupRequest) validateTenantID(formats strfmt.Registry) error {
+
+	if err := validate.RequiredString("tenantId", "body", m.TenantID); err != nil {
 		return err
 	}
 

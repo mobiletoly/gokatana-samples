@@ -2,29 +2,29 @@
 
 package swagger
 
-func NewUserListResponseBuilder() UserListResponse_Builder_Users {
-	return UserListResponse_Builder_Users{root: &UserListResponse{}}
-}
-
-type UserListResponse_Builder_Users struct {
-	root *UserListResponse
+func NewUserListResponseBuilder() UserListResponse_Builder_Pagination {
+	return UserListResponse_Builder_Pagination{root: &UserListResponse{}}
 }
 
 type UserListResponse_Builder_Pagination struct {
 	root *UserListResponse
 }
 
-func (b UserListResponse_Builder_Users) Users(arg []*UserProfile) UserListResponse_Builder_Pagination {
-	b.root.Users = arg
-	return UserListResponse_Builder_Pagination{root: b.root}
+type UserListResponse_Builder_Users struct {
+	root *UserListResponse
+}
+
+func (b UserListResponse_Builder_Pagination) Pagination(arg *PaginationInfo) UserListResponse_Builder_Users {
+	b.root.Pagination = arg
+	return UserListResponse_Builder_Users{root: b.root}
 }
 
 type UserListResponse_Builder_GobFinalizer struct {
 	root *UserListResponse
 }
 
-func (b UserListResponse_Builder_Pagination) Pagination(arg *PaginationInfo) UserListResponse_Builder_GobFinalizer {
-	b.root.Pagination = arg
+func (b UserListResponse_Builder_Users) Users(arg []*AuthUserResponse) UserListResponse_Builder_GobFinalizer {
+	b.root.Users = arg
 	return UserListResponse_Builder_GobFinalizer{root: b.root}
 }
 

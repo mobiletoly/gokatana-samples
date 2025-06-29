@@ -55,9 +55,10 @@ func WaitForInterruptSignal(ctx context.Context, server *echo.Echo, timeout time
 }
 
 func apiRoutes(e *echo.Echo, uc *usecase.UseCases) {
-	authMiddleware := serverhelp.NewJWTAuthApiServerMiddleware(uc.Auth.GetJWTSecret())
-	authLock := authMiddleware.WithAnyRole("admin", "user")
-	adminAuthLock := authMiddleware.WithAnyRole("admin")
+	authMiddleware := serverhelp.NewJWTAuthApiServerMiddleware([]byte(uc.Config.Credentials.JwtSecret))
+	authLock := authMiddleware.WithAnyRole("admin", "sysadmin", "user")
+	adminAuthLock := authMiddleware.WithAnyRole("admin", "sysadmin")
+	sysadminAuthLock := authMiddleware.WithAnyRole("sysadmin")
 
 	api := e.Group("/api/v1")
 	api.GET("/version", getHttpVersionRoute())
@@ -68,18 +69,31 @@ func apiRoutes(e *echo.Echo, uc *usecase.UseCases) {
 	auth.POST("/signin", signinHandler(uc.Auth))
 	auth.POST("/signout", signoutHandler(uc.Auth), authLock)
 	auth.POST("/refresh", refreshTokenHandler(uc.Auth))
-
-	// User Management API routes (admin role required)
-	users := api.Group("/users", adminAuthLock)
-	users.GET("", listUsersHandler(uc.UserMgm))                                 // GET /api/v1/users
-	users.GET("/:userId", getUserByIdHandler(uc.UserMgm))                       // GET /api/v1/users/{userId}
-	users.GET("/:userId/roles", getUserRolesHandler(uc.UserMgm))                // GET /api/v1/users/{userId}/roles
-	users.POST("/:userId/roles", assignUserRoleHandler(uc.UserMgm))             // POST /api/v1/users/{userId}/roles
-	users.DELETE("/:userId/roles/:roleName", deleteUserRoleHandler(uc.UserMgm)) // DELETE /api/v1/users/{userId}/roles/{roleName}
+	auth.GET("/confirm-email", confirmEmailHandler(uc.Auth))
 
 	// User profile routes (basic authentication required)
-	me := api.Group("/me", authLock)
-	me.GET("/profile", getUserProfileHandler(uc.UserMgm)) // GET /api/v1/me/profile
+	api.GET("/users/me", getMyUserHandler(uc.UserMgm), authLock)
+
+	// User Management API routes (sysadmin role required)
+	api.GET("/users/all", listAllUsersHandler(uc.UserMgm), sysadminAuthLock) // GET /api/v1/users/all
+
+	// User Management API routes (admin role required)
+	users := api.Group("/users", authLock)
+	users.GET("", listAllUsersByTenantHandler(uc.UserMgm))                                     // GET /api/v1/users
+	users.GET("/:userId", getUserByIdHandler(uc.UserMgm))                                      // GET /api/v1/users/{userId}
+	users.GET("/:userId/profile", getUserProfileHandler(uc.UserProfileMgm))                    // GET /api/v1/users/{userId}/profile
+	users.PUT("/:userId/profile", updateUserProfileHandler(uc.UserProfileMgm))                 // PUT /api/v1/users/{userId}/profile
+	users.GET("/:userId/roles", getUserRolesHandler(uc.UserMgm))                               // GET /api/v1/users/{userId}/roles
+	users.POST("/:userId/roles", assignUserRoleHandler(uc.UserMgm), adminAuthLock)             // POST /api/v1/users/{userId}/roles
+	users.DELETE("/:userId/roles/:roleName", deleteUserRoleHandler(uc.UserMgm), adminAuthLock) // DELETE /api/v1/users/{userId}/roles/{roleName}
+
+	// Tenant Management API routes (sysadmin role required)
+	tenants := api.Group("/tenants", authLock)
+	tenants.GET("", getAllTenantsHandler(uc.Auth))                               // GET /api/v1/tenants
+	tenants.POST("", createTenantHandler(uc.Auth), sysadminAuthLock)             // POST /api/v1/tenants
+	tenants.GET("/:tenantId", getTenantByIdHandler(uc.Auth))                     // GET /api/v1/tenants/{tenantId}
+	tenants.PUT("/:tenantId", updateTenantHandler(uc.Auth), adminAuthLock)       // PUT /api/v1/tenants/{tenantId}
+	tenants.DELETE("/:tenantId", deleteTenantHandler(uc.Auth), sysadminAuthLock) // DELETE /api/v1/tenants/{tenantId}
 }
 
 func getHttpVersionRoute() func(c echo.Context) error {

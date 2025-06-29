@@ -14,7 +14,7 @@ type RefreshRequest_Builder_GobFinalizer struct {
 	root *RefreshRequest
 }
 
-func (b RefreshRequest_Builder_RefreshToken) RefreshToken(arg *string) RefreshRequest_Builder_GobFinalizer {
+func (b RefreshRequest_Builder_RefreshToken) RefreshToken(arg string) RefreshRequest_Builder_GobFinalizer {
 	b.root.RefreshToken = arg
 	return RefreshRequest_Builder_GobFinalizer{root: b.root}
 }

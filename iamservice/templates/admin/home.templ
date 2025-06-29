@@ -1,0 +1,35 @@
+package admin
+
+import "github.com/mobiletoly/gokatana-samples/iamservice/templates/common"
+
+templ Home() {
+	<div class="space-y-8">
+		<div class="text-center">
+			<h2 class="text-3xl font-bold text-gray-900">Home</h2>
+		</div>
+
+		<div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+			@common.FeatureCard(
+				"users",
+				"text-blue-600",
+				"User Management",
+				"Create, view, and manage user accounts",
+				"/web/admin/users",
+				"View Users",
+				"success",
+			)
+
+			@common.FeatureCard(
+				"building-office",
+				"text-purple-600",
+				"Tenant Management",
+				"Create, view, and manage tenant organizations",
+				"/web/admin/tenants",
+				"View Tenants",
+				"success",
+			)
+		</div>
+	</div>
+}
+
+

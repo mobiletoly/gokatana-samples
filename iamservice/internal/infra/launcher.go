@@ -46,7 +46,22 @@ func Start(deployment string, overrides func(cfg *app.Config), loaded chan struc
 }
 
 func validateMandatoryConfig(cfg *app.Config) {
-	if cfg.Credentials.Secret == "_" || cfg.Credentials.Secret == "" {
+	if cfg.Database.User == "_" || cfg.Database.User == "" {
+		panic("database.user is not set")
+	}
+	if cfg.Database.Password == "_" || cfg.Database.Password == "" {
+		panic("database.password is not set")
+	}
+	if cfg.Credentials.JwtSecret == "_" || cfg.Credentials.JwtSecret == "" {
 		panic("credentials.secret is not set")
+	}
+	if cfg.GCloud.ServiceJson == "_" || cfg.GCloud.ServiceJson == "" {
+		panic("gcloud.serviceJson is not set")
+	}
+	if cfg.GCloud.Email.User == "_" || cfg.GCloud.Email.User == "" {
+		panic("gcloud.email.user is not set")
+	}
+	if cfg.GCloud.Email.From == "_" || cfg.GCloud.Email.From == "" {
+		panic("gcloud.email.from is not set")
 	}
 }

@@ -2,6 +2,10 @@
 
 package model
 
+import (
+	"time"
+)
+
 func NewAuthUserBuilder() AuthUser_Builder_ID {
 	return AuthUser_Builder_ID{root: &AuthUser{}}
 }
@@ -46,12 +50,21 @@ func (b AuthUser_Builder_FirstName) FirstName(arg string) AuthUser_Builder_LastN
 	return AuthUser_Builder_LastName{root: b.root}
 }
 
+type AuthUser_Builder_TenantID struct {
+	root *AuthUser
+}
+
+func (b AuthUser_Builder_LastName) LastName(arg string) AuthUser_Builder_TenantID {
+	b.root.LastName = arg
+	return AuthUser_Builder_TenantID{root: b.root}
+}
+
 type AuthUser_Builder_IsActive struct {
 	root *AuthUser
 }
 
-func (b AuthUser_Builder_LastName) LastName(arg string) AuthUser_Builder_IsActive {
-	b.root.LastName = arg
+func (b AuthUser_Builder_TenantID) TenantID(arg string) AuthUser_Builder_IsActive {
+	b.root.TenantID = arg
 	return AuthUser_Builder_IsActive{root: b.root}
 }
 
@@ -77,7 +90,7 @@ type AuthUser_Builder_UpdatedAt struct {
 	root *AuthUser
 }
 
-func (b AuthUser_Builder_CreatedAt) CreatedAt(arg string) AuthUser_Builder_UpdatedAt {
+func (b AuthUser_Builder_CreatedAt) CreatedAt(arg time.Time) AuthUser_Builder_UpdatedAt {
 	b.root.CreatedAt = arg
 	return AuthUser_Builder_UpdatedAt{root: b.root}
 }
@@ -86,11 +99,152 @@ type AuthUser_Builder_GobFinalizer struct {
 	root *AuthUser
 }
 
-func (b AuthUser_Builder_UpdatedAt) UpdatedAt(arg string) AuthUser_Builder_GobFinalizer {
+func (b AuthUser_Builder_UpdatedAt) UpdatedAt(arg time.Time) AuthUser_Builder_GobFinalizer {
 	b.root.UpdatedAt = arg
 	return AuthUser_Builder_GobFinalizer{root: b.root}
 }
 
 func (b AuthUser_Builder_GobFinalizer) Build() *AuthUser {
+	return b.root
+}
+
+func NewTenantBuilder() Tenant_Builder_ID {
+	return Tenant_Builder_ID{root: &Tenant{}}
+}
+
+type Tenant_Builder_ID struct {
+	root *Tenant
+}
+
+type Tenant_Builder_Name struct {
+	root *Tenant
+}
+
+func (b Tenant_Builder_ID) ID(arg string) Tenant_Builder_Name {
+	b.root.ID = arg
+	return Tenant_Builder_Name{root: b.root}
+}
+
+type Tenant_Builder_Description struct {
+	root *Tenant
+}
+
+func (b Tenant_Builder_Name) Name(arg string) Tenant_Builder_Description {
+	b.root.Name = arg
+	return Tenant_Builder_Description{root: b.root}
+}
+
+type Tenant_Builder_CreatedAt struct {
+	root *Tenant
+}
+
+func (b Tenant_Builder_Description) Description(arg string) Tenant_Builder_CreatedAt {
+	b.root.Description = arg
+	return Tenant_Builder_CreatedAt{root: b.root}
+}
+
+type Tenant_Builder_UpdatedAt struct {
+	root *Tenant
+}
+
+func (b Tenant_Builder_CreatedAt) CreatedAt(arg time.Time) Tenant_Builder_UpdatedAt {
+	b.root.CreatedAt = arg
+	return Tenant_Builder_UpdatedAt{root: b.root}
+}
+
+type Tenant_Builder_GobFinalizer struct {
+	root *Tenant
+}
+
+func (b Tenant_Builder_UpdatedAt) UpdatedAt(arg time.Time) Tenant_Builder_GobFinalizer {
+	b.root.UpdatedAt = arg
+	return Tenant_Builder_GobFinalizer{root: b.root}
+}
+
+func (b Tenant_Builder_GobFinalizer) Build() *Tenant {
+	return b.root
+}
+
+func NewEmailConfirmationTokenBuilder() EmailConfirmationToken_Builder_ID {
+	return EmailConfirmationToken_Builder_ID{root: &EmailConfirmationToken{}}
+}
+
+type EmailConfirmationToken_Builder_ID struct {
+	root *EmailConfirmationToken
+}
+
+type EmailConfirmationToken_Builder_UserID struct {
+	root *EmailConfirmationToken
+}
+
+func (b EmailConfirmationToken_Builder_ID) ID(arg string) EmailConfirmationToken_Builder_UserID {
+	b.root.ID = arg
+	return EmailConfirmationToken_Builder_UserID{root: b.root}
+}
+
+type EmailConfirmationToken_Builder_Email struct {
+	root *EmailConfirmationToken
+}
+
+func (b EmailConfirmationToken_Builder_UserID) UserID(arg string) EmailConfirmationToken_Builder_Email {
+	b.root.UserID = arg
+	return EmailConfirmationToken_Builder_Email{root: b.root}
+}
+
+type EmailConfirmationToken_Builder_TokenHash struct {
+	root *EmailConfirmationToken
+}
+
+func (b EmailConfirmationToken_Builder_Email) Email(arg string) EmailConfirmationToken_Builder_TokenHash {
+	b.root.Email = arg
+	return EmailConfirmationToken_Builder_TokenHash{root: b.root}
+}
+
+type EmailConfirmationToken_Builder_Source struct {
+	root *EmailConfirmationToken
+}
+
+func (b EmailConfirmationToken_Builder_TokenHash) TokenHash(arg string) EmailConfirmationToken_Builder_Source {
+	b.root.TokenHash = arg
+	return EmailConfirmationToken_Builder_Source{root: b.root}
+}
+
+type EmailConfirmationToken_Builder_ExpiresAt struct {
+	root *EmailConfirmationToken
+}
+
+func (b EmailConfirmationToken_Builder_Source) Source(arg string) EmailConfirmationToken_Builder_ExpiresAt {
+	b.root.Source = arg
+	return EmailConfirmationToken_Builder_ExpiresAt{root: b.root}
+}
+
+type EmailConfirmationToken_Builder_UsedAt struct {
+	root *EmailConfirmationToken
+}
+
+func (b EmailConfirmationToken_Builder_ExpiresAt) ExpiresAt(arg time.Time) EmailConfirmationToken_Builder_UsedAt {
+	b.root.ExpiresAt = arg
+	return EmailConfirmationToken_Builder_UsedAt{root: b.root}
+}
+
+type EmailConfirmationToken_Builder_CreatedAt struct {
+	root *EmailConfirmationToken
+}
+
+func (b EmailConfirmationToken_Builder_UsedAt) UsedAt(arg *time.Time) EmailConfirmationToken_Builder_CreatedAt {
+	b.root.UsedAt = arg
+	return EmailConfirmationToken_Builder_CreatedAt{root: b.root}
+}
+
+type EmailConfirmationToken_Builder_GobFinalizer struct {
+	root *EmailConfirmationToken
+}
+
+func (b EmailConfirmationToken_Builder_CreatedAt) CreatedAt(arg time.Time) EmailConfirmationToken_Builder_GobFinalizer {
+	b.root.CreatedAt = arg
+	return EmailConfirmationToken_Builder_GobFinalizer{root: b.root}
+}
+
+func (b EmailConfirmationToken_Builder_GobFinalizer) Build() *EmailConfirmationToken {
 	return b.root
 }

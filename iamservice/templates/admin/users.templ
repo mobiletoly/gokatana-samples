@@ -1,0 +1,285 @@
+package admin
+
+import "github.com/mobiletoly/gokatana-samples/iamservice/templates/common"
+
+import (
+	"github.com/mobiletoly/gokatana-samples/iamservice/internal/core/swagger"
+	"time"
+)
+
+templ UsersListWithTenantSelector(users []*swagger.AuthUserResponse, tenants []*swagger.TenantResponse, selectedTenantID string, isSysadmin bool, canCreateUsers bool) {
+	<div class="space-y-6">
+		<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+			<h2 class="text-2xl font-bold text-gray-900">Users</h2>
+			if canCreateUsers {
+				@common.LinkButton("primary", "md", "/web/admin/users/new", "Add New User", "plus")
+			}
+		</div>
+		if isSysadmin && len(tenants) > 0 {
+			<div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+				<div class="flex items-center space-x-4">
+					<label for="tenant-selector" class="text-sm font-medium text-gray-700">
+						Filter by Tenant:
+					</label>
+					<select
+						id="tenant-selector"
+						name="tenant-selector"
+						class="block w-64 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+						hx-get="/web/admin/users"
+						hx-target="#users-list"
+						hx-trigger="change"
+						hx-include="this"
+					>
+						for _, tenant := range tenants {
+							if tenant.ID == selectedTenantID {
+								<option value={ tenant.ID } selected>{ tenant.Name } ({ tenant.ID })</option>
+							} else {
+								<option value={ tenant.ID }>{ tenant.Name } ({ tenant.ID })</option>
+							}
+						}
+					</select>
+				</div>
+			</div>
+		}
+		<div id="users-list">
+			@UsersListContent(users, canCreateUsers)
+		</div>
+	</div>
+}
+
+templ UsersList(users []*swagger.AuthUserResponse, canCreateUsers bool) {
+	<div class="space-y-6">
+		<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+			<h2 class="text-2xl font-bold text-gray-900">Users</h2>
+			if canCreateUsers {
+				<a
+					href="/web/admin/users/new"
+					class="mt-4 sm:mt-0 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+					hx-get="/web/admin/users/new"
+					hx-target="#content"
+					hx-push-url="true"
+				>
+					<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+					</svg>
+					Add New User
+				</a>
+			}
+		</div>
+		<div id="users-list">
+			@UsersListContent(users, canCreateUsers)
+		</div>
+	</div>
+}
+
+templ UsersListContent(users []*swagger.AuthUserResponse, canCreateUsers bool) {
+	if len(users) == 0 {
+		if canCreateUsers {
+			@common.EmptyState("users", "No users", "Get started by creating your first user.",
+				common.LinkButton("primary", "md", "/web/admin/users/new", "Add your first user", "plus"))
+		} else {
+			@common.EmptyState("users", "No users", "No users found in this tenant.", nil)
+		}
+	} else {
+		<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+			for _, user := range users {
+				@UserCard(user)
+			}
+		</div>
+	}
+}
+
+templ UserCard(user *swagger.AuthUserResponse) {
+	<div class="bg-white border border-gray-200 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow duration-200" id={ "user-" + user.ID }>
+		<div class="flex items-center justify-between">
+			<div>
+				<h3 class="text-lg font-medium text-gray-900">{ user.FirstName } { user.LastName }</h3>
+				<p class="text-sm text-gray-500">{ string(user.Email) }</p>
+				<p class="text-xs text-gray-400">Tenant: { user.TenantID }</p>
+				<p class="text-xs text-gray-400">ID: { user.ID }</p>
+			</div>
+			<div class="flex items-center space-x-2">
+				<svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+				</svg>
+			</div>
+		</div>
+		<div class="mt-4 flex flex-col sm:flex-row sm:space-x-3 space-y-2 sm:space-y-0">
+			<a
+				href={ templ.URL("/web/admin/users/" + user.ID) }
+				class="inline-flex items-center justify-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+				hx-get={ "/web/admin/users/" + user.ID }
+				hx-target="#content"
+				hx-push-url="true"
+			>
+				<svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+				</svg>
+				View Details
+			</a>
+			<a
+				href={ templ.URL("/web/admin/users/" + user.ID + "/roles") }
+				class="inline-flex items-center justify-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+				hx-get={ "/web/admin/users/" + user.ID + "/roles" }
+				hx-target="#content"
+				hx-push-url="true"
+			>
+				<svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+				</svg>
+				Roles
+			</a>
+			<button
+				class="inline-flex items-center justify-center px-3 py-2 border border-red-300 shadow-sm text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200"
+				hx-delete={ "/web/admin/users/" + user.ID }
+				hx-target={ "#user-" + user.ID }
+				hx-swap="outerHTML"
+				hx-confirm="Are you sure you want to delete this user?"
+			>
+				<svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+				</svg>
+				Delete
+			</button>
+		</div>
+	</div>
+}
+
+templ UserDetail(user *swagger.AuthUserResponse, roles []string, canManageUsers bool) {
+	<div class="space-y-6">
+		<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+			<h2 class="text-2xl font-bold text-gray-900">User Details</h2>
+			<a
+				href="/web/admin/users"
+				class="mt-4 sm:mt-0 inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+				hx-get="/web/admin/users"
+				hx-target="#content"
+				hx-push-url="true"
+			>
+				<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+				</svg>
+				Back to List
+			</a>
+		</div>
+		<div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
+			<div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+				<div class="flex items-center">
+					<div class="flex-shrink-0">
+						<svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+						</svg>
+					</div>
+					<div class="ml-4">
+						<h3 class="text-xl font-semibold text-gray-900">{ user.FirstName } { user.LastName }</h3>
+						<p class="text-sm text-gray-500">{ string(user.Email) }</p>
+					</div>
+				</div>
+			</div>
+			<div class="px-6 py-4">
+				<dl class="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
+					<div>
+						<dt class="text-sm font-medium text-gray-500">First Name</dt>
+						<dd class="mt-1 text-sm text-gray-900">{ user.FirstName }</dd>
+					</div>
+					<div>
+						<dt class="text-sm font-medium text-gray-500">Last Name</dt>
+						<dd class="mt-1 text-sm text-gray-900">{ user.LastName }</dd>
+					</div>
+					<div>
+						<dt class="text-sm font-medium text-gray-500">Email</dt>
+						<dd class="mt-1 text-sm text-gray-900">{ string(user.Email) }</dd>
+					</div>
+					<div>
+						<dt class="text-sm font-medium text-gray-500">Tenant ID</dt>
+						<dd class="mt-1 text-sm text-gray-900 font-mono text-xs">{ user.TenantID }</dd>
+					</div>
+					<div>
+						<dt class="text-sm font-medium text-gray-500">User ID</dt>
+						<dd class="mt-1 text-sm text-gray-900 font-mono text-xs">{ user.ID }</dd>
+					</div>
+					<div>
+						<dt class="text-sm font-medium text-gray-500">Roles</dt>
+						<dd class="mt-1">
+							if len(roles) == 0 {
+								<span class="text-sm text-gray-500 italic">No roles assigned</span>
+							} else {
+								<div class="flex flex-wrap gap-2">
+									for _, role := range roles {
+										<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+											{ role }
+										</span>
+									}
+								</div>
+							}
+						</dd>
+					</div>
+					<div>
+						<dt class="text-sm font-medium text-gray-500">Created At</dt>
+						<dd class="mt-1 text-sm text-gray-900">{ time.Time(user.CreatedAt).Format("2006-01-02 15:04:05") }</dd>
+					</div>
+					<div>
+						<dt class="text-sm font-medium text-gray-500">Updated At</dt>
+						<dd class="mt-1 text-sm text-gray-900">{ time.Time(user.UpdatedAt).Format("2006-01-02 15:04:05") }</dd>
+					</div>
+				</dl>
+			</div>
+			<div class="px-6 py-4 bg-gray-50 border-t border-gray-200">
+				<div class="flex flex-wrap gap-3">
+					<a
+						href={ templ.URL("/web/admin/users/" + user.ID + "/edit") }
+						class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+						hx-get={ "/web/admin/users/" + user.ID + "/edit" }
+						hx-target="#content"
+						hx-push-url="true"
+					>
+						<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+						</svg>
+						Edit Details
+					</a>
+					<a
+						href={ templ.URL("/web/admin/users/" + user.ID + "/change-password") }
+						class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+						hx-get={ "/web/admin/users/" + user.ID + "/change-password" }
+						hx-target="#content"
+						hx-push-url="true"
+					>
+						<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v-2l-4.257-2.257A6 6 0 0117 9z"></path>
+						</svg>
+						Change Password
+					</a>
+					if canManageUsers {
+						<a
+							href={ templ.URL("/web/admin/users/" + user.ID + "/roles") }
+							class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+							hx-get={ "/web/admin/users/" + user.ID + "/roles" }
+							hx-target="#content"
+							hx-push-url="true"
+						>
+							<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+							</svg>
+							Manage Roles
+						</a>
+						<button
+							class="inline-flex items-center px-4 py-2 border border-red-300 shadow-sm text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200"
+							hx-delete={ "/web/admin/users/" + user.ID }
+							hx-target="#content"
+							hx-confirm="Are you sure you want to delete this user?"
+							hx-get="/web/admin/users"
+							hx-trigger="htmx:afterRequest"
+						>
+							<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+							</svg>
+							Delete User
+						</button>
+					}
+				</div>
+			</div>
+		</div>
+	</div>
+}

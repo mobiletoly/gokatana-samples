@@ -18,17 +18,26 @@ type SigninRequest_Builder_Password struct {
 	root *SigninRequest
 }
 
-func (b SigninRequest_Builder_Email) Email(arg *strfmt.Email) SigninRequest_Builder_Password {
+func (b SigninRequest_Builder_Email) Email(arg strfmt.Email) SigninRequest_Builder_Password {
 	b.root.Email = arg
 	return SigninRequest_Builder_Password{root: b.root}
+}
+
+type SigninRequest_Builder_TenantID struct {
+	root *SigninRequest
+}
+
+func (b SigninRequest_Builder_Password) Password(arg string) SigninRequest_Builder_TenantID {
+	b.root.Password = arg
+	return SigninRequest_Builder_TenantID{root: b.root}
 }
 
 type SigninRequest_Builder_GobFinalizer struct {
 	root *SigninRequest
 }
 
-func (b SigninRequest_Builder_Password) Password(arg *string) SigninRequest_Builder_GobFinalizer {
-	b.root.Password = arg
+func (b SigninRequest_Builder_TenantID) TenantID(arg string) SigninRequest_Builder_GobFinalizer {
+	b.root.TenantID = arg
 	return SigninRequest_Builder_GobFinalizer{root: b.root}
 }
 

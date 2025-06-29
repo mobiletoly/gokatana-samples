@@ -3,6 +3,15 @@ database:
     - service: iamservice
       schema: public
       path: ../dbmigrate
+  port: 5433
   sslmode: disable
+  user: postgres
+  password: postgres
+gcloud:
+  mock: true
+  serviceJson: '{"type":"service_account","project_id":"test","private_key_id":"test","private_key":"test","client_email":"test@test.test","client_id":"test","auth_uri":"test","token_uri":"test","auth_provider_x509_cert_url":"test","client_x509_cert_url":"test"}'
+  email:
+    user: test@test.test
+    from: test@test.test
 credentials:
-  secret: secret
+  jwtSecret: secret

@@ -5,13 +5,16 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
+	"github.com/mobiletoly/gokatana-samples/iamservice/internal/core/usecase"
+	"github.com/mobiletoly/gokatana/katapp"
 	"github.com/mobiletoly/gokatana/kathttp_echo"
 	"github.com/samber/lo"
 	"net/http"
 )
 
 type jwtAuthUserClaims struct {
-	Roles []string `json:"roles"`
+	Roles    []string `json:"roles"`
+	TenantID string   `json:"tenantId"`
 	jwt.RegisteredClaims
 }
 
@@ -34,7 +37,7 @@ func NewJWTAuthApiServerMiddleware(jwtSecret []byte) JWTAuthMiddleware {
 	}
 }
 
-func NewJWTAuthWebServerMiddleware(jwtSecret []byte) JWTAuthMiddleware {
+func NewJWTAuthWebServerMiddleware(jwtSecret []byte) *JWTAuthMiddleware {
 	adminJwtConfig := echojwt.Config{
 		SigningKey: jwtSecret,
 		NewClaimsFunc: func(c echo.Context) jwt.Claims {
@@ -45,7 +48,7 @@ func NewJWTAuthWebServerMiddleware(jwtSecret []byte) JWTAuthMiddleware {
 			return echo.NewHTTPError(http.StatusUnauthorized, "You must sign in to access this page")
 		},
 	}
-	return JWTAuthMiddleware{
+	return &JWTAuthMiddleware{
 		adminJwtConfig: &adminJwtConfig,
 	}
 }
@@ -93,15 +96,37 @@ func (j JWTAuthMiddleware) WithAnyRole(roles ...string) echo.MiddlewareFunc {
 	}
 }
 
-// UserIDFromValidatedToken extracts user ID from an already validated JWT token
-func UserIDFromValidatedToken(c echo.Context) (string, error) {
-	token := c.Get("user").(*jwt.Token)
-	claims := token.Claims.(*jwtAuthUserClaims)
-
-	userID := claims.Subject
-	if userID == "" {
-		return "", kathttp_echo.ReportUnauthorized(errors.New("invalid token: missing user ID"))
+// GetUserPrincipalFromToken extracts UserPrincipal from JWT token
+func GetUserPrincipalFromToken(c echo.Context) (*usecase.UserPrincipal, error) {
+	token, ok := c.Get("user").(*jwt.Token)
+	if !ok || token == nil {
+		msg := "failed to get user principal from token: missing token"
+		katapp.Logger(c.Request().Context()).Error(msg)
+		return nil, kathttp_echo.ReportUnauthorized(errors.New(msg))
 	}
 
-	return userID, nil
+	claims, ok := token.Claims.(*jwtAuthUserClaims)
+	if !ok {
+		msg := "failed to get user principal from token: invalid claims"
+		katapp.Logger(c.Request().Context()).Error(msg)
+		return nil, kathttp_echo.ReportUnauthorized(errors.New(msg))
+	}
+
+	// Extract user ID from Subject claim
+	userID := claims.Subject
+	if userID == "" {
+		msg := "failed to get user principal from token: missing user ID"
+		katapp.Logger(c.Request().Context()).Error(msg)
+		return nil, kathttp_echo.ReportUnauthorized(errors.New(msg))
+	}
+
+	// Extract email from Issuer claim (if available) or leave empty
+	email := claims.Issuer // This might need to be adjusted based on your JWT structure
+
+	return &usecase.UserPrincipal{
+		UserID:   userID,
+		TenantID: claims.TenantID,
+		Email:    email,
+		Roles:    claims.Roles,
+	}, nil
 }

@@ -1,0 +1,12 @@
+package admin
+
+// ============================================================================
+// CARD COMPONENTS
+// ============================================================================
+
+// Card renders a basic card container
+templ Card(classes string, content templ.Component) {
+	<div class={ "bg-white border border-gray-200 rounded-lg shadow-sm", classes }>
+		@content
+	</div>
+}

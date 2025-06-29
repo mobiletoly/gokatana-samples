@@ -1,0 +1,899 @@
+swagger: "2.0"
+info:
+    description: API for tenant management operations
+    title: Tenant Management API
+    version: 1.0.0
+basePath: /api/v1/auth
+paths:
+    /api/v1/a:
+        get:
+            responses:
+                "200":
+                    description: Tenants retrieved successfully
+            summary: List all tenants (Sysadmin only)
+    /api/v1/tenants:
+        get:
+            description: Returns a list of all tenants in the system. Requires sysadmin role.
+            operationId: getAllTenants
+            parameters:
+                - default: !!float 1
+                  description: Page number for pagination
+                  in: query
+                  minimum: !!float 1
+                  name: page
+                  type: integer
+                - default: !!float 20
+                  description: Number of tenants per page
+                  in: query
+                  maximum: !!float 100
+                  minimum: !!float 1
+                  name: limit
+                  type: integer
+                - description: Filter by active status
+                  in: query
+                  name: active
+                  type: boolean
+            responses:
+                "200":
+                    description: Tenants retrieved successfully
+                    schema:
+                        $ref: '#/definitions/TenantListResponse'
+                "401":
+                    description: Unauthorized
+                "403":
+                    description: Forbidden - requires sysadmin role
+                "500":
+                    description: Internal server error
+            security:
+                - BearerAuth: []
+            summary: List all tenants (Sysadmin only)
+            tags:
+                - Tenants
+        post:
+            description: Creates a new tenant in the system. Requires sysadmin role.
+            operationId: createTenant
+            parameters:
+                - description: Tenant creation information
+                  in: body
+                  name: tenantRequest
+                  required: true
+                  schema:
+                    $ref: '#/definitions/TenantCreateRequest'
+            responses:
+                "201":
+                    description: Tenant successfully created
+                    schema:
+                        $ref: '#/definitions/TenantResponse'
+                "400":
+                    description: Invalid input data
+                "401":
+                    description: Unauthorized
+                "403":
+                    description: Forbidden - requires sysadmin role
+                "409":
+                    description: Tenant already exists (duplicate ID)
+                "500":
+                    description: Internal server error
+            security:
+                - BearerAuth: []
+            summary: Create a new tenant (Sysadmin only)
+            tags:
+                - Tenants
+    /api/v1/tenants/{tenantId}:
+        delete:
+            description: Deletes a tenant from the system. This will also delete all associated users. Requires sysadmin role.
+            operationId: deleteTenantById
+            parameters:
+                - description: The ID of the tenant to delete
+                  in: path
+                  name: tenantId
+                  required: true
+                  type: string
+            responses:
+                "200":
+                    description: Tenant successfully deleted
+                "401":
+                    description: Unauthorized
+                "403":
+                    description: Forbidden - requires sysadmin role
+                "404":
+                    description: Tenant not found
+                "500":
+                    description: Internal server error
+            security:
+                - BearerAuth: []
+            summary: Delete tenant (Sysadmin only)
+            tags:
+                - Tenants
+        get:
+            description: Returns detailed information about a specific tenant. Requires sysadmin role.
+            operationId: getTenantById
+            parameters:
+                - description: The ID of the tenant to retrieve
+                  in: path
+                  name: tenantId
+                  required: true
+                  type: string
+            responses:
+                "200":
+                    description: Tenant retrieved successfully
+                    schema:
+                        $ref: '#/definitions/TenantResponse'
+                "401":
+                    description: Unauthorized
+                "403":
+                    description: Forbidden - requires sysadmin role
+                "404":
+                    description: Tenant not found
+                "500":
+                    description: Internal server error
+            security:
+                - BearerAuth: []
+            summary: Get tenant by ID (Sysadmin only)
+            tags:
+                - Tenants
+        put:
+            description: Updates an existing tenant. Requires sysadmin role.
+            operationId: updateTenantById
+            parameters:
+                - description: The ID of the tenant to update
+                  in: path
+                  name: tenantId
+                  required: true
+                  type: string
+                - description: Tenant update information
+                  in: body
+                  name: tenantRequest
+                  required: true
+                  schema:
+                    $ref: '#/definitions/TenantUpdateRequest'
+            responses:
+                "200":
+                    description: Tenant successfully updated
+                    schema:
+                        $ref: '#/definitions/TenantResponse'
+                "400":
+                    description: Invalid input data
+                "401":
+                    description: Unauthorized
+                "403":
+                    description: Forbidden - requires sysadmin role
+                "404":
+                    description: Tenant not found
+                "500":
+                    description: Internal server error
+            security:
+                - BearerAuth: []
+            summary: Update tenant (Sysadmin only)
+            tags:
+                - Tenants
+    /api/v1/user/all:
+        get:
+            description: Returns a list of all users in the system. Requires sysadmin role.
+            operationId: listAllUsers
+            parameters:
+                - default: !!float 1
+                  description: Page number for pagination
+                  in: query
+                  minimum: !!float 1
+                  name: page
+                  type: integer
+                - default: !!float 20
+                  description: Number of users per page
+                  in: query
+                  maximum: !!float 100
+                  minimum: !!float 1
+                  name: limit
+                  type: integer
+            responses:
+                "200":
+                    description: Users retrieved successfully
+                    schema:
+                        $ref: '#/definitions/UserListResponse'
+            security:
+                - BearerAuth: []
+            summary: List all users (Sysadmin only)
+            tags:
+                - Users
+    /api/v1/users:
+        get:
+            description: Returns a list of all users in the system. Requires admin role.
+            operationId: listUsersByTenant
+            parameters:
+                - default: !!float 1
+                  description: Page number for pagination
+                  in: query
+                  minimum: !!float 1
+                  name: page
+                  type: integer
+                - default: !!float 20
+                  description: Number of users per page
+                  in: query
+                  maximum: !!float 100
+                  minimum: !!float 1
+                  name: limit
+                  type: integer
+            responses:
+                "200":
+                    description: Users retrieved successfully
+                    schema:
+                        $ref: '#/definitions/UserListResponse'
+            security:
+                - BearerAuth: []
+            summary: List all users (Admin only)
+            tags:
+                - Users
+    /api/v1/users/me:
+        get:
+            description: Returns the profile information for the authenticated user
+            operationId: getCurrentUser
+            responses:
+                "200":
+                    description: User profile retrieved successfully
+                    schema:
+                        $ref: '#/definitions/AuthUserResponse'
+            security:
+                - BearerAuth: []
+            summary: Get current user profile
+            tags:
+                - Users
+    /api/v1/users/{userId}:
+        get:
+            description: Returns detailed information about a specific user. Requires admin role.
+            operationId: getUserById
+            parameters:
+                - description: The ID of the user to retrieve
+                  in: path
+                  name: userId
+                  required: true
+                  type: string
+            responses:
+                "200":
+                    description: User retrieved successfully
+                    schema:
+                        $ref: '#/definitions/AuthUserResponse'
+            security:
+                - BearerAuth: []
+            summary: Get user by ID (Admin only)
+            tags:
+                - Users
+    /api/v1/users/{userId}/profile:
+        get:
+            description: Returns the profile information for a specific user. Requires admin role.
+            operationId: getUserProfile
+            parameters:
+                - description: The ID of the user
+                  in: path
+                  name: userId
+                  required: true
+                  type: string
+            responses:
+                "200":
+                    description: User profile retrieved successfully
+                    schema:
+                        $ref: '#/definitions/UserProfile'
+            security:
+                - BearerAuth: []
+            summary: Get user profile (Admin only)
+            tags:
+                - Users
+        put:
+            description: Updates the profile information for a specific user. Requires admin role.
+            operationId: updateUserProfile
+            parameters:
+                - description: The ID of the user
+                  in: path
+                  name: userId
+                  required: true
+                  type: string
+                - description: User profile update data
+                  in: body
+                  name: body
+                  required: true
+                  schema:
+                    $ref: '#/definitions/UserProfileUpdateRequest'
+            responses:
+                "200":
+                    description: User profile updated successfully
+                    schema:
+                        $ref: '#/definitions/UserProfile'
+            security:
+                - BearerAuth: []
+            summary: Update user profile (Admin only)
+            tags:
+                - Users
+    /api/v1/users/{userId}/roles:
+        get:
+            description: Returns the roles assigned to a specific user. Requires admin role.
+            operationId: getUserRoles
+            parameters:
+                - description: The ID of the user
+                  in: path
+                  name: userId
+                  required: true
+                  type: string
+            responses:
+                "200":
+                    description: User roles retrieved successfully
+                    schema:
+                        $ref: '#/definitions/UserRolesResponse'
+            security:
+                - BearerAuth: []
+            summary: Get user roles (Admin only)
+            tags:
+                - Users
+        post:
+            description: Assigns a role to a user. Requires admin role.
+            operationId: assignUserRole
+            parameters:
+                - description: The ID of the user
+                  in: path
+                  name: userId
+                  required: true
+                  type: string
+                - in: body
+                  name: body
+                  required: true
+                  schema:
+                    $ref: '#/definitions/AssignRoleRequest'
+            responses:
+                "200":
+                    description: Role assigned successfully
+            security:
+                - BearerAuth: []
+            summary: Assign role to user (Admin only)
+            tags:
+                - Users
+    /confirm-email:
+        get:
+            description: Confirm user email address using the confirmation code sent via email
+            operationId: confirmEmail
+            parameters:
+                - description: User ID to confirm email for
+                  in: query
+                  name: userId
+                  required: true
+                  type: string
+                - description: Email confirmation code (6-digit for mobile, long token for web)
+                  in: query
+                  name: code
+                  required: true
+                  type: string
+            responses:
+                "200":
+                    description: Email confirmed successfully
+                    schema:
+                        $ref: '#/definitions/EmailConfirmationResponse'
+                "400":
+                    description: Invalid or expired code
+                "404":
+                    description: Code not found
+                "500":
+                    description: Internal server error
+            summary: Confirm user email address
+    /refresh:
+        post:
+            description: Refresh the authentication token using refresh token
+            operationId: refreshToken
+            parameters:
+                - description: Refresh token request
+                  in: body
+                  name: refreshRequest
+                  required: true
+                  schema:
+                    $ref: '#/definitions/RefreshRequest'
+            responses:
+                "200":
+                    description: Token refreshed successfully
+                    schema:
+                        $ref: '#/definitions/AuthResponse'
+                "400":
+                    description: Invalid refresh token
+                "401":
+                    description: Refresh token expired or invalid
+            summary: Refresh authentication token
+    /signin:
+        post:
+            description: Authenticate user with email and password (local mode)
+            operationId: signIn
+            parameters:
+                - description: User signin credentials
+                  in: body
+                  name: signinRequest
+                  required: true
+                  schema:
+                    $ref: '#/definitions/SigninRequest'
+            responses:
+                "200":
+                    description: User successfully authenticated
+                    schema:
+                        $ref: '#/definitions/AuthResponse'
+                "400":
+                    description: Invalid input data
+                "401":
+                    description: Invalid credentials
+                "500":
+                    description: Internal server error
+            summary: Sign in user
+    /signout:
+        post:
+            description: Sign out the current user and invalidate session/token
+            operationId: signOut
+            responses:
+                "200":
+                    description: User successfully signed out
+                "401":
+                    description: Unauthorized - invalid or missing token
+            security:
+                - BearerAuth: []
+            summary: Sign out user
+    /signup:
+        post:
+            description: Register a new user with email and password (local mode)
+            operationId: signUp
+            parameters:
+                - description: User signup information
+                  in: body
+                  name: signupRequest
+                  required: true
+                  schema:
+                    $ref: '#/definitions/SignupRequest'
+            responses:
+                "201":
+                    description: User successfully created, email confirmation required
+                    schema:
+                        $ref: '#/definitions/SignupResponse'
+                "400":
+                    description: Invalid input data
+                "409":
+                    description: User already exists
+                "500":
+                    description: Internal server error
+            summary: Sign up a new user
+definitions:
+    AssignRoleRequest:
+        properties:
+            roleName:
+                description: Name of the role to assign
+                enum:
+                    - user
+                    - admin
+                    - moderator
+                type: string
+                x-nullable: false
+        required:
+            - roleName
+        type: object
+    AuthResponse:
+        properties:
+            accessToken:
+                description: JWT access token
+                example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+                type: string
+                x-nullable: false
+            expiresIn:
+                description: Token expiration time in seconds
+                example: !!float 3600
+                type: integer
+                x-nullable: false
+            refreshToken:
+                description: JWT refresh token
+                example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+                type: string
+                x-nullable: false
+            tokenType:
+                description: Token type
+                example: Bearer
+                type: string
+                x-nullable: false
+            userId:
+                description: User unique identifier
+                example: uuid-123-456-789
+                type: string
+                x-nullable: false
+        required:
+            - accessToken
+            - refreshToken
+            - tokenType
+            - expiresIn
+            - userId
+        type: object
+    AuthUserResponse:
+        description: Authentication user data from auth_user table (excluding sensitive fields)
+        properties:
+            createdAt:
+                description: Account creation timestamp
+                example: "2023-12-01T10:00:00Z"
+                format: date-time
+                type: string
+                x-nullable: false
+            email:
+                description: User email address (unique in auth_user table)
+                example: user@example.com
+                format: email
+                type: string
+                x-nullable: false
+            firstName:
+                description: User first name
+                example: John
+                type: string
+                x-nullable: false
+            id:
+                description: User unique identifier (primary key from auth_user table)
+                example: uuid-123-456-789
+                type: string
+                x-nullable: false
+            lastName:
+                description: User last name
+                example: Doe
+                type: string
+                x-nullable: false
+            tenantId:
+                description: Tenant identifier for multi-tenant support
+                example: acme-corp
+                type: string
+                x-nullable: false
+            updatedAt:
+                description: Last profile update timestamp
+                example: "2023-12-01T10:00:00Z"
+                format: date-time
+                type: string
+                x-nullable: false
+        required:
+            - id
+            - email
+            - firstName
+            - lastName
+            - createdAt
+            - updatedAt
+            - tenantId
+        type: object
+    EmailConfirmationResponse:
+        description: Response after successful email confirmation
+        properties:
+            message:
+                description: Success message
+                example: Email confirmed successfully
+                type: string
+                x-nullable: false
+        required:
+            - message
+        type: object
+    PaginationInfo:
+        properties:
+            limit:
+                description: Number of items per page
+                type: integer
+                x-nullable: false
+            page:
+                description: Current page number
+                type: integer
+                x-nullable: false
+            total:
+                description: Total number of items
+                type: integer
+                x-nullable: false
+            totalPages:
+                description: Total number of pages
+                type: integer
+                x-nullable: false
+        required:
+            - page
+            - limit
+            - total
+            - totalPages
+        type: object
+    RefreshRequest:
+        properties:
+            refreshToken:
+                description: Refresh token
+                example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+                type: string
+                x-nullable: false
+        required:
+            - refreshToken
+        type: object
+    SigninRequest:
+        properties:
+            email:
+                description: User email address
+                example: user@example.com
+                format: email
+                type: string
+                x-nullable: false
+            password:
+                description: User password
+                example: SecurePassword123!
+                type: string
+                x-nullable: false
+            tenantId:
+                description: Tenant identifier for multi-tenant support
+                example: acme-corp
+                type: string
+                x-nullable: false
+        required:
+            - email
+            - password
+            - tenantId
+        type: object
+    SignupRequest:
+        description: Request payload for creating new auth_user record
+        properties:
+            email:
+                description: User email address (must be unique within tenant)
+                example: user@example.com
+                format: email
+                type: string
+                x-nullable: false
+            firstName:
+                description: User first name
+                example: John
+                type: string
+                x-nullable: false
+            lastName:
+                description: User last name
+                example: Doe
+                type: string
+                x-nullable: false
+            password:
+                description: User password (minimum 8 characters, will be hashed)
+                example: SecurePassword123!
+                minLength: !!float 8
+                type: string
+                x-nullable: false
+            source:
+                description: Platform source for customized email confirmation experience
+                enum:
+                    - web
+                    - android
+                    - ios
+                example: web
+                type: string
+                x-nullable: false
+            tenantId:
+                description: Tenant identifier for multi-tenant support
+                example: acme-corp
+                type: string
+                x-nullable: false
+        required:
+            - email
+            - password
+            - firstName
+            - lastName
+            - tenantId
+            - source
+        type: object
+    SignupResponse:
+        description: Response after successful user signup indicating email confirmation is required
+        properties:
+            email:
+                description: Email address where confirmation was sent
+                format: email
+                type: string
+                x-nullable: false
+            message:
+                description: Success message
+                example: User account created successfully. Please check your email to confirm your account.
+                type: string
+                x-nullable: false
+            userId:
+                description: ID of the created user
+                type: string
+                x-nullable: false
+        required:
+            - message
+            - email
+            - userId
+        type: object
+    TenantCreateRequest:
+        description: Request payload for creating a new tenant
+        properties:
+            description:
+                description: Optional description of the tenant
+                example: Acme Corporation tenant for enterprise customers
+                type: string
+                x-nullable: false
+            id:
+                description: Unique tenant identifier
+                example: acme-corp
+                type: string
+                x-nullable: false
+            name:
+                description: Human-readable tenant name
+                example: Acme Corporation
+                type: string
+                x-nullable: false
+        required:
+            - id
+            - name
+            - description
+        type: object
+    TenantListResponse:
+        properties:
+            pagination:
+                $ref: common.yaml#/definitions/PaginationInfo
+            tenants:
+                items:
+                    $ref: '#/definitions/TenantResponse'
+                type: array
+        required:
+            - tenants
+            - pagination
+        type: object
+    TenantResponse:
+        description: Tenant information response
+        properties:
+            createdAt:
+                description: Tenant creation timestamp
+                example: "2023-12-01T10:00:00Z"
+                format: date-time
+                type: string
+                x-nullable: false
+            description:
+                description: Optional description of the tenant
+                example: Acme Corporation tenant for enterprise customers
+                type: string
+                x-nullable: false
+            id:
+                description: Unique tenant identifier
+                example: acme-corp
+                type: string
+                x-nullable: false
+            name:
+                description: Human-readable tenant name
+                example: Acme Corporation
+                type: string
+                x-nullable: false
+            updatedAt:
+                description: Last tenant update timestamp
+                example: "2023-12-01T10:00:00Z"
+                format: date-time
+                type: string
+                x-nullable: false
+        required:
+            - id
+            - name
+            - description
+            - createdAt
+            - updatedAt
+        type: object
+    TenantUpdateRequest:
+        description: Request payload for updating a tenant
+        properties:
+            description:
+                description: Optional description of the tenant
+                example: Updated description for Acme Corporation
+                type: string
+                x-nullable: false
+            name:
+                description: Human-readable tenant name
+                example: Acme Corporation Updated
+                type: string
+                x-nullable: false
+        required:
+            - name
+            - description
+        type: object
+    UserListResponse:
+        properties:
+            pagination:
+                $ref: common.yaml#/definitions/PaginationInfo
+            users:
+                items:
+                    $ref: '#/definitions/AuthUserResponse'
+                type: array
+        required:
+            - users
+            - pagination
+        type: object
+    UserProfile:
+        description: User profile data from user_profile table
+        properties:
+            birthDate:
+                description: User birth date
+                example: "1990-01-15"
+                format: date
+                type: string
+                x-nullable: true
+            createdAt:
+                description: Profile creation timestamp
+                example: "2023-12-01T10:00:00Z"
+                format: date-time
+                type: string
+                x-nullable: false
+            gender:
+                description: User gender (male/female/other)
+                enum:
+                    - male
+                    - female
+                    - other
+                example: male
+                type: string
+                x-nullable: true
+            height:
+                description: User height in centimeters
+                example: !!float 175
+                type: integer
+                x-nullable: true
+            id:
+                description: Profile unique identifier (primary key from user_profile table)
+                example: !!float 1
+                type: integer
+                x-nullable: false
+            isMetric:
+                description: Whether to use metric units (true) or imperial units (false)
+                example: true
+                type: boolean
+                x-nullable: false
+            updatedAt:
+                description: Last profile update timestamp
+                example: "2023-12-01T10:00:00Z"
+                format: date-time
+                type: string
+                x-nullable: false
+            userId:
+                description: User unique identifier (foreign key to auth_user table)
+                example: uuid-123-456-789
+                type: string
+                x-nullable: false
+            weight:
+                description: User weight in grams
+                example: !!float 70000
+                type: integer
+                x-nullable: true
+        required:
+            - id
+            - userId
+            - isMetric
+            - createdAt
+            - updatedAt
+        type: object
+    UserProfileUpdateRequest:
+        description: User profile update request data
+        properties:
+            birthDate:
+                description: User birth date in YYYY-MM-DD format
+                example: "1990-01-15"
+                format: date
+                type: string
+                x-nullable: true
+            gender:
+                description: User gender
+                example: Male
+                type: string
+                x-nullable: true
+            height:
+                description: User height in centimeters
+                example: !!float 175
+                type: integer
+                x-nullable: true
+            isMetric:
+                description: Whether to use metric units (true) or imperial units (false)
+                example: true
+                type: boolean
+                x-nullable: true
+            weight:
+                description: User weight in grams
+                example: !!float 70000
+                type: integer
+                x-nullable: true
+        type: object
+    UserRolesResponse:
+        properties:
+            roles:
+                description: List of role names assigned to the user
+                items:
+                    type: string
+                type: array
+            userId:
+                type: string
+        required:
+            - userId
+            - roles
+        type: object
+securityDefinitions:
+    BearerAuth:
+        description: 'Bearer token authentication. Format: Bearer {token}'
+        in: header
+        name: Authorization
+        type: apiKey

@@ -8,8 +8,18 @@ type Config struct {
 	Credentials CredentialsConfig
 	Server      katapp.ServerConfig
 	Cache       katapp.CacheConfig
+	GCloud      GCloudConfig
 }
 
 type CredentialsConfig struct {
-	Secret string
+	JwtSecret string
+}
+
+type GCloudConfig struct {
+	Mock        bool
+	ServiceJson string
+	Email       struct {
+		User string
+		From string
+	}
 }

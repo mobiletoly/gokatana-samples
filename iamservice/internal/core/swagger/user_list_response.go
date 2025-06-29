@@ -20,30 +20,50 @@ import (
 // swagger:model UserListResponse
 type UserListResponse struct {
 
-	// users
-	// Required: true
-	Users []*UserProfile `json:"users"`
-
 	// pagination
 	// Required: true
 	Pagination *PaginationInfo `json:"pagination"`
+
+	// users
+	// Required: true
+	Users []*AuthUserResponse `json:"users"`
 }
 
 // Validate validates this user list response
 func (m *UserListResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateUsers(formats); err != nil {
+	if err := m.validatePagination(formats); err != nil {
 		res = append(res, err)
 	}
 
-	if err := m.validatePagination(formats); err != nil {
+	if err := m.validateUsers(formats); err != nil {
 		res = append(res, err)
 	}
 
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *UserListResponse) validatePagination(formats strfmt.Registry) error {
+
+	if err := validate.Required("pagination", "body", m.Pagination); err != nil {
+		return err
+	}
+
+	if m.Pagination != nil {
+		if err := m.Pagination.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("pagination")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("pagination")
+			}
+			return err
+		}
+	}
+
 	return nil
 }
 
@@ -74,14 +94,29 @@ func (m *UserListResponse) validateUsers(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *UserListResponse) validatePagination(formats strfmt.Registry) error {
+// ContextValidate validate this user list response based on the context it is used
+func (m *UserListResponse) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
 
-	if err := validate.Required("pagination", "body", m.Pagination); err != nil {
-		return err
+	if err := m.contextValidatePagination(ctx, formats); err != nil {
+		res = append(res, err)
 	}
 
+	if err := m.contextValidateUsers(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *UserListResponse) contextValidatePagination(ctx context.Context, formats strfmt.Registry) error {
+
 	if m.Pagination != nil {
-		if err := m.Pagination.Validate(formats); err != nil {
+
+		if err := m.Pagination.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("pagination")
 			} else if ce, ok := err.(*errors.CompositeError); ok {
@@ -91,24 +126,6 @@ func (m *UserListResponse) validatePagination(formats strfmt.Registry) error {
 		}
 	}
 
-	return nil
-}
-
-// ContextValidate validate this user list response based on the context it is used
-func (m *UserListResponse) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
-	var res []error
-
-	if err := m.contextValidateUsers(ctx, formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.contextValidatePagination(ctx, formats); err != nil {
-		res = append(res, err)
-	}
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
 	return nil
 }
 
@@ -132,23 +149,6 @@ func (m *UserListResponse) contextValidateUsers(ctx context.Context, formats str
 			}
 		}
 
-	}
-
-	return nil
-}
-
-func (m *UserListResponse) contextValidatePagination(ctx context.Context, formats strfmt.Registry) error {
-
-	if m.Pagination != nil {
-
-		if err := m.Pagination.ContextValidate(ctx, formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("pagination")
-			} else if ce, ok := err.(*errors.CompositeError); ok {
-				return ce.ValidateName("pagination")
-			}
-			return err
-		}
 	}
 
 	return nil

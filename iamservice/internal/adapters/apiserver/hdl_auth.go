@@ -6,11 +6,11 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/mobiletoly/gokatana-samples/iamservice/internal/core/swagger"
 	"github.com/mobiletoly/gokatana-samples/iamservice/internal/core/usecase"
+	"github.com/mobiletoly/gokatana/katapp"
 	"github.com/mobiletoly/gokatana/kathttp_echo"
 )
 
-// signupHandler handles user registration
-func signupHandler(uc *usecase.AuthUser) func(c echo.Context) error {
+func signupHandler(uc *usecase.AuthMgm) func(c echo.Context) error {
 	return func(c echo.Context) error {
 		ctx := c.Request().Context()
 		var signupReq swagger.SignupRequest
@@ -18,17 +18,16 @@ func signupHandler(uc *usecase.AuthUser) func(c echo.Context) error {
 			return kathttp_echo.ReportHTTPError(err)
 		}
 
-		authResponse, err := uc.SignUp(ctx, &signupReq)
+		signupResponse, err := uc.SignUp(ctx, &signupReq)
 		if err != nil {
 			return kathttp_echo.ReportHTTPError(err)
 		}
 
-		return c.JSON(http.StatusCreated, authResponse)
+		return c.JSON(http.StatusCreated, signupResponse)
 	}
 }
 
-// signinHandler handles user authentication
-func signinHandler(uc *usecase.AuthUser) func(c echo.Context) error {
+func signinHandler(uc *usecase.AuthMgm) func(c echo.Context) error {
 	return func(c echo.Context) error {
 		ctx := c.Request().Context()
 		var signinReq swagger.SigninRequest
@@ -45,32 +44,14 @@ func signinHandler(uc *usecase.AuthUser) func(c echo.Context) error {
 	}
 }
 
-// signoutHandler handles user sign out
-func signoutHandler(uc *usecase.AuthUser) func(c echo.Context) error {
+func signoutHandler(uc *usecase.AuthMgm) func(c echo.Context) error {
 	return func(c echo.Context) error {
-		ctx := c.Request().Context()
-
-		// Get refresh token from request body or header
-		refreshToken := c.Request().Header.Get("X-Refresh-Token")
-		if refreshToken == "" {
-			// Try to get from request body
-			var body map[string]string
-			if err := c.Bind(&body); err == nil {
-				refreshToken = body["refreshToken"]
-			}
-		}
-
-		messageResponse, err := uc.SignOut(ctx, refreshToken)
-		if err != nil {
-			return kathttp_echo.ReportHTTPError(err)
-		}
-
-		return c.JSON(http.StatusOK, messageResponse)
+		// TODO implement it
+		return c.JSON(http.StatusOK, struct{}{})
 	}
 }
 
-// refreshTokenHandler handles token refresh
-func refreshTokenHandler(uc *usecase.AuthUser) func(c echo.Context) error {
+func refreshTokenHandler(uc *usecase.AuthMgm) func(c echo.Context) error {
 	return func(c echo.Context) error {
 		ctx := c.Request().Context()
 		var refreshReq swagger.RefreshRequest
@@ -84,5 +65,28 @@ func refreshTokenHandler(uc *usecase.AuthUser) func(c echo.Context) error {
 		}
 
 		return c.JSON(http.StatusOK, authResponse)
+	}
+}
+
+func confirmEmailHandler(uc *usecase.AuthMgm) func(c echo.Context) error {
+	return func(c echo.Context) error {
+		ctx := c.Request().Context()
+		userID := c.QueryParam("userId")
+		code := c.QueryParam("code")
+
+		if userID == "" || code == "" {
+			return kathttp_echo.ReportBadRequest(katapp.NewErr(katapp.ErrInvalidInput, "user ID and confirmation code are required"))
+		}
+
+		err := uc.ConfirmEmail(ctx, userID, code)
+		if err != nil {
+			return kathttp_echo.ReportHTTPError(err)
+		}
+
+		response := &swagger.EmailConfirmationResponse{
+			Message: "Email confirmed successfully",
+		}
+
+		return c.JSON(http.StatusOK, response)
 	}
 }

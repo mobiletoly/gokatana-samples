@@ -12,23 +12,19 @@ import (
 	"github.com/mobiletoly/gokatana/kathttp_echo"
 )
 
-// getUserProfileHandler handles getting current user profile
-func getUserProfileHandler(uc *usecase.UserMgm) func(c echo.Context) error {
+// getMyUserHandler handles getting current user profile
+func getMyUserHandler(uc *usecase.UserMgm) func(c echo.Context) error {
 	return func(c echo.Context) error {
 		ctx := c.Request().Context()
-
-		// Extract user ID from JWT token
-		userID, err := serverhelp.UserIDFromValidatedToken(c)
+		principle, err := serverhelp.GetUserPrincipalFromToken(c)
 		if err != nil {
 			return kathttp_echo.ReportHTTPError(err)
 		}
-
-		userProfile, err := uc.GetCurrentUserProfile(ctx, userID)
-		if err != nil {
+		if authUserResponse, err := uc.LoadUserByID(ctx, principle, principle.UserID); err != nil {
 			return kathttp_echo.ReportHTTPError(err)
+		} else {
+			return c.JSON(http.StatusOK, authUserResponse)
 		}
-
-		return c.JSON(http.StatusOK, userProfile)
 	}
 }
 
@@ -36,26 +32,27 @@ func getUserProfileHandler(uc *usecase.UserMgm) func(c echo.Context) error {
 func getUserByIdHandler(uc *usecase.UserMgm) func(c echo.Context) error {
 	return func(c echo.Context) error {
 		ctx := c.Request().Context()
-
-		// Get user ID from path parameter and validate
-		userID := c.Param("userId")
-		if userID == "" {
-			return kathttp_echo.ReportBadRequest(errors.New("user ID is required"))
-		}
-
-		userProfile, err := uc.GetUserByID(ctx, userID)
+		principal, err := serverhelp.GetUserPrincipalFromToken(c)
 		if err != nil {
 			return kathttp_echo.ReportHTTPError(err)
 		}
-
-		return c.JSON(http.StatusOK, userProfile)
+		userID := c.Param("userId")
+		if authUserResponse, err := uc.LoadUserByID(ctx, principal, userID); err != nil {
+			return kathttp_echo.ReportHTTPError(err)
+		} else {
+			return c.JSON(http.StatusOK, authUserResponse)
+		}
 	}
 }
 
-// listUsersHandler handles listing all users with pagination (admin only)
-func listUsersHandler(uc *usecase.UserMgm) func(c echo.Context) error {
+// listAllUsersByTenantHandler handles listing all tenant users with pagination
+func listAllUsersByTenantHandler(uc *usecase.UserMgm) func(c echo.Context) error {
 	return func(c echo.Context) error {
 		ctx := c.Request().Context()
+		principal, err := serverhelp.GetUserPrincipalFromToken(c)
+		if err != nil {
+			return kathttp_echo.ReportHTTPError(err)
+		}
 
 		// Parse pagination parameters
 		page := 1
@@ -72,12 +69,43 @@ func listUsersHandler(uc *usecase.UserMgm) func(c echo.Context) error {
 			}
 		}
 
-		userList, err := uc.ListUsers(ctx, page, limit)
+		if userList, err := uc.ListAllUsersByTenant(ctx, principal, principal.TenantID, page, limit); err != nil {
+			return kathttp_echo.ReportHTTPError(err)
+		} else {
+			return c.JSON(http.StatusOK, userList)
+		}
+	}
+}
+
+// listAllUsersHandler handles listing all users with pagination (sysadmin only)
+func listAllUsersHandler(uc *usecase.UserMgm) func(c echo.Context) error {
+	return func(c echo.Context) error {
+		ctx := c.Request().Context()
+		principal, err := serverhelp.GetUserPrincipalFromToken(c)
 		if err != nil {
 			return kathttp_echo.ReportHTTPError(err)
 		}
 
-		return c.JSON(http.StatusOK, userList)
+		// Parse pagination parameters
+		page := 1
+		if pageStr := c.QueryParam("page"); pageStr != "" {
+			if p, err := strconv.Atoi(pageStr); err == nil && p > 0 {
+				page = p
+			}
+		}
+
+		limit := 20
+		if limitStr := c.QueryParam("limit"); limitStr != "" {
+			if l, err := strconv.Atoi(limitStr); err == nil && l > 0 && l <= 100 {
+				limit = l
+			}
+		}
+
+		if userList, err := uc.ListAllUsers(ctx, principal, page, limit); err != nil {
+			return kathttp_echo.ReportHTTPError(err)
+		} else {
+			return c.JSON(http.StatusOK, userList)
+		}
 	}
 }
 
@@ -85,19 +113,17 @@ func listUsersHandler(uc *usecase.UserMgm) func(c echo.Context) error {
 func getUserRolesHandler(uc *usecase.UserMgm) func(c echo.Context) error {
 	return func(c echo.Context) error {
 		ctx := c.Request().Context()
-
-		// Get user ID from path parameter and validate
-		userID := c.Param("userId")
-		if userID == "" {
-			return kathttp_echo.ReportBadRequest(errors.New("user ID is required"))
-		}
-
-		userRoles, err := uc.GetUserRoles(ctx, userID)
+		principal, err := serverhelp.GetUserPrincipalFromToken(c)
 		if err != nil {
 			return kathttp_echo.ReportHTTPError(err)
 		}
+		userID := c.Param("userId")
 
-		return c.JSON(http.StatusOK, userRoles)
+		if userRoles, err := uc.GetUserRoles(ctx, principal, userID); err != nil {
+			return kathttp_echo.ReportHTTPError(err)
+		} else {
+			return c.JSON(http.StatusOK, userRoles)
+		}
 	}
 }
 
@@ -105,18 +131,11 @@ func getUserRolesHandler(uc *usecase.UserMgm) func(c echo.Context) error {
 func assignUserRoleHandler(uc *usecase.UserMgm) func(c echo.Context) error {
 	return func(c echo.Context) error {
 		ctx := c.Request().Context()
-
-		// Extract requesting user info from JWT token
-		requestingUserID, err := serverhelp.UserIDFromValidatedToken(c)
+		principal, err := serverhelp.GetUserPrincipalFromToken(c)
 		if err != nil {
 			return kathttp_echo.ReportHTTPError(err)
 		}
-
-		// Get user ID from path parameter and validate
 		userID := c.Param("userId")
-		if userID == "" {
-			return kathttp_echo.ReportBadRequest(errors.New("user ID is required"))
-		}
 
 		// Parse request body
 		var req swagger.AssignRoleRequest
@@ -124,17 +143,10 @@ func assignUserRoleHandler(uc *usecase.UserMgm) func(c echo.Context) error {
 			return kathttp_echo.ReportBadRequest(errors.New("invalid request body"))
 		}
 
-		// Validate role name
-		if req.RoleName == nil || *req.RoleName == "" {
-			return kathttp_echo.ReportBadRequest(errors.New("role name is required"))
-		}
-
-		response, err := uc.AssignUserRole(ctx, userID, *req.RoleName, requestingUserID)
-		if err != nil {
+		if err = uc.AssignUserRole(ctx, principal, userID, req.RoleName); err != nil {
 			return kathttp_echo.ReportHTTPError(err)
 		}
-
-		return c.JSON(http.StatusOK, response)
+		return c.JSON(http.StatusOK, struct{}{})
 	}
 }
 
@@ -142,24 +154,58 @@ func assignUserRoleHandler(uc *usecase.UserMgm) func(c echo.Context) error {
 func deleteUserRoleHandler(uc *usecase.UserMgm) func(c echo.Context) error {
 	return func(c echo.Context) error {
 		ctx := c.Request().Context()
-
-		// Get user ID from path parameter and validate
-		userID := c.Param("userId")
-		if userID == "" {
-			return kathttp_echo.ReportBadRequest(errors.New("user ID is required"))
-		}
-
-		// Get role name from query parameter and validate
-		roleName := c.Param("roleName")
-		if roleName == "" {
-			return kathttp_echo.ReportBadRequest(errors.New("role name is required"))
-		}
-
-		response, err := uc.DeleteUserRole(ctx, userID, roleName)
+		principal, err := serverhelp.GetUserPrincipalFromToken(c)
 		if err != nil {
 			return kathttp_echo.ReportHTTPError(err)
 		}
+		userID := c.Param("userId")
+		roleName := c.Param("roleName")
 
-		return c.JSON(http.StatusOK, response)
+		if err = uc.DeleteUserRole(ctx, principal, userID, roleName); err != nil {
+			return kathttp_echo.ReportHTTPError(err)
+		}
+		return c.JSON(http.StatusOK, struct{}{})
+	}
+}
+
+// getUserProfileHandler handles getting user profile by user ID (admin only)
+func getUserProfileHandler(uc *usecase.UserProfileMgm) func(c echo.Context) error {
+	return func(c echo.Context) error {
+		ctx := c.Request().Context()
+		principal, err := serverhelp.GetUserPrincipalFromToken(c)
+		if err != nil {
+			return kathttp_echo.ReportHTTPError(err)
+		}
+		userID := c.Param("userId")
+
+		if userProfile, err := uc.GetUserProfileByUserID(ctx, principal, userID); err != nil {
+			return kathttp_echo.ReportHTTPError(err)
+		} else {
+			return c.JSON(http.StatusOK, userProfile)
+		}
+	}
+}
+
+// updateUserProfileHandler handles updating user profile by user ID (admin only)
+func updateUserProfileHandler(uc *usecase.UserProfileMgm) func(c echo.Context) error {
+	return func(c echo.Context) error {
+		ctx := c.Request().Context()
+		principal, err := serverhelp.GetUserPrincipalFromToken(c)
+		if err != nil {
+			return kathttp_echo.ReportHTTPError(err)
+		}
+		userID := c.Param("userId")
+
+		// Parse request body
+		var req swagger.UserProfileUpdateRequest
+		if err := c.Bind(&req); err != nil {
+			return kathttp_echo.ReportBadRequest(errors.New("invalid request body"))
+		}
+
+		if userProfile, err := uc.UpdateUserProfileByUserID(ctx, principal, userID, &req); err != nil {
+			return kathttp_echo.ReportHTTPError(err)
+		} else {
+			return c.JSON(http.StatusOK, userProfile)
+		}
 	}
 }

@@ -23,7 +23,7 @@ type AssignRoleRequest struct {
 	// Name of the role to assign
 	// Required: true
 	// Enum: ["user","admin","moderator"]
-	RoleName *string `json:"roleName"`
+	RoleName string `json:"roleName"`
 }
 
 // Validate validates this assign role request
@@ -74,12 +74,12 @@ func (m *AssignRoleRequest) validateRoleNameEnum(path, location string, value st
 
 func (m *AssignRoleRequest) validateRoleName(formats strfmt.Registry) error {
 
-	if err := validate.Required("roleName", "body", m.RoleName); err != nil {
+	if err := validate.RequiredString("roleName", "body", m.RoleName); err != nil {
 		return err
 	}
 
 	// value enum
-	if err := m.validateRoleNameEnum("roleName", "body", *m.RoleName); err != nil {
+	if err := m.validateRoleNameEnum("roleName", "body", m.RoleName); err != nil {
 		return err
 	}
 

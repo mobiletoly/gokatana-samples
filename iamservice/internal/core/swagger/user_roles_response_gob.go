@@ -2,29 +2,29 @@
 
 package swagger
 
-func NewUserRolesResponseBuilder() UserRolesResponse_Builder_UserID {
-	return UserRolesResponse_Builder_UserID{root: &UserRolesResponse{}}
-}
-
-type UserRolesResponse_Builder_UserID struct {
-	root *UserRolesResponse
+func NewUserRolesResponseBuilder() UserRolesResponse_Builder_Roles {
+	return UserRolesResponse_Builder_Roles{root: &UserRolesResponse{}}
 }
 
 type UserRolesResponse_Builder_Roles struct {
 	root *UserRolesResponse
 }
 
-func (b UserRolesResponse_Builder_UserID) UserID(arg *string) UserRolesResponse_Builder_Roles {
-	b.root.UserID = arg
-	return UserRolesResponse_Builder_Roles{root: b.root}
+type UserRolesResponse_Builder_UserID struct {
+	root *UserRolesResponse
+}
+
+func (b UserRolesResponse_Builder_Roles) Roles(arg []string) UserRolesResponse_Builder_UserID {
+	b.root.Roles = arg
+	return UserRolesResponse_Builder_UserID{root: b.root}
 }
 
 type UserRolesResponse_Builder_GobFinalizer struct {
 	root *UserRolesResponse
 }
 
-func (b UserRolesResponse_Builder_Roles) Roles(arg []string) UserRolesResponse_Builder_GobFinalizer {
-	b.root.Roles = arg
+func (b UserRolesResponse_Builder_UserID) UserID(arg *string) UserRolesResponse_Builder_GobFinalizer {
+	b.root.UserID = arg
 	return UserRolesResponse_Builder_GobFinalizer{root: b.root}
 }
 
