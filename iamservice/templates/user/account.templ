@@ -208,7 +208,7 @@ templ EditAccount(user *swagger.AuthUserResponse) {
 					</div>
 				</div>
 				<div class="flex justify-end space-x-3">
-					@common.LoadingSubmitButton("Save Changes", "Saving...", "primary", "md", "save", false)
+					@common.LoadingSubmitButton("Save Changes", "primary", "md", "save", false)
 					<button
 						type="button"
 						hx-get="/web/user/account"
@@ -295,7 +295,7 @@ templ ChangePassword() {
 					</div>
 				</div>
 				<div class="flex justify-end space-x-3">
-					@common.LoadingSubmitButton("Change Password", "Changing...", "primary", "md", "key", false)
+					@common.LoadingSubmitButton("Change Password", "primary", "md", "key", false)
 					<button
 						type="button"
 						hx-get="/web/user/account"

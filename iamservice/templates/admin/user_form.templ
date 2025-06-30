@@ -25,7 +25,7 @@ templ UserFormContent() {
 		@common.FormField("text", "firstName", "firstName", "First Name", "Enter first name", true, templ.Attributes{})
 		@common.FormField("text", "lastName", "lastName", "Last Name", "Enter last name", true, templ.Attributes{})
 		<div class="flex justify-end">
-			@common.LoadingSubmitButton("Create User", "Creating...", "primary", "md", "plus", false)
+			@common.LoadingSubmitButton("Create User", "primary", "md", "plus", false)
 		</div>
 	</form>
 }
@@ -79,7 +79,7 @@ templ UserEditFormContent(user *swagger.AuthUserResponse) {
 			/>
 		</div>
 		<div class="flex justify-end space-x-3">
-			@common.LoadingSubmitButton("Update Details", "Updating...", "primary", "md", "save", false)
+			@common.LoadingSubmitButton("Update Details", "primary", "md", "save", false)
 			<a
 				href={ templ.URL("/web/admin/users/" + user.ID) }
 				class="inline-flex items-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
@@ -157,7 +157,7 @@ templ UserChangePasswordFormContent(user *swagger.AuthUserResponse) {
 			/>
 		</div>
 		<div class="flex justify-end space-x-3">
-			@common.LoadingSubmitButton("Change Password", "Changing...", "primary", "md", "key", false)
+			@common.LoadingSubmitButton("Change Password", "primary", "md", "key", false)
 			<a
 				href={ templ.URL("/web/admin/users/" + user.ID) }
 				class="inline-flex items-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
@@ -243,7 +243,7 @@ templ UserRoles(userID string, roles []string) {
 							<option value="admin">Admin</option>
 						</select>
 					</div>
-					@common.LoadingSubmitButton("Assign Role", "Assigning...", "primary", "sm", "plus", false)
+					@common.LoadingSubmitButton("Assign Role", "primary", "sm", "plus", false)
 				</form>
 			</div>
 		</div>

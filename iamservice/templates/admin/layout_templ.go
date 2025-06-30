@@ -44,7 +44,7 @@ func Layout(title string, content templ.Component, userEmail string) templ.Compo
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, " - IAMService</title><script src=\"https://cdn.tailwindcss.com\"></script><link rel=\"stylesheet\" href=\"/static/css/app.css\"><script src=\"https://unpkg.com/htmx.org@2.0.4\"></script><script src=\"https://unpkg.com/hyperscript.org@0.9.12\"></script></head><body class=\"bg-gray-50 min-h-screen\"><div class=\"max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8\"><div class=\"bg-white shadow-sm rounded-lg\"><div class=\"border-b border-gray-200 px-6 py-4\"><h1 class=\"text-2xl font-bold text-gray-900\">IAMService Admin Dashboard</h1><nav class=\"flex items-center justify-between mt-4\"><div class=\"flex space-x-6\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, " - IAMService</title><script src=\"https://cdn.tailwindcss.com\"></script><link rel=\"stylesheet\" href=\"/static/css/app.css\"><script src=\"https://unpkg.com/htmx.org@2.0.4\"></script><script src=\"https://unpkg.com/hyperscript.org@0.9.12\"></script></head><body class=\"bg-gray-50 min-h-screen\"><div class=\"max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8\"><div class=\"bg-white shadow-sm rounded-lg\"><div class=\"border-b border-gray-200 px-6 py-4\"><h1 class=\"text-2xl font-bold text-gray-900\">IAMService Admin Dashboard v002</h1><nav class=\"flex items-center justify-between mt-4\"><div class=\"flex space-x-6\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

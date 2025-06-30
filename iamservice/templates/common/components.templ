@@ -490,7 +490,7 @@ func GetButtonClasses(variant string, size string, fullWidth bool) string {
 	var variantClasses string
 	switch variant {
 	case "primary":
-		variantClasses = "border-transparent text-white bg-blue-600 hover:bg-blue-700 focus:ring-blue-500"
+		variantClasses = "border-transparent text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-blue-500"
 	case "secondary":
 		variantClasses = "border-gray-300 text-gray-700 bg-white hover:bg-gray-50 focus:ring-blue-500"
 	case "success":
@@ -512,10 +512,10 @@ func GetButtonClasses(variant string, size string, fullWidth bool) string {
 // variant: "primary", "secondary", "success", "danger"
 // size: "sm", "md", "lg"
 // fullWidth: true for w-full class
-templ LoadingSubmitButton(text string, loadingText string, variant string, size string, iconName string, fullWidth bool) {
+templ LoadingSubmitButton(text string, variant string, size string, iconName string, fullWidth bool) {
 	<button type="submit" class={ GetButtonClasses(variant, size, fullWidth) }>
 		<!-- Loading state (shown during HTMX request) -->
-		@LoadingSpinnerIndicator(loadingText, "white", size)
+		@LoadingSpinnerIndicator(text, "white", size)
 		<!-- Normal state (hidden during HTMX request) -->
 		<span class="htmx-indicator-hide flex items-center">
 			if iconName != "" {

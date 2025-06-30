@@ -1453,7 +1453,7 @@ func GetButtonClasses(variant string, size string, fullWidth bool) string {
 	var variantClasses string
 	switch variant {
 	case "primary":
-		variantClasses = "border-transparent text-white bg-blue-600 hover:bg-blue-700 focus:ring-blue-500"
+		variantClasses = "border-transparent text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-blue-500"
 	case "secondary":
 		variantClasses = "border-gray-300 text-gray-700 bg-white hover:bg-gray-50 focus:ring-blue-500"
 	case "success":
@@ -1475,7 +1475,7 @@ func GetButtonClasses(variant string, size string, fullWidth bool) string {
 // variant: "primary", "secondary", "success", "danger"
 // size: "sm", "md", "lg"
 // fullWidth: true for w-full class
-func LoadingSubmitButton(text string, loadingText string, variant string, size string, iconName string, fullWidth bool) templ.Component {
+func LoadingSubmitButton(text string, variant string, size string, iconName string, fullWidth bool) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -1518,7 +1518,7 @@ func LoadingSubmitButton(text string, loadingText string, variant string, size s
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = LoadingSpinnerIndicator(loadingText, "white", size).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = LoadingSpinnerIndicator(text, "white", size).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

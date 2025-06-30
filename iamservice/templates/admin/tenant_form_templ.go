@@ -98,7 +98,7 @@ func TenantFormContent() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = common.LoadingSubmitButton("Create Tenant", "Creating...", "primary", "md", "plus", false).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = common.LoadingSubmitButton("Create Tenant", "primary", "md", "plus", false).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -232,7 +232,7 @@ func TenantEditFormContent(tenant *swagger.TenantResponse) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = common.LoadingSubmitButton("Update Tenant", "Updating...", "primary", "md", "save", false).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = common.LoadingSubmitButton("Update Tenant", "primary", "md", "save", false).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

@@ -47,7 +47,7 @@ templ TenantFormContent() {
 			</p>
 		</div>
 		<div class="flex justify-end">
-			@common.LoadingSubmitButton("Create Tenant", "Creating...", "primary", "md", "plus", false)
+			@common.LoadingSubmitButton("Create Tenant", "primary", "md", "plus", false)
 		</div>
 	</form>
 }
@@ -117,7 +117,7 @@ templ TenantEditFormContent(tenant *swagger.TenantResponse) {
 			</p>
 		</div>
 		<div class="flex justify-end space-x-3">
-			@common.LoadingSubmitButton("Update Tenant", "Updating...", "primary", "md", "save", false)
+			@common.LoadingSubmitButton("Update Tenant", "primary", "md", "save", false)
 			<a
 				href={ templ.URL("/web/admin/tenants/" + tenant.ID) }
 				class="inline-flex items-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"

@@ -21,6 +21,7 @@ RUN CGO_ENABLED=0 go build \
 FROM gcr.io/distroless/static-debian11
 COPY --from=build /go/src/app/configs /configs
 COPY --from=build /go/src/app/dbmigrate/ /dbmigrate/
+COPY --from=build /go/src/app/static/ /static/
 COPY --from=build /go/bin/app /app
 
 EXPOSE 8080

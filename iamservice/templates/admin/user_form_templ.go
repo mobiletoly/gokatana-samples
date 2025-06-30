@@ -106,7 +106,7 @@ func UserFormContent() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = common.LoadingSubmitButton("Create User", "Creating...", "primary", "md", "plus", false).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = common.LoadingSubmitButton("Create User", "primary", "md", "plus", false).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -257,7 +257,7 @@ func UserEditFormContent(user *swagger.AuthUserResponse) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = common.LoadingSubmitButton("Update Details", "Updating...", "primary", "md", "save", false).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = common.LoadingSubmitButton("Update Details", "primary", "md", "save", false).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -417,7 +417,7 @@ func UserChangePasswordFormContent(user *swagger.AuthUserResponse) templ.Compone
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = common.LoadingSubmitButton("Change Password", "Changing...", "primary", "md", "key", false).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = common.LoadingSubmitButton("Change Password", "primary", "md", "key", false).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -617,7 +617,7 @@ func UserRoles(userID string, roles []string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = common.LoadingSubmitButton("Assign Role", "Assigning...", "primary", "sm", "plus", false).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = common.LoadingSubmitButton("Assign Role", "primary", "sm", "plus", false).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
