@@ -1,40 +1,48 @@
-swagger: '2.0'
+openapi: 3.0.3
 info:
-  title: Tenant Management API
-  description: API for tenant management operations
+  title: Common API Components
+  description: Common API components and schemas
   version: 1.0.0
 
-definitions:
-  PaginationInfo:
-    type: object
-    required:
-      - page
-      - limit
-      - total
-      - totalPages
-    properties:
-      page:
-        type: integer
-        x-nullable: false
-        description: Current page number
-      limit:
-        type: integer
-        x-nullable: false
-        description: Number of items per page
-      total:
-        type: integer
-        x-nullable: false
-        description: Total number of items
-      totalPages:
-        type: integer
-        x-nullable: false
-        description: Total number of pages
+security:
+  - BearerAuth: [ ]
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: 'Bearer token authentication. Format: Bearer {token}'
+  schemas:
+    PaginationInfo:
+      type: object
+      required:
+        - page
+        - limit
+        - total
+        - totalPages
+      properties:
+        page:
+          type: integer
+          nullable: false
+          description: Current page number
+        limit:
+          type: integer
+          nullable: false
+          description: Number of items per page
+        total:
+          type: integer
+          nullable: false
+          description: Total number of items
+        totalPages:
+          type: integer
+          nullable: false
+          description: Total number of pages
 
 paths:
-  /api/v1/a:
+  /api/v1/version:
     get:
-      summary: List all tenants (Sysadmin only)
+      summary: Get service version
       responses:
-        200:
-          description: Tenants retrieved successfully
-
+        '200':
+          description: Service version

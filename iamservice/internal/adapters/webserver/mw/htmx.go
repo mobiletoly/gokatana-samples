@@ -13,7 +13,6 @@ func HTMXMiddleware() echo.MiddlewareFunc {
 
 			// Store in context for easy access in handlers
 			c.Set("isHTMX", isHTMX)
-
 			return next(c)
 		}
 	}

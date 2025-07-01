@@ -4,7 +4,6 @@ import (
 	"github.com/mobiletoly/gokatana-samples/iamservice/internal/adapters/internal/serverhelp"
 	"net/http"
 
-	"github.com/go-openapi/strfmt"
 	"github.com/labstack/echo/v4"
 	"github.com/mobiletoly/gokatana-samples/iamservice/internal/core/model"
 	"github.com/mobiletoly/gokatana-samples/iamservice/internal/core/swagger"
@@ -117,10 +116,10 @@ func deleteTenantHandler(authMgm *usecase.AuthMgm) echo.HandlerFunc {
 // tenantModelToTenantResponse converts model.Tenant to swagger.TenantResponse
 func tenantModelToTenantResponse(tenant *model.Tenant) *swagger.TenantResponse {
 	return swagger.NewTenantResponseBuilder().
-		CreatedAt(strfmt.DateTime(tenant.CreatedAt)).
+		CreatedAt(tenant.CreatedAt).
 		Description(tenant.Description).
-		ID(tenant.ID).
+		Id(tenant.ID).
 		Name(tenant.Name).
-		UpdatedAt(strfmt.DateTime(tenant.UpdatedAt)).
+		UpdatedAt(tenant.UpdatedAt).
 		Build()
 }

@@ -1,4 +1,11 @@
 database:
-  host: devdbhost:5432
+  host: some-postgres-host
   name: iamservice
+  user: postgres
   sslmode: require
+server:
+  domain: https://www.some-company-domain.com
+gcloud:
+  email:
+    user: user@some-company-domain.com
+    from: noreply@some-company-domain.com

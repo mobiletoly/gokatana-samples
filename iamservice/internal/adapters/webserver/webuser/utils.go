@@ -6,12 +6,12 @@ import (
 	"strconv"
 )
 
-func convertHeightToMm(feet, inches int) int64 {
+func convertHeightToMm(feet, inches int) int {
 	totalInches := float64(feet)*12 + float64(inches)
-	return int64(totalInches * 25.4)
+	return int(totalInches * 25.4)
 }
 
-func convertHeightMmToFeetInches(mm int64) (int, int) {
+func convertHeightMmToFeetInches(mm int) (int, int) {
 	totalInches := float64(mm) / 25.4
 	totalInchesRounded := int(totalInches + 0.5) // Round to nearest inch
 	feet := totalInchesRounded / 12
@@ -19,23 +19,23 @@ func convertHeightMmToFeetInches(mm int64) (int, int) {
 	return feet, inches
 }
 
-func parseMetricHeightIntoMillimeters(str string) (*int64, error) {
+func parseMetricHeightIntoMillimeters(str string) (*int, error) {
 	if str == "" {
 		return nil, nil
 	}
-	if height, err := strconv.ParseInt(str, 10, 64); err == nil {
-		return lo.ToPtr(height * 10), nil
+	if height, err := strconv.ParseInt(str, 10, 32); err == nil {
+		return lo.ToPtr(int(height) * 10), nil
 	} else {
 		return nil, katapp.NewErr(katapp.ErrInvalidInput, "Invalid height value")
 	}
 }
 
-func parseImperialHeightIntoMillimeters(feetStr, inchesStr string) (*int64, error) {
+func parseImperialHeightIntoMillimeters(feetStr, inchesStr string) (*int, error) {
 	if feetStr == "" || inchesStr == "" {
 		return nil, nil
 	}
-	if feet, err := strconv.ParseInt(feetStr, 10, 64); err == nil {
-		if inches, err := strconv.ParseInt(inchesStr, 10, 64); err == nil {
+	if feet, err := strconv.ParseInt(feetStr, 10, 32); err == nil {
+		if inches, err := strconv.ParseInt(inchesStr, 10, 32); err == nil {
 			heightMm := convertHeightToMm(int(feet), int(inches))
 			return lo.ToPtr(heightMm), nil
 		} else {
@@ -45,26 +45,26 @@ func parseImperialHeightIntoMillimeters(feetStr, inchesStr string) (*int64, erro
 	return nil, katapp.NewErr(katapp.ErrInvalidInput, "Invalid feet value")
 }
 
-func parseMetricWeightIntoGrams(str string) (*int64, error) {
+func parseMetricWeightIntoGrams(str string) (*int, error) {
 	if str == "" {
 		return nil, nil
 	}
-	if weightKg, err := strconv.ParseFloat(str, 64); err == nil {
+	if weightKg, err := strconv.ParseFloat(str, 32); err == nil {
 		// Convert kg to grams (multiply by 1000) and round to nearest gram
-		weightGrams := int64(weightKg*1000 + 0.5)
+		weightGrams := int(weightKg*1000 + 0.5)
 		return &weightGrams, nil
 	}
 	return nil, katapp.NewErr(katapp.ErrInvalidInput, "Invalid weight value")
 }
 
-func parseImperialWeightIntoGrams(str string) (*int64, error) {
+func parseImperialWeightIntoGrams(str string) (*int, error) {
 	if str == "" {
 		return nil, nil
 	}
-	if weightLbs, err := strconv.ParseFloat(str, 64); err == nil {
+	if weightLbs, err := strconv.ParseFloat(str, 32); err == nil {
 		// Convert lbs to kg, then to grams
 		weightKg := weightLbs / 2.20462
-		weightGrams := int64(weightKg*1000 + 0.5) // Add 0.5 for proper rounding
+		weightGrams := int(weightKg*1000 + 0.5) // Add 0.5 for proper rounding
 		return &weightGrams, nil
 	}
 	return nil, katapp.NewErr(katapp.ErrInvalidInput, "Invalid weight value")

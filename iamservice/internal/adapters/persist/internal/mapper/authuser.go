@@ -4,7 +4,6 @@ import (
 	"github.com/mobiletoly/gokatana-samples/iamservice/internal/core/model"
 	"time"
 
-	"github.com/go-openapi/strfmt"
 	"github.com/mobiletoly/gokatana-samples/iamservice/internal/adapters/persist/internal/repo"
 	"github.com/mobiletoly/gokatana-samples/iamservice/internal/core/swagger"
 )
@@ -56,11 +55,11 @@ func TenantEntityToTenantModel(entity *repo.TenantEntity) *model.Tenant {
 // TenantModelToTenantResponse converts model.Tenant to swagger.TenantResponse
 func TenantModelToTenantResponse(tenant *model.Tenant) *swagger.TenantResponse {
 	return swagger.NewTenantResponseBuilder().
-		CreatedAt(strfmt.DateTime(tenant.CreatedAt)).
+		CreatedAt(tenant.CreatedAt).
 		Description(tenant.Description).
-		ID(tenant.ID).
+		Id(tenant.ID).
 		Name(tenant.Name).
-		UpdatedAt(strfmt.DateTime(tenant.UpdatedAt)).
+		UpdatedAt(tenant.UpdatedAt).
 		Build()
 }
 
@@ -68,7 +67,7 @@ func TenantModelToTenantResponse(tenant *model.Tenant) *swagger.TenantResponse {
 func TenantCreateRequestToTenantEntity(req *swagger.TenantCreateRequest) *repo.TenantEntity {
 	now := time.Now()
 	return repo.NewTenantEntityBuilder().
-		ID(req.ID).
+		ID(req.Id).
 		Name(req.Name).
 		Description(req.Description).
 		CreatedAt(now).
@@ -106,37 +105,4 @@ func UserProfileEntityToUserProfileModel(entity *repo.UserProfileEntity) *model.
 		CreatedAt(entity.CreatedAt).
 		UpdatedAt(entity.UpdatedAt).
 		Build()
-}
-
-// UserProfileModelToUserProfileResponse converts model.UserProfile to swagger.UserProfile
-func UserProfileModelToUserProfileResponse(profile *model.UserProfile) *swagger.UserProfile {
-	var birthDate *strfmt.Date
-	if profile.BirthDate != nil {
-		// Parse the date string and convert to strfmt.Date
-		if parsedTime, err := time.Parse("2006-01-02", *profile.BirthDate); err == nil {
-			date := strfmt.Date(parsedTime)
-			birthDate = &date
-		}
-	}
-
-	return swagger.NewUserProfileBuilder().
-		BirthDate(birthDate).
-		CreatedAt(strfmt.DateTime(profile.CreatedAt)).
-		Gender(profile.Gender).
-		Height(convertIntPtrToInt64Ptr(profile.Height)).
-		ID(int64(profile.ID)).
-		IsMetric(profile.IsMetric).
-		UpdatedAt(strfmt.DateTime(profile.UpdatedAt)).
-		UserID(profile.UserID).
-		Weight(convertIntPtrToInt64Ptr(profile.Weight)).
-		Build()
-}
-
-// Helper function to convert *int to *int64
-func convertIntPtrToInt64Ptr(intPtr *int) *int64 {
-	if intPtr == nil {
-		return nil
-	}
-	val := int64(*intPtr)
-	return &val
 }

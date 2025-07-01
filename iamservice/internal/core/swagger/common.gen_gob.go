@@ -14,7 +14,7 @@ type PaginationInfo_Builder_Page struct {
 	root *PaginationInfo
 }
 
-func (b PaginationInfo_Builder_Limit) Limit(arg int64) PaginationInfo_Builder_Page {
+func (b PaginationInfo_Builder_Limit) Limit(arg int) PaginationInfo_Builder_Page {
 	b.root.Limit = arg
 	return PaginationInfo_Builder_Page{root: b.root}
 }
@@ -23,7 +23,7 @@ type PaginationInfo_Builder_Total struct {
 	root *PaginationInfo
 }
 
-func (b PaginationInfo_Builder_Page) Page(arg int64) PaginationInfo_Builder_Total {
+func (b PaginationInfo_Builder_Page) Page(arg int) PaginationInfo_Builder_Total {
 	b.root.Page = arg
 	return PaginationInfo_Builder_Total{root: b.root}
 }
@@ -32,7 +32,7 @@ type PaginationInfo_Builder_TotalPages struct {
 	root *PaginationInfo
 }
 
-func (b PaginationInfo_Builder_Total) Total(arg int64) PaginationInfo_Builder_TotalPages {
+func (b PaginationInfo_Builder_Total) Total(arg int) PaginationInfo_Builder_TotalPages {
 	b.root.Total = arg
 	return PaginationInfo_Builder_TotalPages{root: b.root}
 }
@@ -41,7 +41,7 @@ type PaginationInfo_Builder_GobFinalizer struct {
 	root *PaginationInfo
 }
 
-func (b PaginationInfo_Builder_TotalPages) TotalPages(arg int64) PaginationInfo_Builder_GobFinalizer {
+func (b PaginationInfo_Builder_TotalPages) TotalPages(arg int) PaginationInfo_Builder_GobFinalizer {
 	b.root.TotalPages = arg
 	return PaginationInfo_Builder_GobFinalizer{root: b.root}
 }

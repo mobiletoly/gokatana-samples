@@ -173,7 +173,7 @@ func UserEditForm(user *swagger.AuthUserResponse) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = common.PageHeader("Edit User Details", common.BackButton("/web/admin/users/"+user.ID, "Back to User")).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = common.PageHeader("Edit User Details", common.BackButton("/web/admin/users/"+user.Id, "Back to User")).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -219,7 +219,7 @@ func UserEditFormContent(user *swagger.AuthUserResponse) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var6 string
-		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs("/web/admin/users/" + user.ID)
+		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs("/web/admin/users/" + user.Id)
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/admin/user_form.templ`, Line: 48, Col: 40}
 		}
@@ -266,7 +266,7 @@ func UserEditFormContent(user *swagger.AuthUserResponse) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var9 templ.SafeURL
-		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL("/web/admin/users/" + user.ID))
+		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL("/web/admin/users/" + user.Id))
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/admin/user_form.templ`, Line: 84, Col: 51}
 		}
@@ -279,7 +279,7 @@ func UserEditFormContent(user *swagger.AuthUserResponse) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var10 string
-		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs("/web/admin/users/" + user.ID)
+		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs("/web/admin/users/" + user.Id)
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/admin/user_form.templ`, Line: 86, Col: 42}
 		}
@@ -320,7 +320,7 @@ func UserChangePasswordForm(user *swagger.AuthUserResponse) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = common.PageHeader("Change Password", common.BackButton("/web/admin/users/"+user.ID, "Back to User")).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = common.PageHeader("Change Password", common.BackButton("/web/admin/users/"+user.Id, "Back to User")).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -366,7 +366,7 @@ func UserChangePasswordFormContent(user *swagger.AuthUserResponse) templ.Compone
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var13 string
-		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs("/web/admin/users/" + user.ID + "/change-password")
+		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs("/web/admin/users/" + user.Id + "/change-password")
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/admin/user_form.templ`, Line: 106, Col: 62}
 		}
@@ -426,7 +426,7 @@ func UserChangePasswordFormContent(user *swagger.AuthUserResponse) templ.Compone
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var17 templ.SafeURL
-		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL("/web/admin/users/" + user.ID))
+		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL("/web/admin/users/" + user.Id))
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/admin/user_form.templ`, Line: 162, Col: 51}
 		}
@@ -439,7 +439,7 @@ func UserChangePasswordFormContent(user *swagger.AuthUserResponse) templ.Compone
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var18 string
-		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs("/web/admin/users/" + user.ID)
+		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs("/web/admin/users/" + user.Id)
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/admin/user_form.templ`, Line: 164, Col: 42}
 		}

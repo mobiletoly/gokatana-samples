@@ -15,7 +15,7 @@ import (
 	"time"
 )
 
-func UsersListWithTenantSelector(users []*swagger.AuthUserResponse, tenants []*swagger.TenantResponse, selectedTenantID string, isSysadmin bool, canCreateUsers bool) templ.Component {
+func UsersListWithTenantSelector(users []swagger.AuthUserResponse, tenants []swagger.TenantResponse, selectedTenantID string, isSysadmin bool, canCreateUsers bool) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -56,13 +56,13 @@ func UsersListWithTenantSelector(users []*swagger.AuthUserResponse, tenants []*s
 				return templ_7745c5c3_Err
 			}
 			for _, tenant := range tenants {
-				if tenant.ID == selectedTenantID {
+				if tenant.Id == selectedTenantID {
 					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<option value=\"")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var2 string
-					templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(tenant.ID)
+					templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(tenant.Id)
 					if templ_7745c5c3_Err != nil {
 						return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/admin/users.templ`, Line: 35, Col: 33}
 					}
@@ -88,7 +88,7 @@ func UsersListWithTenantSelector(users []*swagger.AuthUserResponse, tenants []*s
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var4 string
-					templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(tenant.ID)
+					templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(tenant.Id)
 					if templ_7745c5c3_Err != nil {
 						return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/admin/users.templ`, Line: 35, Col: 73}
 					}
@@ -106,7 +106,7 @@ func UsersListWithTenantSelector(users []*swagger.AuthUserResponse, tenants []*s
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var5 string
-					templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(tenant.ID)
+					templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(tenant.Id)
 					if templ_7745c5c3_Err != nil {
 						return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/admin/users.templ`, Line: 37, Col: 33}
 					}
@@ -132,7 +132,7 @@ func UsersListWithTenantSelector(users []*swagger.AuthUserResponse, tenants []*s
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var7 string
-					templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(tenant.ID)
+					templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(tenant.Id)
 					if templ_7745c5c3_Err != nil {
 						return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/admin/users.templ`, Line: 37, Col: 64}
 					}
@@ -167,7 +167,7 @@ func UsersListWithTenantSelector(users []*swagger.AuthUserResponse, tenants []*s
 	})
 }
 
-func UsersList(users []*swagger.AuthUserResponse, canCreateUsers bool) templ.Component {
+func UsersList(users []swagger.AuthUserResponse, canCreateUsers bool) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -214,7 +214,7 @@ func UsersList(users []*swagger.AuthUserResponse, canCreateUsers bool) templ.Com
 	})
 }
 
-func UsersListContent(users []*swagger.AuthUserResponse, canCreateUsers bool) templ.Component {
+func UsersListContent(users []swagger.AuthUserResponse, canCreateUsers bool) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -268,7 +268,7 @@ func UsersListContent(users []*swagger.AuthUserResponse, canCreateUsers bool) te
 	})
 }
 
-func UserCard(user *swagger.AuthUserResponse) templ.Component {
+func UserCard(user swagger.AuthUserResponse) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -294,7 +294,7 @@ func UserCard(user *swagger.AuthUserResponse) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var11 string
-		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs("user-" + user.ID)
+		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs("user-" + user.Id)
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/admin/users.templ`, Line: 93, Col: 140}
 		}
@@ -346,7 +346,7 @@ func UserCard(user *swagger.AuthUserResponse) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var15 string
-		templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(user.TenantID)
+		templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(user.TenantId)
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/admin/users.templ`, Line: 98, Col: 60}
 		}
@@ -359,7 +359,7 @@ func UserCard(user *swagger.AuthUserResponse) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var16 string
-		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(user.ID)
+		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(user.Id)
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/admin/users.templ`, Line: 99, Col: 50}
 		}
@@ -372,7 +372,7 @@ func UserCard(user *swagger.AuthUserResponse) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var17 templ.SafeURL
-		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL("/web/admin/users/" + user.ID))
+		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL("/web/admin/users/" + user.Id))
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/admin/users.templ`, Line: 109, Col: 51}
 		}
@@ -385,7 +385,7 @@ func UserCard(user *swagger.AuthUserResponse) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var18 string
-		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs("/web/admin/users/" + user.ID)
+		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs("/web/admin/users/" + user.Id)
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/admin/users.templ`, Line: 111, Col: 42}
 		}
@@ -398,7 +398,7 @@ func UserCard(user *swagger.AuthUserResponse) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var19 templ.SafeURL
-		templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL("/web/admin/users/" + user.ID + "/roles"))
+		templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL("/web/admin/users/" + user.Id + "/roles"))
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/admin/users.templ`, Line: 122, Col: 62}
 		}
@@ -411,7 +411,7 @@ func UserCard(user *swagger.AuthUserResponse) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var20 string
-		templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs("/web/admin/users/" + user.ID + "/roles")
+		templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs("/web/admin/users/" + user.Id + "/roles")
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/admin/users.templ`, Line: 124, Col: 53}
 		}
@@ -424,7 +424,7 @@ func UserCard(user *swagger.AuthUserResponse) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var21 string
-		templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs("/web/admin/users/" + user.ID)
+		templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs("/web/admin/users/" + user.Id)
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/admin/users.templ`, Line: 135, Col: 45}
 		}
@@ -437,7 +437,7 @@ func UserCard(user *swagger.AuthUserResponse) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var22 string
-		templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs("#user-" + user.ID)
+		templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs("#user-" + user.Id)
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/admin/users.templ`, Line: 136, Col: 34}
 		}
@@ -557,7 +557,7 @@ func UserDetail(user *swagger.AuthUserResponse, roles []string, canManageUsers b
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var30 string
-		templ_7745c5c3_Var30, templ_7745c5c3_Err = templ.JoinStringErrs(user.TenantID)
+		templ_7745c5c3_Var30, templ_7745c5c3_Err = templ.JoinStringErrs(user.TenantId)
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/admin/users.templ`, Line: 196, Col: 78}
 		}
@@ -570,7 +570,7 @@ func UserDetail(user *swagger.AuthUserResponse, roles []string, canManageUsers b
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var31 string
-		templ_7745c5c3_Var31, templ_7745c5c3_Err = templ.JoinStringErrs(user.ID)
+		templ_7745c5c3_Var31, templ_7745c5c3_Err = templ.JoinStringErrs(user.Id)
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/admin/users.templ`, Line: 200, Col: 72}
 		}
@@ -647,7 +647,7 @@ func UserDetail(user *swagger.AuthUserResponse, roles []string, canManageUsers b
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var35 templ.SafeURL
-		templ_7745c5c3_Var35, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL("/web/admin/users/" + user.ID + "/edit"))
+		templ_7745c5c3_Var35, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL("/web/admin/users/" + user.Id + "/edit"))
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/admin/users.templ`, Line: 231, Col: 63}
 		}
@@ -660,7 +660,7 @@ func UserDetail(user *swagger.AuthUserResponse, roles []string, canManageUsers b
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var36 string
-		templ_7745c5c3_Var36, templ_7745c5c3_Err = templ.JoinStringErrs("/web/admin/users/" + user.ID + "/edit")
+		templ_7745c5c3_Var36, templ_7745c5c3_Err = templ.JoinStringErrs("/web/admin/users/" + user.Id + "/edit")
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/admin/users.templ`, Line: 233, Col: 54}
 		}
@@ -673,7 +673,7 @@ func UserDetail(user *swagger.AuthUserResponse, roles []string, canManageUsers b
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var37 templ.SafeURL
-		templ_7745c5c3_Var37, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL("/web/admin/users/" + user.ID + "/change-password"))
+		templ_7745c5c3_Var37, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL("/web/admin/users/" + user.Id + "/change-password"))
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/admin/users.templ`, Line: 243, Col: 74}
 		}
@@ -686,7 +686,7 @@ func UserDetail(user *swagger.AuthUserResponse, roles []string, canManageUsers b
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var38 string
-		templ_7745c5c3_Var38, templ_7745c5c3_Err = templ.JoinStringErrs("/web/admin/users/" + user.ID + "/change-password")
+		templ_7745c5c3_Var38, templ_7745c5c3_Err = templ.JoinStringErrs("/web/admin/users/" + user.Id + "/change-password")
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/admin/users.templ`, Line: 245, Col: 65}
 		}
@@ -704,7 +704,7 @@ func UserDetail(user *swagger.AuthUserResponse, roles []string, canManageUsers b
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var39 templ.SafeURL
-			templ_7745c5c3_Var39, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL("/web/admin/users/" + user.ID + "/roles"))
+			templ_7745c5c3_Var39, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL("/web/admin/users/" + user.Id + "/roles"))
 			if templ_7745c5c3_Err != nil {
 				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/admin/users.templ`, Line: 256, Col: 65}
 			}
@@ -717,7 +717,7 @@ func UserDetail(user *swagger.AuthUserResponse, roles []string, canManageUsers b
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var40 string
-			templ_7745c5c3_Var40, templ_7745c5c3_Err = templ.JoinStringErrs("/web/admin/users/" + user.ID + "/roles")
+			templ_7745c5c3_Var40, templ_7745c5c3_Err = templ.JoinStringErrs("/web/admin/users/" + user.Id + "/roles")
 			if templ_7745c5c3_Err != nil {
 				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/admin/users.templ`, Line: 258, Col: 56}
 			}
@@ -730,7 +730,7 @@ func UserDetail(user *swagger.AuthUserResponse, roles []string, canManageUsers b
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var41 string
-			templ_7745c5c3_Var41, templ_7745c5c3_Err = templ.JoinStringErrs("/web/admin/users/" + user.ID)
+			templ_7745c5c3_Var41, templ_7745c5c3_Err = templ.JoinStringErrs("/web/admin/users/" + user.Id)
 			if templ_7745c5c3_Err != nil {
 				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/admin/users.templ`, Line: 269, Col: 48}
 			}

@@ -1,10 +1,10 @@
 package intgr_test
 
 import (
+	"github.com/oapi-codegen/runtime/types"
+	"github.com/samber/lo"
 	"time"
 
-	"github.com/go-openapi/strfmt"
-	"github.com/go-openapi/swag"
 	"github.com/mobiletoly/gokatana-samples/iamservice/internal/core/swagger"
 	"github.com/mobiletoly/gokatana/kathttpc"
 	"github.com/stretchr/testify/assert"
@@ -20,7 +20,7 @@ func runUserManagementTests(t *testing.T, env *TestEnvironment) {
 		sysadminSigninReq := &swagger.SigninRequest{
 			Email:    "john.doe.sysadmin@example.com",
 			Password: "qazwsxedc",
-			TenantID: "default-tenant",
+			TenantId: "default-tenant",
 		}
 		sysadminAuthResp, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.SigninRequest, swagger.AuthResponse](
 			ctx, &appConfig.Server, "api/v1/auth/signin", nil, sysadminSigninReq)
@@ -35,7 +35,7 @@ func runUserManagementTests(t *testing.T, env *TestEnvironment) {
 		adminSigninReq := &swagger.SigninRequest{
 			Email:    "testadmin@example.com",
 			Password: "qazwsxedc",
-			TenantID: "default-tenant",
+			TenantId: "default-tenant",
 		}
 		adminAuthResp, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.SigninRequest, swagger.AuthResponse](
 			ctx, &appConfig.Server, "api/v1/auth/signin", nil, adminSigninReq)
@@ -50,7 +50,7 @@ func runUserManagementTests(t *testing.T, env *TestEnvironment) {
 		userSigninReq := &swagger.SigninRequest{
 			Email:    "testuser@example.com",
 			Password: "qazwsxedc",
-			TenantID: "default-tenant",
+			TenantId: "default-tenant",
 		}
 		userAuthResp, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.SigninRequest, swagger.AuthResponse](
 			ctx, &appConfig.Server, "api/v1/auth/signin", nil, userSigninReq)
@@ -71,7 +71,7 @@ func runUserManagementTests(t *testing.T, env *TestEnvironment) {
 				// loop through users and check that users are from at least 2 different tenants
 				tenants := make(map[string]bool)
 				for _, user := range userListResp.Users {
-					tenants[user.TenantID] = true
+					tenants[user.TenantId] = true
 				}
 				assert.GreaterOrEqual(t, len(tenants), 2)
 			})
@@ -124,7 +124,7 @@ func runUserManagementTests(t *testing.T, env *TestEnvironment) {
 					ctx, &appConfig.Server, "api/v1/users/"+userID, adminHeaders)
 				assert.NoError(t, err)
 				assert.NotNil(t, authUserResponse)
-				assert.Equal(t, userID, authUserResponse.ID)
+				assert.Equal(t, userID, authUserResponse.Id)
 			})
 			t.Run("admin user must fail with 403 Forbidden for user from other tenant", func(t *testing.T) {
 				_, _, err := kathttpc.LocalHttpJsonGetRequest[swagger.AuthUserResponse](
@@ -136,7 +136,7 @@ func runUserManagementTests(t *testing.T, env *TestEnvironment) {
 					ctx, &appConfig.Server, "api/v1/users/"+userID, userHeaders)
 				assert.NoError(t, err)
 				assert.NotNil(t, authUserResponse)
-				assert.Equal(t, userID, authUserResponse.ID)
+				assert.Equal(t, userID, authUserResponse.Id)
 			})
 			t.Run("regular user must fail with 403 Forbidden for non-itself user", func(t *testing.T) {
 				_, _, err := kathttpc.LocalHttpJsonGetRequest[swagger.AuthUserResponse](
@@ -152,12 +152,12 @@ func runUserManagementTests(t *testing.T, env *TestEnvironment) {
 					ctx, &appConfig.Server, "api/v1/users/"+userID+"/profile", adminHeaders)
 				assert.NoError(t, err)
 				assert.NotNil(t, userProfile)
-				assert.Equal(t, userID, userProfile.UserID)
-				assert.Greater(t, userProfile.ID, int64(0))
+				assert.Equal(t, userID, userProfile.UserId)
+				assert.Greater(t, userProfile.Id, 0)
 				assert.NotNil(t, userProfile.CreatedAt)
 				assert.NotNil(t, userProfile.UpdatedAt)
-				assert.Equal(t, int64(175), *userProfile.Height)
-				assert.Equal(t, int64(70), *userProfile.Weight)
+				assert.Equal(t, 175, *userProfile.Height)
+				assert.Equal(t, 70, string(*userProfile.Weight))
 				assert.Equal(t, "male", *userProfile.Gender)
 				assert.Equal(t, "1990-01-15", userProfile.BirthDate.String())
 			})
@@ -168,11 +168,11 @@ func runUserManagementTests(t *testing.T, env *TestEnvironment) {
 			})
 			t.Run("regular user must succeed for itself", func(t *testing.T) {
 				userProfile, _, err := kathttpc.LocalHttpJsonGetRequest[swagger.UserProfile](
-					ctx, &appConfig.Server, "api/v1/users/"+userAuthResp.UserID+"/profile", userHeaders)
+					ctx, &appConfig.Server, "api/v1/users/"+userAuthResp.UserId+"/profile", userHeaders)
 				assert.NoError(t, err)
 				assert.NotNil(t, userProfile)
-				assert.Equal(t, userAuthResp.UserID, userProfile.UserID)
-				assert.Greater(t, userProfile.ID, int64(0))
+				assert.Equal(t, userAuthResp.UserId, userProfile.UserId)
+				assert.Greater(t, userProfile.Id, 0)
 				assert.NotNil(t, userProfile.CreatedAt)
 				assert.NotNil(t, userProfile.UpdatedAt)
 			})
@@ -193,26 +193,26 @@ func runUserManagementTests(t *testing.T, env *TestEnvironment) {
 			t.Run("admin user must succeed", func(t *testing.T) {
 				// Create update request
 				updateReq := swagger.UserProfileUpdateRequest{
-					Height:    swag.Int64(180),
-					Weight:    swag.Int64(75),
-					Gender:    swag.String("male"),
-					BirthDate: (*strfmt.Date)(swag.Time(time.Date(1990, 5, 15, 0, 0, 0, 0, time.UTC))),
+					Height:    lo.ToPtr(180),
+					Weight:    lo.ToPtr(75),
+					Gender:    lo.ToPtr("male"),
+					BirthDate: &types.Date{Time: time.Date(1990, 5, 15, 0, 0, 0, 0, time.UTC)},
 				}
 
 				updatedProfile, _, err := kathttpc.LocalHttpJsonPutRequest[swagger.UserProfileUpdateRequest, swagger.UserProfile](
 					ctx, &appConfig.Server, "api/v1/users/"+userID+"/profile", adminHeaders, &updateReq)
 				assert.NoError(t, err)
 				assert.NotNil(t, updatedProfile)
-				assert.Equal(t, userID, updatedProfile.UserID)
-				assert.Equal(t, int64(180), *updatedProfile.Height)
-				assert.Equal(t, int64(75), *updatedProfile.Weight)
-				assert.Equal(t, "male", *updatedProfile.Gender)
+				assert.Equal(t, userID, updatedProfile.UserId)
+				assert.Equal(t, 180, *updatedProfile.Height)
+				assert.Equal(t, 75, *updatedProfile.Weight)
+				assert.Equal(t, "male", string(*updatedProfile.Gender))
 				assert.NotNil(t, updatedProfile.BirthDate)
 				assert.NotNil(t, updatedProfile.UpdatedAt)
 			})
 			t.Run("admin user must fail with 403 Forbidden for user from other tenant", func(t *testing.T) {
 				updateReq := swagger.UserProfileUpdateRequest{
-					Height: swag.Int64(170),
+					Height: lo.ToPtr(170),
 				}
 				_, _, err := kathttpc.LocalHttpJsonPutRequest[swagger.UserProfileUpdateRequest, swagger.UserProfile](
 					ctx, &appConfig.Server, "api/v1/users/test-user-1/profile", adminHeaders, &updateReq)
@@ -220,22 +220,22 @@ func runUserManagementTests(t *testing.T, env *TestEnvironment) {
 			})
 			t.Run("regular user must succeed for own profile", func(t *testing.T) {
 				updateReq := swagger.UserProfileUpdateRequest{
-					Height: swag.Int64(170),
-					Weight: swag.Int64(65),
-					Gender: swag.String("female"),
+					Height: lo.ToPtr(170),
+					Weight: lo.ToPtr(65),
+					Gender: lo.ToPtr("female"),
 				}
 				updatedProfile, _, err := kathttpc.LocalHttpJsonPutRequest[swagger.UserProfileUpdateRequest, swagger.UserProfile](
-					ctx, &appConfig.Server, "api/v1/users/"+userAuthResp.UserID+"/profile", userHeaders, &updateReq)
+					ctx, &appConfig.Server, "api/v1/users/"+userAuthResp.UserId+"/profile", userHeaders, &updateReq)
 				assert.NoError(t, err)
 				assert.NotNil(t, updatedProfile)
-				assert.Equal(t, userAuthResp.UserID, updatedProfile.UserID)
-				assert.Equal(t, int64(170), *updatedProfile.Height)
-				assert.Equal(t, int64(65), *updatedProfile.Weight)
-				assert.Equal(t, "female", *updatedProfile.Gender)
+				assert.Equal(t, userAuthResp.UserId, updatedProfile.UserId)
+				assert.Equal(t, 170, *updatedProfile.Height)
+				assert.Equal(t, 65, *updatedProfile.Weight)
+				assert.Equal(t, "female", string(*updatedProfile.Gender))
 			})
 			t.Run("regular user must fail with 403 Forbidden for other user's profile", func(t *testing.T) {
 				updateReq := swagger.UserProfileUpdateRequest{
-					Height: swag.Int64(170),
+					Height: lo.ToPtr(170),
 				}
 				_, _, err := kathttpc.LocalHttpJsonPutRequest[swagger.UserProfileUpdateRequest, swagger.UserProfile](
 					ctx, &appConfig.Server, "api/v1/users/default-user-1/profile", userHeaders, &updateReq)
@@ -243,7 +243,7 @@ func runUserManagementTests(t *testing.T, env *TestEnvironment) {
 			})
 			t.Run("unauthenticated request must fail with 401 Unauthorized", func(t *testing.T) {
 				updateReq := swagger.UserProfileUpdateRequest{
-					Height: swag.Int64(170),
+					Height: lo.ToPtr(170),
 				}
 				_, _, err := kathttpc.LocalHttpJsonPutRequest[swagger.UserProfileUpdateRequest, swagger.UserProfile](
 					ctx, &appConfig.Server, "api/v1/users/"+userID+"/profile", nil, &updateReq)
@@ -252,8 +252,8 @@ func runUserManagementTests(t *testing.T, env *TestEnvironment) {
 			t.Run("update with null values must succeed", func(t *testing.T) {
 				// Clear gender field
 				updateReq := swagger.UserProfileUpdateRequest{
-					Height:    swag.Int64(175),
-					Weight:    swag.Int64(70),
+					Height:    lo.ToPtr(175),
+					Weight:    lo.ToPtr(70),
 					Gender:    nil, // This should clear the gender field
 					BirthDate: nil, // This should clear the birth date field
 				}
@@ -262,9 +262,9 @@ func runUserManagementTests(t *testing.T, env *TestEnvironment) {
 					ctx, &appConfig.Server, "api/v1/users/"+userID+"/profile", adminHeaders, &updateReq)
 				assert.NoError(t, err)
 				assert.NotNil(t, updatedProfile)
-				assert.Equal(t, userID, updatedProfile.UserID)
-				assert.Equal(t, int64(175), *updatedProfile.Height)
-				assert.Equal(t, int64(70), *updatedProfile.Weight)
+				assert.Equal(t, userID, updatedProfile.UserId)
+				assert.Equal(t, 175, *updatedProfile.Height)
+				assert.Equal(t, 70, *updatedProfile.Weight)
 				assert.Nil(t, updatedProfile.Gender)
 				assert.Nil(t, updatedProfile.BirthDate)
 			})
@@ -295,7 +295,7 @@ func runUserManagementTests(t *testing.T, env *TestEnvironment) {
 			})
 			t.Run("regular user must succeed for itself", func(t *testing.T) {
 				rolesResp, _, err := kathttpc.LocalHttpJsonGetRequest[swagger.UserRolesResponse](
-					ctx, &appConfig.Server, "api/v1/users/"+userAuthResp.UserID+"/roles", userHeaders)
+					ctx, &appConfig.Server, "api/v1/users/"+userAuthResp.UserId+"/roles", userHeaders)
 				assert.NoError(t, err)
 				assert.NotNil(t, rolesResp)
 				assert.Contains(t, rolesResp.Roles, "user")
@@ -390,7 +390,7 @@ func runUserManagementTests(t *testing.T, env *TestEnvironment) {
 		userSigninReq := &swagger.SigninRequest{
 			Email:    "testuser@example.com",
 			Password: "qazwsxedc",
-			TenantID: "default-tenant",
+			TenantId: "default-tenant",
 		}
 		userAuthResp, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.SigninRequest, swagger.AuthResponse](
 			ctx, &appConfig.Server, "api/v1/auth/signin", nil, userSigninReq)

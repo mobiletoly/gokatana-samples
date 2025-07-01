@@ -1,10 +1,12 @@
-swagger: '2.0'
+openapi: 3.0.3
 info:
   version: '1.0.0'
   title: 'IAMService User Authentication'
   description: 'User authentication APIs for IAMService application using auth_user table'
 
-basePath: '/api/v1/auth'
+servers:
+  - url: '/api/v1/auth'
+    description: Authentication API server
 
 paths:
   /signup:
@@ -12,23 +14,25 @@ paths:
       operationId: signUp
       summary: 'Sign up a new user'
       description: 'Register a new user with email and password (local mode)'
-      parameters:
-        - name: 'signupRequest'
-          in: 'body'
-          description: 'User signup information'
-          required: true
-          schema:
-            $ref: '#/definitions/SignupRequest'
+      requestBody:
+        description: 'User signup information'
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignupRequest'
       responses:
-        201:
+        '201':
           description: 'User successfully created, email confirmation required'
-          schema:
-            $ref: '#/definitions/SignupResponse'
-        400:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignupResponse'
+        '400':
           description: 'Invalid input data'
-        409:
+        '409':
           description: 'User already exists'
-        500:
+        '500':
           description: 'Internal server error'
 
   /signin:
@@ -36,23 +40,25 @@ paths:
       operationId: signIn
       summary: 'Sign in user'
       description: 'Authenticate user with email and password (local mode)'
-      parameters:
-        - name: 'signinRequest'
-          in: 'body'
-          description: 'User signin credentials'
-          required: true
-          schema:
-            $ref: '#/definitions/SigninRequest'
+      requestBody:
+        description: 'User signin credentials'
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SigninRequest'
       responses:
-        200:
+        '200':
           description: 'User successfully authenticated'
-          schema:
-            $ref: '#/definitions/AuthResponse'
-        400:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
           description: 'Invalid input data'
-        401:
+        '401':
           description: 'Invalid credentials'
-        500:
+        '500':
           description: 'Internal server error'
 
   /signout:
@@ -60,12 +66,10 @@ paths:
       operationId: signOut
       summary: 'Sign out user'
       description: 'Sign out the current user and invalidate session/token'
-      security:
-        - BearerAuth: []
       responses:
-        200:
+        '200':
           description: 'User successfully signed out'
-        401:
+        '401':
           description: 'Unauthorized - invalid or missing token'
 
   /refresh:
@@ -73,21 +77,23 @@ paths:
       operationId: refreshToken
       summary: 'Refresh authentication token'
       description: 'Refresh the authentication token using refresh token'
-      parameters:
-        - name: 'refreshRequest'
-          in: 'body'
-          description: 'Refresh token request'
-          required: true
-          schema:
-            $ref: '#/definitions/RefreshRequest'
+      requestBody:
+        description: 'Refresh token request'
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshRequest'
       responses:
-        200:
+        '200':
           description: 'Token refreshed successfully'
-          schema:
-            $ref: '#/definitions/AuthResponse'
-        400:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
           description: 'Invalid refresh token'
-        401:
+        '401':
           description: 'Refresh token expired or invalid'
 
   /confirm-email:
@@ -100,178 +106,174 @@ paths:
           in: 'query'
           description: 'User ID to confirm email for'
           required: true
-          type: string
+          schema:
+            type: string
         - name: 'code'
           in: 'query'
           description: 'Email confirmation code (6-digit for mobile, long token for web)'
           required: true
-          type: string
-      responses:
-        200:
-          description: 'Email confirmed successfully'
           schema:
-            $ref: '#/definitions/EmailConfirmationResponse'
-        400:
+            type: string
+      responses:
+        '200':
+          description: 'Email confirmed successfully'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmailConfirmationResponse'
+        '400':
           description: 'Invalid or expired code'
-        404:
+        '404':
           description: 'Code not found'
-        500:
+        '500':
           description: 'Internal server error'
 
-securityDefinitions:
-  BearerAuth:
-    type: apiKey
-    name: Authorization
-    in: header
-    description: 'Bearer token authentication. Format: Bearer {token}'
+components:
+  schemas:
+    SignupRequest:
+      type: object
+      description: 'Request payload for creating new auth_user record'
+      properties:
+        email:
+          type: string
+          nullable: false
+          example: 'user@example.com'
+          description: 'User email address (must be unique within tenant)'
+        password:
+          type: string
+          nullable: false
+          minLength: 8
+          example: 'SecurePassword123!'
+          description: 'User password (minimum 8 characters, will be hashed)'
+        firstName:
+          type: string
+          nullable: false
+          example: 'John'
+          description: 'User first name'
+        lastName:
+          type: string
+          nullable: false
+          example: 'Doe'
+          description: 'User last name'
+        tenantId:
+          type: string
+          nullable: false
+          example: 'acme-corp'
+          description: 'Tenant identifier for multi-tenant support'
+        source:
+          type: string
+          nullable: false
+          enum: ['web', 'android', 'ios']
+          example: 'web'
+          description: 'Platform source for customized email confirmation experience'
+      required:
+        - email
+        - password
+        - firstName
+        - lastName
+        - tenantId
+        - source
 
-definitions:
-  SignupRequest:
-    type: object
-    description: 'Request payload for creating new auth_user record'
-    properties:
-      email:
-        type: string
-        format: email
-        x-nullable: false
-        example: 'user@example.com'
-        description: 'User email address (must be unique within tenant)'
-      password:
-        type: string
-        x-nullable: false
-        minLength: 8
-        example: 'SecurePassword123!'
-        description: 'User password (minimum 8 characters, will be hashed)'
-      firstName:
-        type: string
-        x-nullable: false
-        example: 'John'
-        description: 'User first name'
-      lastName:
-        type: string
-        x-nullable: false
-        example: 'Doe'
-        description: 'User last name'
-      tenantId:
-        type: string
-        x-nullable: false
-        example: 'acme-corp'
-        description: 'Tenant identifier for multi-tenant support'
-      source:
-        type: string
-        x-nullable: false
-        enum: ['web', 'android', 'ios']
-        example: 'web'
-        description: 'Platform source for customized email confirmation experience'
-    required:
-      - email
-      - password
-      - firstName
-      - lastName
-      - tenantId
-      - source
+    SigninRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          nullable: false
+          example: 'user@example.com'
+          description: 'User email address'
+        password:
+          type: string
+          nullable: false
+          example: 'SecurePassword123!'
+          description: 'User password'
+        tenantId:
+          type: string
+          nullable: false
+          example: 'acme-corp'
+          description: 'Tenant identifier for multi-tenant support'
+      required:
+        - email
+        - password
+        - tenantId
 
-  SigninRequest:
-    type: object
-    properties:
-      email:
-        type: string
-        x-nullable: false
-        format: email
-        example: 'user@example.com'
-        description: 'User email address'
-      password:
-        type: string
-        x-nullable: false
-        example: 'SecurePassword123!'
-        description: 'User password'
-      tenantId:
-        type: string
-        x-nullable: false
-        example: 'acme-corp'
-        description: 'Tenant identifier for multi-tenant support'
-    required:
-      - email
-      - password
-      - tenantId
+    RefreshRequest:
+      type: object
+      properties:
+        refreshToken:
+          type: string
+          nullable: false
+          example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
+          description: 'Refresh token'
+      required:
+        - refreshToken
 
-  RefreshRequest:
-    type: object
-    properties:
-      refreshToken:
-        type: string
-        x-nullable: false
-        example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
-        description: 'Refresh token'
-    required:
-      - refreshToken
+    SignupResponse:
+      type: object
+      description: 'Response after successful user signup indicating email confirmation is required'
+      properties:
+        message:
+          type: string
+          nullable: false
+          description: 'Success message'
+          example: 'User account created successfully. Please check your email to confirm your account.'
+        email:
+          type: string
+          nullable: false
+          description: 'Email address where confirmation was sent'
+        userId:
+          type: string
+          nullable: false
+          description: 'ID of the created user'
+      required:
+        - message
+        - email
+        - userId
 
-  SignupResponse:
-    type: object
-    description: 'Response after successful user signup indicating email confirmation is required'
-    properties:
-      message:
-        type: string
-        x-nullable: false
-        description: 'Success message'
-        example: 'User account created successfully. Please check your email to confirm your account.'
-      email:
-        type: string
-        x-nullable: false
-        format: email
-        description: 'Email address where confirmation was sent'
-      userId:
-        type: string
-        x-nullable: false
-        description: 'ID of the created user'
-    required:
-      - message
-      - email
-      - userId
+    EmailConfirmationResponse:
+      type: object
+      description: 'Response after successful email confirmation'
+      properties:
+        message:
+          type: string
+          nullable: false
+          description: 'Success message'
+          example: 'Email confirmed successfully'
+      required:
+        - message
 
-  EmailConfirmationResponse:
-    type: object
-    description: 'Response after successful email confirmation'
-    properties:
-      message:
-        type: string
-        x-nullable: false
-        description: 'Success message'
-        example: 'Email confirmed successfully'
-    required:
-      - message
-
-  AuthResponse:
-    type: object
-    properties:
-      accessToken:
-        type: string
-        x-nullable: false
-        example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
-        description: 'JWT access token'
-      refreshToken:
-        type: string
-        x-nullable: false
-        example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
-        description: 'JWT refresh token'
-      tokenType:
-        type: string
-        x-nullable: false
-        example: 'Bearer'
-        description: 'Token type'
-      expiresIn:
-        type: integer
-        x-nullable: false
-        example: 3600
-        description: 'Token expiration time in seconds'
-      userId:
-        type: string
-        x-nullable: false
-        example: 'uuid-123-456-789'
-        description: 'User unique identifier'
-    required:
-      - accessToken
-      - refreshToken
-      - tokenType
-      - expiresIn
-      - userId
+    AuthResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          nullable: false
+          example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
+          description: 'JWT access token'
+        refreshToken:
+          type: string
+          nullable: false
+          example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
+          description: 'JWT refresh token'
+        tokenType:
+          type: string
+          nullable: false
+          example: 'Bearer'
+          description: 'Token type'
+        expiresIn:
+          type: integer
+          format: int64
+          nullable: false
+          example: 3600
+          description: 'Token expiration time in seconds'
+        userId:
+          type: string
+          nullable: false
+          example: 'uuid-123-456-789'
+          description: 'User unique identifier'
+      required:
+        - accessToken
+        - refreshToken
+        - tokenType
+        - expiresIn
+        - userId

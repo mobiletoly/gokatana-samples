@@ -153,7 +153,7 @@ func MobileConfirmation(data *MobileConfirmationData) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, " because you signed up for a IAMService account.</p><p>If you have any questions, please contact our support team.</p><p>© 2024 IAMService Corp. All rights reserved.</p></div></div></body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, " because you signed up for a IAMService account.</p><p>If you have any questions, please contact our support team.</p><p>© 2025 IAMService. All rights reserved.</p></div></div></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

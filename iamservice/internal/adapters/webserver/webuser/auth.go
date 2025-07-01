@@ -1,7 +1,6 @@
 package webuser
 
 import (
-	"github.com/go-openapi/strfmt"
 	"github.com/labstack/echo/v4"
 	"github.com/mobiletoly/gokatana-samples/iamservice/internal/adapters/webserver/mw"
 	"github.com/mobiletoly/gokatana-samples/iamservice/internal/core/swagger"
@@ -55,9 +54,9 @@ func (a *AuthWebHandlers) SignInSubmitHandler(c echo.Context) error {
 	email := strings.TrimSpace(c.FormValue("email"))
 	password := strings.TrimSpace(c.FormValue("password"))
 	signinReq := &swagger.SigninRequest{
-		Email:    strfmt.Email(email),
+		Email:    email,
 		Password: password,
-		TenantID: tenantId,
+		TenantId: tenantId,
 	}
 	authResp, err := a.authMgm.SignIn(ctx, signinReq)
 	if err != nil {
@@ -87,10 +86,10 @@ func (a *AuthWebHandlers) SignUpSubmitHandler(c echo.Context) error {
 	password := strings.TrimSpace(c.FormValue("password"))
 
 	signupReq := &swagger.SignupRequest{
-		TenantID:  tenantId,
+		TenantId:  tenantId,
 		FirstName: firstName,
 		LastName:  lastName,
-		Email:     strfmt.Email(email),
+		Email:     email,
 		Password:  password,
 		Source:    "web",
 	}

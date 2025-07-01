@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-templ UsersListWithTenantSelector(users []*swagger.AuthUserResponse, tenants []*swagger.TenantResponse, selectedTenantID string, isSysadmin bool, canCreateUsers bool) {
+templ UsersListWithTenantSelector(users []swagger.AuthUserResponse, tenants []swagger.TenantResponse, selectedTenantID string, isSysadmin bool, canCreateUsers bool) {
 	<div class="space-y-6">
 		<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
 			<h2 class="text-2xl font-bold text-gray-900">Users</h2>
@@ -31,10 +31,10 @@ templ UsersListWithTenantSelector(users []*swagger.AuthUserResponse, tenants []*
 						hx-include="this"
 					>
 						for _, tenant := range tenants {
-							if tenant.ID == selectedTenantID {
-								<option value={ tenant.ID } selected>{ tenant.Name } ({ tenant.ID })</option>
+							if tenant.Id == selectedTenantID {
+								<option value={ tenant.Id } selected>{ tenant.Name } ({ tenant.Id })</option>
 							} else {
-								<option value={ tenant.ID }>{ tenant.Name } ({ tenant.ID })</option>
+								<option value={ tenant.Id }>{ tenant.Name } ({ tenant.Id })</option>
 							}
 						}
 					</select>
@@ -47,7 +47,7 @@ templ UsersListWithTenantSelector(users []*swagger.AuthUserResponse, tenants []*
 	</div>
 }
 
-templ UsersList(users []*swagger.AuthUserResponse, canCreateUsers bool) {
+templ UsersList(users []swagger.AuthUserResponse, canCreateUsers bool) {
 	<div class="space-y-6">
 		<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
 			<h2 class="text-2xl font-bold text-gray-900">Users</h2>
@@ -72,7 +72,7 @@ templ UsersList(users []*swagger.AuthUserResponse, canCreateUsers bool) {
 	</div>
 }
 
-templ UsersListContent(users []*swagger.AuthUserResponse, canCreateUsers bool) {
+templ UsersListContent(users []swagger.AuthUserResponse, canCreateUsers bool) {
 	if len(users) == 0 {
 		if canCreateUsers {
 			@common.EmptyState("users", "No users", "Get started by creating your first user.",
@@ -89,14 +89,14 @@ templ UsersListContent(users []*swagger.AuthUserResponse, canCreateUsers bool) {
 	}
 }
 
-templ UserCard(user *swagger.AuthUserResponse) {
-	<div class="bg-white border border-gray-200 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow duration-200" id={ "user-" + user.ID }>
+templ UserCard(user swagger.AuthUserResponse) {
+	<div class="bg-white border border-gray-200 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow duration-200" id={ "user-" + user.Id }>
 		<div class="flex items-center justify-between">
 			<div>
 				<h3 class="text-lg font-medium text-gray-900">{ user.FirstName } { user.LastName }</h3>
 				<p class="text-sm text-gray-500">{ string(user.Email) }</p>
-				<p class="text-xs text-gray-400">Tenant: { user.TenantID }</p>
-				<p class="text-xs text-gray-400">ID: { user.ID }</p>
+				<p class="text-xs text-gray-400">Tenant: { user.TenantId }</p>
+				<p class="text-xs text-gray-400">ID: { user.Id }</p>
 			</div>
 			<div class="flex items-center space-x-2">
 				<svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -106,9 +106,9 @@ templ UserCard(user *swagger.AuthUserResponse) {
 		</div>
 		<div class="mt-4 flex flex-col sm:flex-row sm:space-x-3 space-y-2 sm:space-y-0">
 			<a
-				href={ templ.URL("/web/admin/users/" + user.ID) }
+				href={ templ.URL("/web/admin/users/" + user.Id) }
 				class="inline-flex items-center justify-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
-				hx-get={ "/web/admin/users/" + user.ID }
+				hx-get={ "/web/admin/users/" + user.Id }
 				hx-target="#content"
 				hx-push-url="true"
 			>
@@ -119,9 +119,9 @@ templ UserCard(user *swagger.AuthUserResponse) {
 				View Details
 			</a>
 			<a
-				href={ templ.URL("/web/admin/users/" + user.ID + "/roles") }
+				href={ templ.URL("/web/admin/users/" + user.Id + "/roles") }
 				class="inline-flex items-center justify-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
-				hx-get={ "/web/admin/users/" + user.ID + "/roles" }
+				hx-get={ "/web/admin/users/" + user.Id + "/roles" }
 				hx-target="#content"
 				hx-push-url="true"
 			>
@@ -132,8 +132,8 @@ templ UserCard(user *swagger.AuthUserResponse) {
 			</a>
 			<button
 				class="inline-flex items-center justify-center px-3 py-2 border border-red-300 shadow-sm text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200"
-				hx-delete={ "/web/admin/users/" + user.ID }
-				hx-target={ "#user-" + user.ID }
+				hx-delete={ "/web/admin/users/" + user.Id }
+				hx-target={ "#user-" + user.Id }
 				hx-swap="outerHTML"
 				hx-confirm="Are you sure you want to delete this user?"
 			>
@@ -193,11 +193,11 @@ templ UserDetail(user *swagger.AuthUserResponse, roles []string, canManageUsers 
 					</div>
 					<div>
 						<dt class="text-sm font-medium text-gray-500">Tenant ID</dt>
-						<dd class="mt-1 text-sm text-gray-900 font-mono text-xs">{ user.TenantID }</dd>
+						<dd class="mt-1 text-sm text-gray-900 font-mono text-xs">{ user.TenantId }</dd>
 					</div>
 					<div>
 						<dt class="text-sm font-medium text-gray-500">User ID</dt>
-						<dd class="mt-1 text-sm text-gray-900 font-mono text-xs">{ user.ID }</dd>
+						<dd class="mt-1 text-sm text-gray-900 font-mono text-xs">{ user.Id }</dd>
 					</div>
 					<div>
 						<dt class="text-sm font-medium text-gray-500">Roles</dt>
@@ -228,9 +228,9 @@ templ UserDetail(user *swagger.AuthUserResponse, roles []string, canManageUsers 
 			<div class="px-6 py-4 bg-gray-50 border-t border-gray-200">
 				<div class="flex flex-wrap gap-3">
 					<a
-						href={ templ.URL("/web/admin/users/" + user.ID + "/edit") }
+						href={ templ.URL("/web/admin/users/" + user.Id + "/edit") }
 						class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
-						hx-get={ "/web/admin/users/" + user.ID + "/edit" }
+						hx-get={ "/web/admin/users/" + user.Id + "/edit" }
 						hx-target="#content"
 						hx-push-url="true"
 					>
@@ -240,9 +240,9 @@ templ UserDetail(user *swagger.AuthUserResponse, roles []string, canManageUsers 
 						Edit Details
 					</a>
 					<a
-						href={ templ.URL("/web/admin/users/" + user.ID + "/change-password") }
+						href={ templ.URL("/web/admin/users/" + user.Id + "/change-password") }
 						class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
-						hx-get={ "/web/admin/users/" + user.ID + "/change-password" }
+						hx-get={ "/web/admin/users/" + user.Id + "/change-password" }
 						hx-target="#content"
 						hx-push-url="true"
 					>
@@ -253,9 +253,9 @@ templ UserDetail(user *swagger.AuthUserResponse, roles []string, canManageUsers 
 					</a>
 					if canManageUsers {
 						<a
-							href={ templ.URL("/web/admin/users/" + user.ID + "/roles") }
+							href={ templ.URL("/web/admin/users/" + user.Id + "/roles") }
 							class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
-							hx-get={ "/web/admin/users/" + user.ID + "/roles" }
+							hx-get={ "/web/admin/users/" + user.Id + "/roles" }
 							hx-target="#content"
 							hx-push-url="true"
 						>
@@ -266,7 +266,7 @@ templ UserDetail(user *swagger.AuthUserResponse, roles []string, canManageUsers 
 						</a>
 						<button
 							class="inline-flex items-center px-4 py-2 border border-red-300 shadow-sm text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200"
-							hx-delete={ "/web/admin/users/" + user.ID }
+							hx-delete={ "/web/admin/users/" + user.Id }
 							hx-target="#content"
 							hx-confirm="Are you sure you want to delete this user?"
 							hx-get="/web/admin/users"

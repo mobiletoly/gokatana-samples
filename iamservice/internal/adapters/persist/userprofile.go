@@ -93,16 +93,15 @@ func (a *UserProfileAdapter) UpdateUserProfile(ctx context.Context, tx pgx.Tx, u
 		height = &h
 	}
 	if req.Weight != nil {
-		w := int(*req.Weight)
+		w := *req.Weight
 		weight = &w
 	}
 	if req.Gender != nil {
 		gender = req.Gender
 	}
 	if req.BirthDate != nil {
-		// Convert strfmt.Date to time.Time
-		parsedTime := time.Time(*req.BirthDate)
-		birthDate = &parsedTime
+		parsedTime := *req.BirthDate
+		birthDate = &parsedTime.Time
 	}
 	if req.IsMetric != nil {
 		isMetric = *req.IsMetric

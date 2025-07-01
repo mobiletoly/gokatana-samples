@@ -37,7 +37,7 @@ templ UserFormSuccess(userName string) {
 
 templ UserEditForm(user *swagger.AuthUserResponse) {
 	<div class="space-y-6">
-		@common.PageHeader("Edit User Details", common.BackButton("/web/admin/users/"+user.ID, "Back to User"))
+		@common.PageHeader("Edit User Details", common.BackButton("/web/admin/users/"+user.Id, "Back to User"))
 		<div id="form-messages"></div>
 		@Card("p-6", UserEditFormContent(user))
 	</div>
@@ -45,7 +45,7 @@ templ UserEditForm(user *swagger.AuthUserResponse) {
 
 templ UserEditFormContent(user *swagger.AuthUserResponse) {
 	<form
-		hx-put={ "/web/admin/users/" + user.ID }
+		hx-put={ "/web/admin/users/" + user.Id }
 		hx-target="#form-messages"
 		hx-swap="innerHTML"
 		class="space-y-6"
@@ -81,9 +81,9 @@ templ UserEditFormContent(user *swagger.AuthUserResponse) {
 		<div class="flex justify-end space-x-3">
 			@common.LoadingSubmitButton("Update Details", "primary", "md", "save", false)
 			<a
-				href={ templ.URL("/web/admin/users/" + user.ID) }
+				href={ templ.URL("/web/admin/users/" + user.Id) }
 				class="inline-flex items-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
-				hx-get={ "/web/admin/users/" + user.ID }
+				hx-get={ "/web/admin/users/" + user.Id }
 				hx-target="#content"
 				hx-push-url="true"
 			>
@@ -95,7 +95,7 @@ templ UserEditFormContent(user *swagger.AuthUserResponse) {
 
 templ UserChangePasswordForm(user *swagger.AuthUserResponse) {
 	<div class="space-y-6">
-		@common.PageHeader("Change Password", common.BackButton("/web/admin/users/"+user.ID, "Back to User"))
+		@common.PageHeader("Change Password", common.BackButton("/web/admin/users/"+user.Id, "Back to User"))
 		<div id="form-messages"></div>
 		@Card("p-6", UserChangePasswordFormContent(user))
 	</div>
@@ -103,7 +103,7 @@ templ UserChangePasswordForm(user *swagger.AuthUserResponse) {
 
 templ UserChangePasswordFormContent(user *swagger.AuthUserResponse) {
 	<form
-		hx-post={ "/web/admin/users/" + user.ID + "/change-password" }
+		hx-post={ "/web/admin/users/" + user.Id + "/change-password" }
 		hx-target="#form-messages"
 		hx-swap="innerHTML"
 		class="space-y-6"
@@ -159,9 +159,9 @@ templ UserChangePasswordFormContent(user *swagger.AuthUserResponse) {
 		<div class="flex justify-end space-x-3">
 			@common.LoadingSubmitButton("Change Password", "primary", "md", "key", false)
 			<a
-				href={ templ.URL("/web/admin/users/" + user.ID) }
+				href={ templ.URL("/web/admin/users/" + user.Id) }
 				class="inline-flex items-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
-				hx-get={ "/web/admin/users/" + user.ID }
+				hx-get={ "/web/admin/users/" + user.Id }
 				hx-target="#content"
 				hx-push-url="true"
 			>

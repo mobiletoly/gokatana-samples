@@ -5,7 +5,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/go-openapi/strfmt"
 	"github.com/labstack/echo/v4"
 	"github.com/mobiletoly/gokatana-samples/iamservice/internal/adapters/internal/serverhelp"
 	"github.com/mobiletoly/gokatana-samples/iamservice/internal/core/swagger"
@@ -123,7 +122,7 @@ func (h *UserMgmWebHandlers) CreateUserLoadHandler(c echo.Context) error {
 	ctx := c.Request().Context()
 
 	tenantID := strings.TrimSpace(c.FormValue("tenantId"))
-	email := strfmt.Email(strings.TrimSpace(c.FormValue("email")))
+	email := strings.TrimSpace(c.FormValue("email"))
 	password := strings.TrimSpace(c.FormValue("password"))
 	firstName := strings.TrimSpace(c.FormValue("firstName"))
 	lastName := strings.TrimSpace(c.FormValue("lastName"))
@@ -135,7 +134,7 @@ func (h *UserMgmWebHandlers) CreateUserLoadHandler(c echo.Context) error {
 		LastName(lastName).
 		Password(password).
 		Source("web").
-		TenantID(tenantID).
+		TenantId(tenantID).
 		Build()
 
 	if _, err := h.authMgm.SignUp(ctx, signupReq); err != nil {

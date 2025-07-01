@@ -2,3 +2,7 @@ database:
   host: proddbhost:5432
   name: iamservice
   sslmode: require
+  parameters:
+    channel_binding: require
+server:
+  domain: https://www.some-company-domain.com

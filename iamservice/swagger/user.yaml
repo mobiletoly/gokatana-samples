@@ -1,4 +1,4 @@
-swagger: '2.0'
+openapi: 3.0.3
 info:
   title: User Management API
   description: API for user management operations
@@ -12,13 +12,13 @@ paths:
       description: Returns the profile information for the authenticated user
       tags:
         - Users
-      security:
-        - BearerAuth: [ ]
       responses:
-        200:
+        '200':
           description: User profile retrieved successfully
-          schema:
-            $ref: '#/definitions/AuthUserResponse'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthUserResponse'
 
   /api/v1/users:
     get:
@@ -27,29 +27,31 @@ paths:
       description: Returns a list of all users in the system. Requires admin role.
       tags:
         - Users
-      security:
-        - BearerAuth: [ ]
       parameters:
         - name: page
           in: query
           description: Page number for pagination
           required: false
-          type: integer
-          minimum: 1
-          default: 1
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
         - name: limit
           in: query
           description: Number of users per page
           required: false
-          type: integer
-          minimum: 1
-          maximum: 100
-          default: 20
-      responses:
-        200:
-          description: Users retrieved successfully
           schema:
-            $ref: '#/definitions/UserListResponse'
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: Users retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserListResponse'
 
   /api/v1/user/all:
     get:
@@ -58,29 +60,31 @@ paths:
       description: Returns a list of all users in the system. Requires sysadmin role.
       tags:
         - Users
-      security:
-        - BearerAuth: [ ]
       parameters:
         - name: page
           in: query
           description: Page number for pagination
           required: false
-          type: integer
-          minimum: 1
-          default: 1
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
         - name: limit
           in: query
           description: Number of users per page
           required: false
-          type: integer
-          minimum: 1
-          maximum: 100
-          default: 20
-      responses:
-        200:
-          description: Users retrieved successfully
           schema:
-            $ref: '#/definitions/UserListResponse'
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: Users retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserListResponse'
 
   /api/v1/users/{userId}:
     get:
@@ -89,19 +93,20 @@ paths:
       description: Returns detailed information about a specific user. Requires admin role.
       tags:
         - Users
-      security:
-        - BearerAuth: [ ]
       parameters:
         - name: userId
           in: path
           required: true
           description: The ID of the user to retrieve
-          type: string
-      responses:
-        200:
-          description: User retrieved successfully
           schema:
-            $ref: '#/definitions/AuthUserResponse'
+            type: string
+      responses:
+        '200':
+          description: User retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthUserResponse'
 
   /api/v1/users/{userId}/profile:
     get:
@@ -110,44 +115,47 @@ paths:
       description: Returns the profile information for a specific user. Requires admin role.
       tags:
         - Users
-      security:
-        - BearerAuth: [ ]
       parameters:
         - name: userId
           in: path
           required: true
           description: The ID of the user
-          type: string
-      responses:
-        200:
-          description: User profile retrieved successfully
           schema:
-            $ref: '#/definitions/UserProfile'
+            type: string
+      responses:
+        '200':
+          description: User profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
     put:
       operationId: updateUserProfile
       summary: Update user profile (Admin only)
       description: Updates the profile information for a specific user. Requires admin role.
       tags:
         - Users
-      security:
-        - BearerAuth: [ ]
       parameters:
         - name: userId
           in: path
           required: true
           description: The ID of the user
-          type: string
-        - name: body
-          in: body
-          required: true
-          description: User profile update data
           schema:
-            $ref: '#/definitions/UserProfileUpdateRequest'
+            type: string
+      requestBody:
+        required: true
+        description: User profile update data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserProfileUpdateRequest'
       responses:
-        200:
+        '200':
           description: User profile updated successfully
-          schema:
-            $ref: '#/definitions/UserProfile'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
 
   /api/v1/users/{userId}/roles:
     get:
@@ -156,19 +164,20 @@ paths:
       description: Returns the roles assigned to a specific user. Requires admin role.
       tags:
         - Users
-      security:
-        - BearerAuth: [ ]
       parameters:
         - name: userId
           in: path
           required: true
           description: The ID of the user
-          type: string
-      responses:
-        200:
-          description: User roles retrieved successfully
           schema:
-            $ref: '#/definitions/UserRolesResponse'
+            type: string
+      responses:
+        '200':
+          description: User roles retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserRolesResponse'
 
     post:
       operationId: assignUserRole
@@ -176,200 +185,201 @@ paths:
       description: Assigns a role to a user. Requires admin role.
       tags:
         - Users
-      security:
-        - BearerAuth: [ ]
       parameters:
         - name: userId
           in: path
           required: true
           description: The ID of the user
-          type: string
-        - name: body
-          in: body
-          required: true
           schema:
-            $ref: '#/definitions/AssignRoleRequest'
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssignRoleRequest'
       responses:
-        200:
+        '200':
           description: Role assigned successfully
 
-definitions:
-  UserProfileUpdateRequest:
-    type: object
-    description: 'User profile update request data'
-    properties:
-      height:
-        type: integer
-        x-nullable: true
-        example: 175
-        description: 'User height in centimeters'
-      weight:
-        type: integer
-        x-nullable: true
-        example: 70000
-        description: 'User weight in grams'
-      gender:
-        type: string
-        x-nullable: true
-        example: 'Male'
-        description: 'User gender'
-      birthDate:
-        type: string
-        x-nullable: true
-        format: date
-        example: '1990-01-15'
-        description: 'User birth date in YYYY-MM-DD format'
-      isMetric:
-        type: boolean
-        x-nullable: true
-        example: true
-        description: 'Whether to use metric units (true) or imperial units (false)'
-
-  UserProfile:
-    type: object
-    description: 'User profile data from user_profile table'
-    properties:
-      id:
-        type: integer
-        x-nullable: false
-        example: 1
-        description: 'Profile unique identifier (primary key from user_profile table)'
-      userId:
-        type: string
-        x-nullable: false
-        example: 'uuid-123-456-789'
-        description: 'User unique identifier (foreign key to auth_user table)'
-      height:
-        type: integer
-        x-nullable: true
-        example: 175
-        description: 'User height in centimeters'
-      weight:
-        type: integer
-        x-nullable: true
-        example: 70000
-        description: 'User weight in grams'
-      gender:
-        type: string
-        x-nullable: true
-        example: 'male'
-        description: 'User gender (male/female/other)'
-        enum: ['male', 'female', 'other']
-      birthDate:
-        type: string
-        x-nullable: true
-        format: date
-        example: '1990-01-15'
-        description: 'User birth date'
-      isMetric:
-        type: boolean
-        x-nullable: false
-        example: true
-        description: 'Whether to use metric units (true) or imperial units (false)'
-      createdAt:
-        type: string
-        x-nullable: false
-        format: date-time
-        example: '2023-12-01T10:00:00Z'
-        description: 'Profile creation timestamp'
-      updatedAt:
-        type: string
-        x-nullable: false
-        format: date-time
-        example: '2023-12-01T10:00:00Z'
-        description: 'Last profile update timestamp'
-    required:
-      - id
-      - userId
-      - isMetric
-      - createdAt
-      - updatedAt
-
-  AuthUserResponse:
-    type: object
-    description: 'Authentication user data from auth_user table (excluding sensitive fields)'
-    properties:
-      id:
-        type: string
-        x-nullable: false
-        example: 'uuid-123-456-789'
-        description: 'User unique identifier (primary key from auth_user table)'
-      email:
-        type: string
-        x-nullable: false
-        format: email
-        example: 'user@example.com'
-        description: 'User email address (unique in auth_user table)'
-      firstName:
-        type: string
-        x-nullable: false
-        example: 'John'
-        description: 'User first name'
-      lastName:
-        type: string
-        x-nullable: false
-        example: 'Doe'
-        description: 'User last name'
-      createdAt:
-        type: string
-        x-nullable: false
-        format: date-time
-        example: '2023-12-01T10:00:00Z'
-        description: 'Account creation timestamp'
-      updatedAt:
-        type: string
-        x-nullable: false
-        format: date-time
-        example: '2023-12-01T10:00:00Z'
-        description: 'Last profile update timestamp'
-      tenantId:
-        type: string
-        x-nullable: false
-        example: 'acme-corp'
-        description: 'Tenant identifier for multi-tenant support'
-    required:
-      - id
-      - email
-      - firstName
-      - lastName
-      - createdAt
-      - updatedAt
-      - tenantId
-
-  UserListResponse:
-    type: object
-    required:
-      - users
-      - pagination
-    properties:
-      users:
-        type: array
-        items:
-          $ref: '#/definitions/AuthUserResponse'
-      pagination:
-        $ref: 'common.yaml#/definitions/PaginationInfo'
-
-  UserRolesResponse:
-    type: object
-    required:
-      - userId
-      - roles
-    properties:
-      userId:
-        type: string
-      roles:
-        type: array
-        items:
+components:
+  schemas:
+    UserProfileUpdateRequest:
+      type: object
+      description: 'User profile update request data'
+      properties:
+        height:
+          type: integer
+          nullable: true
+          example: 175
+          description: 'User height in centimeters'
+        weight:
+          type: integer
+          nullable: true
+          example: 70000
+          description: 'User weight in grams'
+        gender:
           type: string
-        description: List of role names assigned to the user
+          nullable: true
+          example: 'Male'
+          description: 'User gender'
+        birthDate:
+          type: string
+          nullable: true
+          format: date
+          example: '1990-01-15'
+          description: 'User birth date in YYYY-MM-DD format'
+        isMetric:
+          type: boolean
+          nullable: true
+          example: true
+          description: 'Whether to use metric units (true) or imperial units (false)'
 
-  AssignRoleRequest:
-    type: object
-    required:
-      - roleName
-    properties:
-      roleName:
-        type: string
-        x-nullable: false
-        description: Name of the role to assign
-        enum: [ user, admin, moderator ]
+    UserProfile:
+      type: object
+      description: 'User profile data from user_profile table'
+      properties:
+        id:
+          type: integer
+          nullable: false
+          example: 1
+          description: 'Profile unique identifier (primary key from user_profile table)'
+        userId:
+          type: string
+          nullable: false
+          example: 'uuid-123-456-789'
+          description: 'User unique identifier (foreign key to auth_user table)'
+        height:
+          type: integer
+          nullable: true
+          example: 175
+          description: 'User height in centimeters'
+        weight:
+          type: integer
+          nullable: true
+          example: 70000
+          description: 'User weight in grams'
+        gender:
+          type: string
+          nullable: true
+          example: 'male'
+          description: 'User gender (male/female/other)'
+          enum: [ 'male', 'female', 'other' ]
+        birthDate:
+          type: string
+          nullable: true
+          format: date
+          example: '1990-01-15'
+          description: 'User birth date'
+        isMetric:
+          type: boolean
+          nullable: false
+          example: true
+          description: 'Whether to use metric units (true) or imperial units (false)'
+        createdAt:
+          type: string
+          nullable: false
+          format: date-time
+          example: '2023-12-01T10:00:00Z'
+          description: 'Profile creation timestamp'
+        updatedAt:
+          type: string
+          nullable: false
+          format: date-time
+          example: '2023-12-01T10:00:00Z'
+          description: 'Last profile update timestamp'
+      required:
+        - id
+        - userId
+        - isMetric
+        - createdAt
+        - updatedAt
+
+    AuthUserResponse:
+      type: object
+      description: 'Authentication user data from auth_user table (excluding sensitive fields)'
+      properties:
+        id:
+          type: string
+          nullable: false
+          example: 'uuid-123-456-789'
+          description: 'User unique identifier (primary key from auth_user table)'
+        email:
+          type: string
+          nullable: false
+          format: email
+          example: 'user@example.com'
+          description: 'User email address (unique in auth_user table)'
+        firstName:
+          type: string
+          nullable: false
+          example: 'John'
+          description: 'User first name'
+        lastName:
+          type: string
+          nullable: false
+          example: 'Doe'
+          description: 'User last name'
+        createdAt:
+          type: string
+          nullable: false
+          format: date-time
+          example: '2023-12-01T10:00:00Z'
+          description: 'Account creation timestamp'
+        updatedAt:
+          type: string
+          nullable: false
+          format: date-time
+          example: '2023-12-01T10:00:00Z'
+          description: 'Last profile update timestamp'
+        tenantId:
+          type: string
+          nullable: false
+          example: 'acme-corp'
+          description: 'Tenant identifier for multi-tenant support'
+      required:
+        - id
+        - email
+        - firstName
+        - lastName
+        - createdAt
+        - updatedAt
+        - tenantId
+
+    UserListResponse:
+      type: object
+      required:
+        - users
+        - pagination
+      properties:
+        users:
+          type: array
+          items:
+            $ref: '#/components/schemas/AuthUserResponse'
+        pagination:
+          $ref: './common.yaml#/components/schemas/PaginationInfo'
+
+    UserRolesResponse:
+      type: object
+      required:
+        - userId
+        - roles
+      properties:
+        userId:
+          type: string
+        roles:
+          type: array
+          items:
+            type: string
+          description: List of role names assigned to the user
+
+    AssignRoleRequest:
+      type: object
+      required:
+        - roleName
+      properties:
+        roleName:
+          type: string
+          nullable: false
+          description: Name of the role to assign
+          enum: [ user, admin, moderator ]

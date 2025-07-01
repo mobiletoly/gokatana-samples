@@ -17,13 +17,13 @@ import (
 
 // SignUp creates a new user account
 func (a *AuthMgm) SignUp(ctx context.Context, req *swagger.SignupRequest) (*swagger.SignupResponse, error) {
-	katapp.Logger(ctx).Info("signing up user", "email", string(req.Email), "tenantID", req.TenantID)
+	katapp.Logger(ctx).Info("signing up user", "email", string(req.Email), "tenantID", req.TenantId)
 	if err := a.validateSignupRequest(req); err != nil {
 		return nil, err
 	}
 
 	user, err := outport.TxWithResult(ctx, a.txPort, func(tx pgx.Tx) (*model.AuthUser, error) {
-		tenantID := req.TenantID
+		tenantID := req.TenantId
 		if err := internal.EnsureTenantExistsById(ctx, a.authUserPersist, tx, tenantID); err != nil {
 			return nil, err
 		}
@@ -102,8 +102,10 @@ func (a *AuthMgm) SignUp(ctx context.Context, req *swagger.SignupRequest) (*swag
 
 		// Create email confirmation token in database (expires in 24 hours)
 		expiresAt := time.Now().Add(24 * time.Hour)
-		_, err = a.authUserPersist.CreateEmailConfirmationToken(ctx, tx, user.ID, string(user.Email), tokenHash,
-			req.Source, expiresAt)
+		_, err = a.authUserPersist.CreateEmailConfirmationToken(
+			ctx, tx, user.ID, user.Email, tokenHash,
+			string(req.Source),
+			expiresAt)
 		if err != nil {
 			katapp.Logger(ctx).Error("failed to create email confirmation token",
 				"userID", user.ID,
@@ -113,7 +115,7 @@ func (a *AuthMgm) SignUp(ctx context.Context, req *swagger.SignupRequest) (*swag
 		}
 
 		// Send confirmation email based on source
-		err = a.sendConfirmationEmail(ctx, user, tokenForEmail, req.Source)
+		err = a.sendConfirmationEmail(ctx, user, tokenForEmail, string(req.Source))
 		if err != nil {
 			katapp.Logger(ctx).Error("failed to send confirmation email",
 				"userID", user.ID,
@@ -137,7 +139,7 @@ func (a *AuthMgm) SignUp(ctx context.Context, req *swagger.SignupRequest) (*swag
 	return &swagger.SignupResponse{
 		Message: message,
 		Email:   req.Email,
-		UserID:  user.ID,
+		UserId:  user.ID,
 	}, nil
 }
 
@@ -157,7 +159,7 @@ func (a *AuthMgm) validateSignupRequest(req *swagger.SignupRequest) error {
 	if req.LastName == "" {
 		return katapp.NewErr(katapp.ErrInvalidInput, "last name is required")
 	}
-	if req.TenantID == "" {
+	if req.TenantId == "" {
 		return katapp.NewErr(katapp.ErrInvalidInput, "tenant ID is required")
 	}
 	if req.Source == "" {
@@ -242,8 +244,7 @@ func (a *AuthMgm) sendConfirmationEmail(ctx context.Context, user *model.AuthUse
 
 // sendWebConfirmationEmail sends a clickable confirmation link for web users
 func (a *AuthMgm) sendWebConfirmationEmail(ctx context.Context, user *model.AuthUser, token string) error {
-	// TODO: Get base URL from configuration
-	baseURL := "http://localhost:8080" // This should come from config
+	baseURL := a.serverConfig.Domain
 	confirmationURL := fmt.Sprintf("%s/api/v1/auth/confirm-email?userId=%s&code=%s", baseURL, user.ID, token)
 
 	data := &email.WebConfirmationData{

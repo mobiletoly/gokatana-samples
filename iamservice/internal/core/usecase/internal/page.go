@@ -16,10 +16,10 @@ func Paginate[T any](items []T, page, limit int) ([]T, *swagger.PaginationInfo) 
 	}
 
 	pagination := swagger.NewPaginationInfoBuilder().
-		Limit(int64(limit)).
-		Page(int64(page)).
-		Total(int64(total)).
-		TotalPages(int64(totalPages)).
+		Limit(limit).
+		Page(page).
+		Total(total).
+		TotalPages(totalPages).
 		Build()
 
 	return items[start:end], pagination

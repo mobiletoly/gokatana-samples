@@ -143,7 +143,7 @@ func assignUserRoleHandler(uc *usecase.UserMgm) func(c echo.Context) error {
 			return kathttp_echo.ReportBadRequest(errors.New("invalid request body"))
 		}
 
-		if err = uc.AssignUserRole(ctx, principal, userID, req.RoleName); err != nil {
+		if err = uc.AssignUserRole(ctx, principal, userID, string(req.RoleName)); err != nil {
 			return kathttp_echo.ReportHTTPError(err)
 		}
 		return c.JSON(http.StatusOK, struct{}{})

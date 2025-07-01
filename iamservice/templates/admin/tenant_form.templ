@@ -62,7 +62,7 @@ templ TenantEditForm(tenant *swagger.TenantResponse) {
 
 templ TenantEditFormContent(tenant *swagger.TenantResponse) {
 	<form
-		hx-put={ "/web/admin/tenants/" + tenant.ID }
+		hx-put={ "/web/admin/tenants/" + tenant.Id }
 		hx-target="#form-messages"
 		hx-swap="innerHTML"
 		class="space-y-6"
@@ -75,7 +75,7 @@ templ TenantEditFormContent(tenant *swagger.TenantResponse) {
 				type="text"
 				id="id"
 				name="id"
-				value={ tenant.ID }
+				value={ tenant.Id }
 				disabled
 				class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-50 text-gray-500 sm:text-sm"
 				placeholder="Tenant ID cannot be changed"
@@ -119,9 +119,9 @@ templ TenantEditFormContent(tenant *swagger.TenantResponse) {
 		<div class="flex justify-end space-x-3">
 			@common.LoadingSubmitButton("Update Tenant", "primary", "md", "save", false)
 			<a
-				href={ templ.URL("/web/admin/tenants/" + tenant.ID) }
+				href={ templ.URL("/web/admin/tenants/" + tenant.Id) }
 				class="inline-flex items-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
-				hx-get={ "/web/admin/tenants/" + tenant.ID }
+				hx-get={ "/web/admin/tenants/" + tenant.Id }
 				hx-target="#content"
 				hx-push-url="true"
 			>

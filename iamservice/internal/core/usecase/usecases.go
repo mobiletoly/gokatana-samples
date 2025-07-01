@@ -14,8 +14,10 @@ type UseCases struct {
 
 func NewUseCases(cfg *app.Config, ports *outport.Ports) *UseCases {
 	return &UseCases{
-		Config:         cfg,
-		Auth:           NewAuthUser(ports.AuthUserPersist, ports.Tx, ports.Mailer, cfg.Credentials.JwtSecret),
+		Config: cfg,
+		Auth: NewAuthUser(
+			&cfg.Server, ports.AuthUserPersist, ports.Tx, ports.Mailer, cfg.Credentials.JwtSecret,
+		),
 		UserMgm:        NewUserMgm(ports.AuthUserPersist, ports.Tx),
 		UserProfileMgm: NewUserProfileMgm(ports),
 	}

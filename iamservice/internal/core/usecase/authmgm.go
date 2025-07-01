@@ -21,6 +21,7 @@ import (
 
 // AuthMgm provides authentication use cases
 type AuthMgm struct {
+	serverConfig    *katapp.ServerConfig
 	authUserPersist outport.AuthUserPersist
 	txPort          outport.TxPort
 	mailer          outport.Mailer
@@ -29,9 +30,11 @@ type AuthMgm struct {
 
 // NewAuthUser creates a new AuthMgm use case
 func NewAuthUser(
-	authUserPort outport.AuthUserPersist, databasePort outport.TxPort, mailer outport.Mailer, jwtSecret string,
+	serverConfig *katapp.ServerConfig, authUserPort outport.AuthUserPersist, databasePort outport.TxPort,
+	mailer outport.Mailer, jwtSecret string,
 ) *AuthMgm {
 	return &AuthMgm{
+		serverConfig:    serverConfig,
 		authUserPersist: authUserPort,
 		txPort:          databasePort,
 		mailer:          mailer,
@@ -78,7 +81,7 @@ func (a *AuthMgm) RefreshToken(ctx context.Context, req *swagger.RefreshRequest)
 			ExpiresIn(expiresIn).
 			RefreshToken(refreshToken).
 			TokenType(tokenType).
-			UserID(user.ID).
+			UserId(user.ID).
 			Build(),
 		nil
 }

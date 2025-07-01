@@ -16,7 +16,7 @@ func (a *AuthMgm) SignIn(ctx context.Context, req *swagger.SigninRequest) (*swag
 	if err := a.validateSigninRequest(req); err != nil {
 		return nil, err
 	}
-	tenantID := req.TenantID
+	tenantID := req.TenantId
 
 	user, err := outport.TxWithResult(ctx, a.txPort, func(tx pgx.Tx) (*model.AuthUser, error) {
 		// Check if tenant exists
@@ -62,7 +62,7 @@ func (a *AuthMgm) SignIn(ctx context.Context, req *swagger.SigninRequest) (*swag
 		ExpiresIn(expiresIn).
 		RefreshToken(refreshToken).
 		TokenType(tokenType).
-		UserID(user.ID).
+		UserId(user.ID).
 		Build(), nil
 }
 
@@ -73,7 +73,7 @@ func (a *AuthMgm) validateSigninRequest(req *swagger.SigninRequest) error {
 	if req.Password == "" {
 		return katapp.NewErr(katapp.ErrInvalidInput, "password is required")
 	}
-	if req.TenantID == "" {
+	if req.TenantId == "" {
 		return katapp.NewErr(katapp.ErrInvalidInput, "tenant ID is required")
 	}
 

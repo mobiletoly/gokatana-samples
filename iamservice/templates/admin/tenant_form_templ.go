@@ -181,7 +181,7 @@ func TenantEditFormContent(tenant *swagger.TenantResponse) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var5 string
-		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs("/web/admin/tenants/" + tenant.ID)
+		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs("/web/admin/tenants/" + tenant.Id)
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/admin/tenant_form.templ`, Line: 65, Col: 44}
 		}
@@ -194,7 +194,7 @@ func TenantEditFormContent(tenant *swagger.TenantResponse) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var6 string
-		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(tenant.ID)
+		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(tenant.Id)
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/admin/tenant_form.templ`, Line: 78, Col: 21}
 		}
@@ -241,7 +241,7 @@ func TenantEditFormContent(tenant *swagger.TenantResponse) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var9 templ.SafeURL
-		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL("/web/admin/tenants/" + tenant.ID))
+		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL("/web/admin/tenants/" + tenant.Id))
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/admin/tenant_form.templ`, Line: 122, Col: 55}
 		}
@@ -254,7 +254,7 @@ func TenantEditFormContent(tenant *swagger.TenantResponse) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var10 string
-		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs("/web/admin/tenants/" + tenant.ID)
+		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs("/web/admin/tenants/" + tenant.Id)
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/admin/tenant_form.templ`, Line: 124, Col: 46}
 		}

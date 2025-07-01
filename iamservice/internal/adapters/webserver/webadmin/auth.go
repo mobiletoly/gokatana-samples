@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/go-openapi/strfmt"
 	"github.com/labstack/echo/v4"
 	"github.com/mobiletoly/gokatana-samples/iamservice/internal/core/swagger"
 	"github.com/mobiletoly/gokatana-samples/iamservice/internal/core/usecase"
@@ -47,9 +46,9 @@ func (h *AuthWebHandlers) SignInSubmitHandler(c echo.Context) error {
 	email := strings.TrimSpace(c.FormValue("email"))
 	password := strings.TrimSpace(c.FormValue("password"))
 	signinReq := &swagger.SigninRequest{
-		Email:    strfmt.Email(email),
+		Email:    email,
 		Password: password,
-		TenantID: tenantId,
+		TenantId: tenantId,
 	}
 
 	authResp, err := h.authMgm.SignIn(ctx, signinReq)

@@ -2,9 +2,9 @@ package usecase
 
 import (
 	"context"
+	openapi_types "github.com/oapi-codegen/runtime/types"
 	"time"
 
-	"github.com/go-openapi/strfmt"
 	"github.com/jackc/pgx/v5"
 	"github.com/mobiletoly/gokatana-samples/iamservice/internal/core/model"
 	"github.com/mobiletoly/gokatana-samples/iamservice/internal/core/outport"
@@ -112,33 +112,28 @@ func (u *UserProfileMgm) UpdateUserProfileByUserID(
 
 // userProfileModelToUserProfileResponse converts model.UserProfile to swagger.UserProfile
 func userProfileModelToUserProfileResponse(profile *model.UserProfile) *swagger.UserProfile {
-	var birthDate *strfmt.Date
+	var birthDate *openapi_types.Date
 	if profile.BirthDate != nil {
-		// Parse the date string and convert to strfmt.Date
 		if parsedTime, err := time.Parse("2006-01-02", *profile.BirthDate); err == nil {
-			date := strfmt.Date(parsedTime)
-			birthDate = &date
+			birthDate = &openapi_types.Date{Time: parsedTime}
 		}
+	}
+
+	var upGender *swagger.UserProfileGender
+	if profile.Gender != nil {
+		gender := swagger.UserProfileGender(*profile.Gender)
+		upGender = &gender
 	}
 
 	return swagger.NewUserProfileBuilder().
 		BirthDate(birthDate).
-		CreatedAt(strfmt.DateTime(profile.CreatedAt)).
-		Gender(profile.Gender).
-		Height(convertIntPtrToInt64Ptr(profile.Height)).
-		ID(int64(profile.ID)).
+		CreatedAt(profile.CreatedAt).
+		Gender(upGender).
+		Height(profile.Height).
+		Id(profile.ID).
 		IsMetric(profile.IsMetric).
-		UpdatedAt(strfmt.DateTime(profile.UpdatedAt)).
-		UserID(profile.UserID).
-		Weight(convertIntPtrToInt64Ptr(profile.Weight)).
+		UpdatedAt(profile.UpdatedAt).
+		UserId(profile.UserID).
+		Weight(profile.Weight).
 		Build()
-}
-
-// Helper function to convert *int to *int64
-func convertIntPtrToInt64Ptr(intPtr *int) *int64 {
-	if intPtr == nil {
-		return nil
-	}
-	val := int64(*intPtr)
-	return &val
 }

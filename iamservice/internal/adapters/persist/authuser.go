@@ -278,12 +278,12 @@ func (a *AuthUserAdapter) GetAllTenants(ctx context.Context, tx pgx.Tx) ([]*mode
 
 // CreateTenant creates a new tenant
 func (a *AuthUserAdapter) CreateTenant(ctx context.Context, tx pgx.Tx, req *swagger.TenantCreateRequest) (*model.Tenant, error) {
-	katapp.Logger(ctx).Info("creating tenant", "tenantID", req.ID, "name", req.Name)
+	katapp.Logger(ctx).Info("creating tenant", "tenantID", req.Id, "name", req.Name)
 
 	tenantEntity := mapper.TenantCreateRequestToTenantEntity(req)
 	err := repo.InsertTenant(ctx, tx, tenantEntity)
 	if err != nil {
-		katapp.Logger(ctx).Error("failed to create tenant", "tenantID", req.ID, "error", err)
+		katapp.Logger(ctx).Error("failed to create tenant", "tenantID", req.Id, "error", err)
 		appErr := katpg.PgToAppError(err, "database insert failed")
 		if appErr.Scope == katapp.ErrDuplicate {
 			return nil, katapp.NewErr(katapp.ErrDuplicate, "tenant with this ID already exists")

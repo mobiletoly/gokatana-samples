@@ -57,7 +57,7 @@ func TenantsList(tenantsListResponse *swagger.TenantListResponse) templ.Componen
 				return templ_7745c5c3_Err
 			}
 			for _, tenant := range tenantsListResponse.Tenants {
-				templ_7745c5c3_Err = TenantCard(tenant).Render(ctx, templ_7745c5c3_Buffer)
+				templ_7745c5c3_Err = TenantCard(&tenant).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -101,7 +101,7 @@ func TenantCard(tenant *swagger.TenantResponse) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var3 string
-		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs("tenant-" + tenant.ID)
+		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs("tenant-" + tenant.Id)
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/admin/tenants.templ`, Line: 30, Col: 144}
 		}
@@ -127,7 +127,7 @@ func TenantCard(tenant *swagger.TenantResponse) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var5 string
-		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(tenant.ID)
+		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(tenant.Id)
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/admin/tenants.templ`, Line: 34, Col: 52}
 		}
@@ -176,7 +176,7 @@ func TenantCard(tenant *swagger.TenantResponse) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var8 templ.SafeURL
-		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL("/web/admin/tenants/" + tenant.ID))
+		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL("/web/admin/tenants/" + tenant.Id))
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/admin/tenants.templ`, Line: 49, Col: 57}
 		}
@@ -189,7 +189,7 @@ func TenantCard(tenant *swagger.TenantResponse) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var9 string
-		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs("/web/admin/tenants/" + tenant.ID)
+		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs("/web/admin/tenants/" + tenant.Id)
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/admin/tenants.templ`, Line: 51, Col: 48}
 		}
@@ -202,7 +202,7 @@ func TenantCard(tenant *swagger.TenantResponse) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var10 templ.SafeURL
-		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL("/web/admin/tenants/" + tenant.ID + "/edit"))
+		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL("/web/admin/tenants/" + tenant.Id + "/edit"))
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/admin/tenants.templ`, Line: 58, Col: 67}
 		}
@@ -215,7 +215,7 @@ func TenantCard(tenant *swagger.TenantResponse) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var11 string
-		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs("/web/admin/tenants/" + tenant.ID + "/edit")
+		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs("/web/admin/tenants/" + tenant.Id + "/edit")
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/admin/tenants.templ`, Line: 60, Col: 58}
 		}
@@ -227,13 +227,13 @@ func TenantCard(tenant *swagger.TenantResponse) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if tenant.ID != "default-tenant" {
+		if tenant.Id != "default-tenant" {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "<button class=\"inline-flex items-center justify-center px-3 py-2 border border-red-300 shadow-sm text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200\" hx-delete=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var12 string
-			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs("/web/admin/tenants/" + tenant.ID)
+			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs("/web/admin/tenants/" + tenant.Id)
 			if templ_7745c5c3_Err != nil {
 				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/admin/tenants.templ`, Line: 68, Col: 51}
 			}
@@ -246,7 +246,7 @@ func TenantCard(tenant *swagger.TenantResponse) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var13 string
-			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs("#tenant-" + tenant.ID)
+			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs("#tenant-" + tenant.Id)
 			if templ_7745c5c3_Err != nil {
 				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/admin/tenants.templ`, Line: 69, Col: 40}
 			}
@@ -293,7 +293,7 @@ func TenantDetail(tenant *swagger.TenantResponse) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var15 string
-		templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(tenant.ID)
+		templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(tenant.Id)
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/admin/tenants.templ`, Line: 103, Col: 62}
 		}
@@ -368,7 +368,7 @@ func TenantDetail(tenant *swagger.TenantResponse) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var20 templ.SafeURL
-		templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL("/web/admin/tenants/" + tenant.ID + "/edit"))
+		templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL("/web/admin/tenants/" + tenant.Id + "/edit"))
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/admin/tenants.templ`, Line: 133, Col: 68}
 		}
@@ -381,7 +381,7 @@ func TenantDetail(tenant *swagger.TenantResponse) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var21 string
-		templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs("/web/admin/tenants/" + tenant.ID + "/edit")
+		templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs("/web/admin/tenants/" + tenant.Id + "/edit")
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/admin/tenants.templ`, Line: 135, Col: 59}
 		}
@@ -393,13 +393,13 @@ func TenantDetail(tenant *swagger.TenantResponse) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if tenant.ID != "default-tenant" {
+		if tenant.Id != "default-tenant" {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "<button class=\"inline-flex items-center px-4 py-2 border border-red-300 shadow-sm text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200\" hx-delete=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var22 string
-			templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs("/web/admin/tenants/" + tenant.ID)
+			templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs("/web/admin/tenants/" + tenant.Id)
 			if templ_7745c5c3_Err != nil {
 				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/admin/tenants.templ`, Line: 143, Col: 52}
 			}

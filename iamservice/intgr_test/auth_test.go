@@ -3,7 +3,6 @@ package intgr_test
 import (
 	"testing"
 
-	"github.com/go-openapi/strfmt"
 	"github.com/mobiletoly/gokatana-samples/iamservice/internal/core/swagger"
 	"github.com/mobiletoly/gokatana/kathttp"
 	"github.com/mobiletoly/gokatana/kathttpc"
@@ -21,11 +20,11 @@ func createAndConfirmUser(t *testing.T, env *TestEnvironment, email string, pass
 
 	// Create user
 	signupReq := &swagger.SignupRequest{
-		Email:     strfmt.Email(email),
+		Email:     email,
 		Password:  password,
 		FirstName: firstName,
 		LastName:  lastName,
-		TenantID:  "default-tenant",
+		TenantId:  "default-tenant",
 		Source:    "web", // Use web for simplicity in auth tests
 	}
 
@@ -48,7 +47,7 @@ func createAndConfirmUser(t *testing.T, env *TestEnvironment, email string, pass
 		ctx, &appConfig.Server, confirmationURL, nil)
 	require.NoError(t, err)
 
-	return signupResp.UserID
+	return signupResp.UserId
 }
 
 // validateAuthResponse validates all required fields in AuthResponse
@@ -58,7 +57,7 @@ func validateAuthResponse(t *testing.T, authResp *swagger.AuthResponse) {
 	assert.NotEmpty(t, authResp.RefreshToken)
 	assert.Equal(t, "Bearer", authResp.TokenType)
 	assert.Greater(t, authResp.ExpiresIn, int64(0))
-	assert.NotEmpty(t, authResp.UserID)
+	assert.NotEmpty(t, authResp.UserId)
 }
 
 // runAuthenticationTests runs all authentication-related tests
@@ -78,11 +77,11 @@ func runAuthenticationTests(t *testing.T, env *TestEnvironment) {
 
 	t.Run("POST /auth/signup", func(t *testing.T) {
 		signupReq := &swagger.SignupRequest{
-			Email:     strfmt.Email("test@example.com"),
+			Email:     "test@example.com",
 			Password:  "qazwsxedc",
 			FirstName: "Test",
 			LastName:  "User",
-			TenantID:  "default-tenant",
+			TenantId:  "default-tenant",
 			Source:    "web",
 		}
 		t.Run("must succeed and return SignupResponse", func(t *testing.T) {
@@ -92,7 +91,7 @@ func runAuthenticationTests(t *testing.T, env *TestEnvironment) {
 			assert.NoError(t, err)
 			assert.NotNil(t, signupResp)
 			assert.Equal(t, "test@example.com", string(signupResp.Email))
-			assert.NotEmpty(t, signupResp.UserID)
+			assert.NotEmpty(t, signupResp.UserId)
 			assert.Contains(t, signupResp.Message, "check your email")
 
 			// Verify email was sent
@@ -105,11 +104,11 @@ func runAuthenticationTests(t *testing.T, env *TestEnvironment) {
 
 			// Try to signup with same email - should fail
 			duplicateReq := &swagger.SignupRequest{
-				Email:     strfmt.Email("verified-duplicate@example.com"),
+				Email:     "verified-duplicate@example.com",
 				Password:  "qazwsxedc",
 				FirstName: "Duplicate",
 				LastName:  "User",
-				TenantID:  "default-tenant",
+				TenantId:  "default-tenant",
 				Source:    "web",
 			}
 			_, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.SignupRequest, swagger.SignupResponse](
@@ -118,11 +117,11 @@ func runAuthenticationTests(t *testing.T, env *TestEnvironment) {
 		})
 		t.Run("invalid email format must fail with 400 Bad Request", func(t *testing.T) {
 			invalidEmailReq := &swagger.SignupRequest{
-				Email:     strfmt.Email("invalid-email"),
+				Email:     "invalid-email",
 				Password:  "qazwsxedc",
 				FirstName: "Test",
 				LastName:  "User",
-				TenantID:  "default-tenant",
+				TenantId:  "default-tenant",
 				Source:    "web",
 			}
 			_, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.SignupRequest, swagger.SignupResponse](
@@ -131,9 +130,9 @@ func runAuthenticationTests(t *testing.T, env *TestEnvironment) {
 		})
 		t.Run("missing required fields must fail with 400 Bad Request", func(t *testing.T) {
 			incompleteReq := &swagger.SignupRequest{
-				Email:    strfmt.Email("incomplete@example.com"),
+				Email:    "incomplete@example.com",
 				Password: "qazwsxedc",
-				TenantID: "default-tenant",
+				TenantId: "default-tenant",
 				Source:   "web",
 				// Missing FirstName and LastName
 			}
@@ -143,11 +142,11 @@ func runAuthenticationTests(t *testing.T, env *TestEnvironment) {
 		})
 		t.Run("non-existing tenant must fail with 404 Not Found", func(t *testing.T) {
 			nonExistentTenantReq := &swagger.SignupRequest{
-				Email:     strfmt.Email("tenant-test@example.com"),
+				Email:     "tenant-test@example.com",
 				Password:  "qazwsxedc",
 				FirstName: "Tenant",
 				LastName:  "Test",
-				TenantID:  "non-existent-tenant",
+				TenantId:  "non-existent-tenant",
 				Source:    "web",
 			}
 			_, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.SignupRequest, swagger.SignupResponse](
@@ -157,11 +156,11 @@ func runAuthenticationTests(t *testing.T, env *TestEnvironment) {
 
 		t.Run("missing source must fail with 400 Bad Request", func(t *testing.T) {
 			noSourceReq := &swagger.SignupRequest{
-				Email:     strfmt.Email("nosource@example.com"),
+				Email:     "nosource@example.com",
 				Password:  "qazwsxedc",
 				FirstName: "No",
 				LastName:  "Source",
-				TenantID:  "default-tenant",
+				TenantId:  "default-tenant",
 				// Source field missing
 			}
 			_, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.SignupRequest, swagger.SignupResponse](
@@ -177,7 +176,7 @@ func runAuthenticationTests(t *testing.T, env *TestEnvironment) {
 		signinReq := &swagger.SigninRequest{
 			Email:    "signin@example.com",
 			Password: "qazwsxedc",
-			TenantID: "default-tenant",
+			TenantId: "default-tenant",
 		}
 		t.Run("valid credentials must succeed", func(t *testing.T) {
 			authResp, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.SigninRequest, swagger.AuthResponse](
@@ -189,7 +188,7 @@ func runAuthenticationTests(t *testing.T, env *TestEnvironment) {
 			invalidReq := &swagger.SigninRequest{
 				Email:    "signin@example.com",
 				Password: "wrongpassword",
-				TenantID: "default-tenant",
+				TenantId: "default-tenant",
 			}
 			_, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.SigninRequest, swagger.AuthResponse](
 				ctx, &appConfig.Server, "api/v1/auth/signin", nil, invalidReq)
@@ -199,7 +198,7 @@ func runAuthenticationTests(t *testing.T, env *TestEnvironment) {
 			nonExistentReq := &swagger.SigninRequest{
 				Email:    "nonexistent@example.com",
 				Password: "qazwsxedc",
-				TenantID: "default-tenant",
+				TenantId: "default-tenant",
 			}
 			_, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.SigninRequest, swagger.AuthResponse](
 				ctx, &appConfig.Server, "api/v1/auth/signin", nil, nonExistentReq)
@@ -209,7 +208,7 @@ func runAuthenticationTests(t *testing.T, env *TestEnvironment) {
 			nonExistentTenantReq := &swagger.SigninRequest{
 				Email:    "signin@example.com",
 				Password: "qazwsxedc",
-				TenantID: "non-existent-tenant",
+				TenantId: "non-existent-tenant",
 			}
 			_, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.SigninRequest, swagger.AuthResponse](
 				ctx, &appConfig.Server, "api/v1/auth/signin", nil, nonExistentTenantReq)
@@ -222,9 +221,9 @@ func runAuthenticationTests(t *testing.T, env *TestEnvironment) {
 		createAndConfirmUser(t, env, "refresh@example.com", "qazwsxedc", "Refresh", "User")
 
 		signinReq := &swagger.SigninRequest{
-			Email:    strfmt.Email("refresh@example.com"),
+			Email:    "refresh@example.com",
 			Password: "qazwsxedc",
-			TenantID: "default-tenant",
+			TenantId: "default-tenant",
 		}
 		authResp, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.SigninRequest, swagger.AuthResponse](
 			ctx, &appConfig.Server, "api/v1/auth/signin", nil, signinReq)
@@ -243,7 +242,7 @@ func runAuthenticationTests(t *testing.T, env *TestEnvironment) {
 			assert.NotEqual(t, authResp.AccessToken, newAuthResp.AccessToken)
 			assert.NotEqual(t, authResp.RefreshToken, newAuthResp.RefreshToken)
 			// UserID should remain the same
-			assert.Equal(t, authResp.UserID, newAuthResp.UserID)
+			assert.Equal(t, authResp.UserId, newAuthResp.UserId)
 		})
 		t.Run("with invalid refresh token must fail with 401 Unauthorized", func(t *testing.T) {
 			invalidRefreshReq := &swagger.RefreshRequest{
@@ -260,9 +259,9 @@ func runAuthenticationTests(t *testing.T, env *TestEnvironment) {
 		createAndConfirmUser(t, env, "signout@example.com", "qazwsxedc", "Signout", "User")
 
 		signinReq := &swagger.SigninRequest{
-			Email:    strfmt.Email("signout@example.com"),
+			Email:    "signout@example.com",
 			Password: "qazwsxedc",
-			TenantID: "default-tenant",
+			TenantId: "default-tenant",
 		}
 		authResp, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.SigninRequest, swagger.AuthResponse](
 			ctx, &appConfig.Server, "api/v1/auth/signin", nil, signinReq)

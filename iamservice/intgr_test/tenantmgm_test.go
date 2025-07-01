@@ -18,7 +18,7 @@ func runTenantManagementTests(t *testing.T, env *TestEnvironment) {
 		sysadminSigninReq := &swagger.SigninRequest{
 			Email:    "john.doe.sysadmin@example.com",
 			Password: "qazwsxedc",
-			TenantID: "default-tenant",
+			TenantId: "default-tenant",
 		}
 		sysadminAuthResp, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.SigninRequest, swagger.AuthResponse](
 			ctx, &appConfig.Server, "api/v1/auth/signin", nil, sysadminSigninReq)
@@ -33,7 +33,7 @@ func runTenantManagementTests(t *testing.T, env *TestEnvironment) {
 		adminSigninReq := &swagger.SigninRequest{
 			Email:    "testadmin@example.com",
 			Password: "qazwsxedc",
-			TenantID: "default-tenant",
+			TenantId: "default-tenant",
 		}
 		adminAuthResp, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.SigninRequest, swagger.AuthResponse](
 			ctx, &appConfig.Server, "api/v1/auth/signin", nil, adminSigninReq)
@@ -48,7 +48,7 @@ func runTenantManagementTests(t *testing.T, env *TestEnvironment) {
 		userSigninReq := &swagger.SigninRequest{
 			Email:    "testuser@example.com",
 			Password: "qazwsxedc",
-			TenantID: "default-tenant",
+			TenantId: "default-tenant",
 		}
 		userAuthResp, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.SigninRequest, swagger.AuthResponse](
 			ctx, &appConfig.Server, "api/v1/auth/signin", nil, userSigninReq)
@@ -77,7 +77,7 @@ func runTenantManagementTests(t *testing.T, env *TestEnvironment) {
 				assert.NotNil(t, tenantListResp)
 				assert.NotNil(t, tenantListResp.Tenants)
 				assert.Equal(t, 1, len(tenantListResp.Tenants))
-				assert.Equal(t, "default-tenant", tenantListResp.Tenants[0].ID)
+				assert.Equal(t, "default-tenant", tenantListResp.Tenants[0].Id)
 			})
 			t.Run("regular user must return its own single tenant", func(t *testing.T) {
 				tenantListResp, _, err := kathttpc.LocalHttpJsonGetRequest[swagger.TenantListResponse](
@@ -86,7 +86,7 @@ func runTenantManagementTests(t *testing.T, env *TestEnvironment) {
 				assert.NotNil(t, tenantListResp)
 				assert.NotNil(t, tenantListResp.Tenants)
 				assert.Equal(t, 1, len(tenantListResp.Tenants))
-				assert.Equal(t, "default-tenant", tenantListResp.Tenants[0].ID)
+				assert.Equal(t, "default-tenant", tenantListResp.Tenants[0].Id)
 			})
 			t.Run("unauthenticated request must fail with 401 Unauthorized", func(t *testing.T) {
 				_, _, err := kathttpc.LocalHttpJsonGetRequest[swagger.TenantListResponse](
@@ -98,7 +98,7 @@ func runTenantManagementTests(t *testing.T, env *TestEnvironment) {
 		t.Run("POST /tenants", func(t *testing.T) {
 			t.Run("sysadmin user must succeed in creating tenant", func(t *testing.T) {
 				createTenantReq := &swagger.TenantCreateRequest{
-					ID:          "integration-test-tenant",
+					Id:          "integration-test-tenant",
 					Name:        "Integration Test Tenant",
 					Description: "Tenant created during integration tests",
 				}
@@ -106,7 +106,7 @@ func runTenantManagementTests(t *testing.T, env *TestEnvironment) {
 					ctx, &appConfig.Server, "api/v1/tenants", sysadminHeaders, createTenantReq)
 				assert.NoError(t, err)
 				assert.NotNil(t, tenantResp)
-				assert.Equal(t, "integration-test-tenant", tenantResp.ID)
+				assert.Equal(t, "integration-test-tenant", tenantResp.Id)
 				assert.Equal(t, "Integration Test Tenant", tenantResp.Name)
 				assert.Equal(t, "Tenant created during integration tests", tenantResp.Description)
 				assert.NotNil(t, tenantResp.CreatedAt)
@@ -114,7 +114,7 @@ func runTenantManagementTests(t *testing.T, env *TestEnvironment) {
 			})
 			t.Run("sysadmin user must fail with duplicate tenant ID", func(t *testing.T) {
 				duplicateTenantReq := &swagger.TenantCreateRequest{
-					ID:          "integration-test-tenant", // Same ID as above
+					Id:          "integration-test-tenant", // Same ID as above
 					Name:        "Duplicate Tenant",
 					Description: "This should fail",
 				}
@@ -124,7 +124,7 @@ func runTenantManagementTests(t *testing.T, env *TestEnvironment) {
 			})
 			t.Run("sysadmin user must fail with invalid tenant ID", func(t *testing.T) {
 				invalidTenantReq := &swagger.TenantCreateRequest{
-					ID:          "ab", // Too short (less than 3 characters)
+					Id:          "ab", // Too short (less than 3 characters)
 					Name:        "Invalid Tenant",
 					Description: "This should fail",
 				}
@@ -134,7 +134,7 @@ func runTenantManagementTests(t *testing.T, env *TestEnvironment) {
 			})
 			t.Run("sysadmin user must fail with missing required fields", func(t *testing.T) {
 				incompleteTenantReq := &swagger.TenantCreateRequest{
-					ID: "incomplete-tenant",
+					Id: "incomplete-tenant",
 					// Missing Name field
 					Description: "This should fail",
 				}
@@ -144,7 +144,7 @@ func runTenantManagementTests(t *testing.T, env *TestEnvironment) {
 			})
 			t.Run("admin user must fail with 403 Forbidden", func(t *testing.T) {
 				createTenantReq := &swagger.TenantCreateRequest{
-					ID:          "admin-test-tenant",
+					Id:          "admin-test-tenant",
 					Name:        "Admin Test Tenant",
 					Description: "This should fail",
 				}
@@ -154,7 +154,7 @@ func runTenantManagementTests(t *testing.T, env *TestEnvironment) {
 			})
 			t.Run("regular user must fail with 403 Forbidden", func(t *testing.T) {
 				createTenantReq := &swagger.TenantCreateRequest{
-					ID:          "user-test-tenant",
+					Id:          "user-test-tenant",
 					Name:        "User Test Tenant",
 					Description: "This should fail",
 				}
@@ -164,7 +164,7 @@ func runTenantManagementTests(t *testing.T, env *TestEnvironment) {
 			})
 			t.Run("unauthenticated request must fail with 401 Unauthorized", func(t *testing.T) {
 				createTenantReq := &swagger.TenantCreateRequest{
-					ID:          "unauth-test-tenant",
+					Id:          "unauth-test-tenant",
 					Name:        "Unauth Test Tenant",
 					Description: "This should fail",
 				}
@@ -181,7 +181,7 @@ func runTenantManagementTests(t *testing.T, env *TestEnvironment) {
 					ctx, &appConfig.Server, "api/v1/tenants/"+tenantID, sysadminHeaders)
 				assert.NoError(t, err)
 				assert.NotNil(t, tenantResp)
-				assert.Equal(t, tenantID, tenantResp.ID)
+				assert.Equal(t, tenantID, tenantResp.Id)
 				assert.Equal(t, "Default Tenant", tenantResp.Name)
 				assert.NotNil(t, tenantResp.CreatedAt)
 				assert.NotNil(t, tenantResp.UpdatedAt)
@@ -196,7 +196,7 @@ func runTenantManagementTests(t *testing.T, env *TestEnvironment) {
 					ctx, &appConfig.Server, "api/v1/tenants/"+tenantID, adminHeaders)
 				assert.NoError(t, err)
 				assert.NotNil(t, tenantResp)
-				assert.Equal(t, "default-tenant", tenantResp.ID)
+				assert.Equal(t, "default-tenant", tenantResp.Id)
 				assert.Equal(t, "Default Tenant", tenantResp.Name)
 				assert.NotNil(t, tenantResp.CreatedAt)
 				assert.NotNil(t, tenantResp.UpdatedAt)
@@ -211,7 +211,7 @@ func runTenantManagementTests(t *testing.T, env *TestEnvironment) {
 					ctx, &appConfig.Server, "api/v1/tenants/"+tenantID, userHeaders)
 				assert.NoError(t, err)
 				assert.NotNil(t, tenantResp)
-				assert.Equal(t, "default-tenant", tenantResp.ID)
+				assert.Equal(t, "default-tenant", tenantResp.Id)
 				assert.Equal(t, "Default Tenant", tenantResp.Name)
 				assert.NotNil(t, tenantResp.CreatedAt)
 				assert.NotNil(t, tenantResp.UpdatedAt)
@@ -239,7 +239,7 @@ func runTenantManagementTests(t *testing.T, env *TestEnvironment) {
 					ctx, &appConfig.Server, "api/v1/tenants/"+tenantID, sysadminHeaders, updateTenantReq)
 				assert.NoError(t, err)
 				assert.NotNil(t, tenantResp)
-				assert.Equal(t, tenantID, tenantResp.ID)
+				assert.Equal(t, tenantID, tenantResp.Id)
 				assert.Equal(t, "Updated Integration Test Tenant", tenantResp.Name)
 				assert.Equal(t, "Updated description for integration test tenant", tenantResp.Description)
 				assert.NotNil(t, tenantResp.UpdatedAt)
@@ -294,7 +294,7 @@ func runTenantManagementTests(t *testing.T, env *TestEnvironment) {
 		t.Run("DELETE /tenants/{tenantId}", func(t *testing.T) {
 			// First create a tenant specifically for deletion testing
 			createTenantReq := &swagger.TenantCreateRequest{
-				ID:          "delete-test-tenant",
+				Id:          "delete-test-tenant",
 				Name:        "Delete Test Tenant",
 				Description: "Tenant created for deletion testing",
 			}

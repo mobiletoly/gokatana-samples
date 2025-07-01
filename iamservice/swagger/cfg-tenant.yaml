@@ -1,0 +1,10 @@
+package: swagger
+output: internal/core/swagger/tenant.gen.go
+generate:
+  models: true
+output-options:
+  # NOTE that this is only required for the `Unreferenced` type
+  skip-prune: true
+  exclude-schemas: [ BearerAuth ]
+import-mapping:
+  ./common.yaml: "-"

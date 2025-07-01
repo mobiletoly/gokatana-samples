@@ -5,9 +5,9 @@ import (
 	"errors"
 	"github.com/jackc/pgx/v5"
 	"github.com/mobiletoly/gokatana-samples/iamservice/internal/core/usecase/internal"
+	openapi_types "github.com/oapi-codegen/runtime/types"
 	"time"
 
-	"github.com/go-openapi/strfmt"
 	"github.com/mobiletoly/gokatana-samples/iamservice/internal/core/model"
 	"github.com/mobiletoly/gokatana-samples/iamservice/internal/core/outport"
 	"github.com/mobiletoly/gokatana-samples/iamservice/internal/core/swagger"
@@ -101,14 +101,14 @@ func (u *UserMgm) ListAllUsersByTenant(
 	// In a real system, you'd add pagination support to the persist layer
 
 	// Convert to swagger models
-	userResponses := make([]*swagger.AuthUserResponse, len(users))
+	userResponses := make([]swagger.AuthUserResponse, len(users))
 	for i, user := range users {
-		userResponses[i] = authUserToAuthUserResponse(user)
+		userResponses[i] = *authUserToAuthUserResponse(user)
 	}
 
 	paginatedUsers, pagination := internal.Paginate(userResponses, page, limit)
 	return swagger.NewUserListResponseBuilder().
-		Pagination(pagination).
+		Pagination(*pagination).
 		Users(paginatedUsers).
 		Build(), nil
 }
@@ -143,14 +143,14 @@ func (u *UserMgm) ListAllUsers(
 	}
 
 	// Convert to swagger models
-	userResponses := make([]*swagger.AuthUserResponse, len(users))
+	userResponses := make([]swagger.AuthUserResponse, len(users))
 	for i, user := range users {
-		userResponses[i] = authUserToAuthUserResponse(user)
+		userResponses[i] = *authUserToAuthUserResponse(user)
 	}
 
 	paginatedUsers, pagination := internal.Paginate(userResponses, page, limit)
 	return swagger.NewUserListResponseBuilder().
-		Pagination(pagination).
+		Pagination(*pagination).
 		Users(paginatedUsers).
 		Build(), nil
 }
@@ -193,7 +193,7 @@ func (u *UserMgm) GetUserRoles(
 
 	return swagger.NewUserRolesResponseBuilder().
 		Roles(roles).
-		UserID(&userID).
+		UserId(userID).
 		Build(), nil
 }
 
@@ -434,19 +434,16 @@ func (u *UserMgm) ChangeUserPassword(
 
 // authUserToAuthUserResponse converts model.AuthUser to swagger.AuthUserResponse
 func authUserToAuthUserResponse(user *model.AuthUser) *swagger.AuthUserResponse {
-	email := strfmt.Email(user.Email)
-
-	// Convert time.Time to strfmt.DateTime directly
-	createdAt := strfmt.DateTime(user.CreatedAt)
-	updatedAt := strfmt.DateTime(user.UpdatedAt)
+	createdAt := user.CreatedAt
+	updatedAt := user.UpdatedAt
 
 	return swagger.NewAuthUserResponseBuilder().
 		CreatedAt(createdAt).
-		Email(email).
+		Email(openapi_types.Email(user.Email)).
 		FirstName(user.FirstName).
-		ID(user.ID).
+		Id(user.ID).
 		LastName(user.LastName).
-		TenantID(user.TenantID).
+		TenantId(user.TenantID).
 		UpdatedAt(updatedAt).
 		Build()
 }

@@ -3,7 +3,6 @@ package usecase
 import (
 	"context"
 	"errors"
-	"github.com/go-openapi/strfmt"
 	"github.com/jackc/pgx/v5"
 	"github.com/mobiletoly/gokatana-samples/iamservice/internal/core/model"
 	"github.com/mobiletoly/gokatana-samples/iamservice/internal/core/outport"
@@ -33,9 +32,9 @@ func (a *AuthMgm) GetAllTenants(ctx context.Context, principal *UserPrincipal) (
 		}
 	}
 
-	tenantResponses := make([]*swagger.TenantResponse, len(filteredTenants))
+	tenantResponses := make([]swagger.TenantResponse, len(filteredTenants))
 	for i, tenant := range filteredTenants {
-		tenantResponses[i] = tenantModelToTenantResponse(tenant)
+		tenantResponses[i] = *tenantModelToTenantResponse(tenant)
 	}
 
 	// Pagination (we hardcode for now)
@@ -43,7 +42,7 @@ func (a *AuthMgm) GetAllTenants(ctx context.Context, principal *UserPrincipal) (
 	limit := 20
 	tenants, pagination := internal.Paginate(filteredTenants, page, limit)
 	response := swagger.NewTenantListResponseBuilder().
-		Pagination(pagination).
+		Pagination(*pagination).
 		Tenants(tenantResponses).
 		Build()
 
@@ -88,7 +87,7 @@ func (a *AuthMgm) CreateTenant(
 ) (*swagger.TenantResponse, error) {
 	katapp.Logger(ctx).Info("creating tenant",
 		"principal", principal.String(),
-		"tenantID", req.ID,
+		"tenantID", req.Id,
 		"name", req.Name)
 
 	if !principal.IsSysAdmin() {
@@ -96,10 +95,10 @@ func (a *AuthMgm) CreateTenant(
 	}
 
 	// Validate input
-	if req.ID == "" {
+	if req.Id == "" {
 		return nil, katapp.NewErr(katapp.ErrInvalidInput, "tenant ID is required")
 	}
-	if len(req.ID) < 3 {
+	if len(req.Id) < 3 {
 		return nil, katapp.NewErr(katapp.ErrInvalidInput, "tenant ID must be at least 3 characters long")
 	}
 	if req.Name == "" {
@@ -109,7 +108,7 @@ func (a *AuthMgm) CreateTenant(
 	// Create tenant in a transaction
 	tenant, err := outport.TxWithResult(ctx, a.txPort, func(tx pgx.Tx) (*model.Tenant, error) {
 		// Check if tenant already exists
-		existingTenant, err := a.authUserPersist.GetTenantByID(ctx, tx, req.ID)
+		existingTenant, err := a.authUserPersist.GetTenantByID(ctx, tx, req.Id)
 		if err != nil {
 			var appErr *katapp.Err
 			if errors.As(err, &appErr) && appErr.Scope == katapp.ErrNotFound {
@@ -239,10 +238,10 @@ func (a *AuthMgm) DeleteTenant(ctx context.Context, principal *UserPrincipal, te
 // tenantModelToTenantResponse converts model.Tenant to swagger.TenantResponse
 func tenantModelToTenantResponse(tenant *model.Tenant) *swagger.TenantResponse {
 	return &swagger.TenantResponse{
-		ID:          tenant.ID,
+		Id:          tenant.ID,
 		Name:        tenant.Name,
 		Description: tenant.Description,
-		CreatedAt:   strfmt.DateTime(tenant.CreatedAt),
-		UpdatedAt:   strfmt.DateTime(tenant.UpdatedAt),
+		CreatedAt:   tenant.CreatedAt,
+		UpdatedAt:   tenant.UpdatedAt,
 	}
 }

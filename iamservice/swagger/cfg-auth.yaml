@@ -1,0 +1,9 @@
+package: swagger
+output: internal/core/swagger/auth.gen.go
+generate:
+  models: true
+output-options:
+  # NOTE that this is only required for the `Unreferenced` type
+  skip-prune: true
+import-mapping:
+  ./common.yaml: "-"

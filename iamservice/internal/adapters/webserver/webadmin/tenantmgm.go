@@ -87,7 +87,7 @@ func (h *TenantMgmWebHandlers) CreateTenantSubmitHandler(c echo.Context) error {
 	name := strings.TrimSpace(c.FormValue("name"))
 	description := strings.TrimSpace(c.FormValue("description"))
 	createReq := &swagger.TenantCreateRequest{
-		ID:          id,
+		Id:          id,
 		Name:        name,
 		Description: description,
 	}
