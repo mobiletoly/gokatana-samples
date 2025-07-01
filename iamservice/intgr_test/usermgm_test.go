@@ -157,8 +157,8 @@ func runUserManagementTests(t *testing.T, env *TestEnvironment) {
 				assert.NotNil(t, userProfile.CreatedAt)
 				assert.NotNil(t, userProfile.UpdatedAt)
 				assert.Equal(t, 175, *userProfile.Height)
-				assert.Equal(t, 70, string(*userProfile.Weight))
-				assert.Equal(t, "male", *userProfile.Gender)
+				assert.Equal(t, 70, *userProfile.Weight)
+				assert.Equal(t, "male", string(*userProfile.Gender))
 				assert.Equal(t, "1990-01-15", userProfile.BirthDate.String())
 			})
 			t.Run("admin user must fail with 403 Forbidden for user from other tenant", func(t *testing.T) {
