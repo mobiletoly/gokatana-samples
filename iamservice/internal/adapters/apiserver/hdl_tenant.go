@@ -60,7 +60,7 @@ func createTenantHandler(authMgm *usecase.AuthMgm) echo.HandlerFunc {
 			return kathttp_echo.ReportHTTPError(err)
 		}
 
-		var req swagger.TenantCreateRequest
+		var req swagger.CreateTenantRequest
 		if err := c.Bind(&req); err != nil {
 			return kathttp_echo.ReportBadRequest(katapp.NewErr(katapp.ErrInvalidInput, "invalid request body"))
 		}
@@ -82,7 +82,7 @@ func updateTenantHandler(authMgm *usecase.AuthMgm) echo.HandlerFunc {
 		}
 		tenantID := c.Param("tenantId")
 
-		var req swagger.TenantUpdateRequest
+		var req swagger.UpdateTenantRequest
 		if err := c.Bind(&req); err != nil {
 			return kathttp_echo.ReportBadRequest(katapp.NewErr(katapp.ErrInvalidInput, "invalid request body"))
 		}

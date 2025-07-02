@@ -51,7 +51,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserListResponse'
+                $ref: '#/components/schemas/AuthUsersResponse'
 
   /api/v1/user/all:
     get:
@@ -84,7 +84,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserListResponse'
+                $ref: '#/components/schemas/AuthUsersResponse'
 
   /api/v1/users/{userId}:
     get:
@@ -110,7 +110,7 @@ paths:
 
   /api/v1/users/{userId}/profile:
     get:
-      operationId: getUserProfile
+      operationId: getUserProfileById
       summary: Get user profile (Admin only)
       description: Returns the profile information for a specific user. Requires admin role.
       tags:
@@ -128,7 +128,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserProfile'
+                $ref: '#/components/schemas/UserProfileResponse'
     put:
       operationId: updateUserProfile
       summary: Update user profile (Admin only)
@@ -148,18 +148,18 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserProfileUpdateRequest'
+              $ref: '#/components/schemas/UpdateUserProfileRequest'
       responses:
         '200':
           description: User profile updated successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserProfile'
+                $ref: '#/components/schemas/UserProfileResponse'
 
   /api/v1/users/{userId}/roles:
     get:
-      operationId: getUserRoles
+      operationId: getUserRolesByUserId
       summary: Get user roles (Admin only)
       description: Returns the roles assigned to a specific user. Requires admin role.
       tags:
@@ -197,14 +197,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/AssignRoleRequest'
+              $ref: '#/components/schemas/AssignUserRoleRequest'
       responses:
         '200':
           description: Role assigned successfully
 
 components:
   schemas:
-    UserProfileUpdateRequest:
+    UpdateUserProfileRequest:
       type: object
       description: 'User profile update request data'
       properties:
@@ -219,10 +219,7 @@ components:
           example: 70000
           description: 'User weight in grams'
         gender:
-          type: string
-          nullable: true
-          example: 'Male'
-          description: 'User gender'
+          $ref: "#/components/schemas/UserProfileGender"
         birthDate:
           type: string
           nullable: true
@@ -235,7 +232,7 @@ components:
           example: true
           description: 'Whether to use metric units (true) or imperial units (false)'
 
-    UserProfile:
+    UserProfileResponse:
       type: object
       description: 'User profile data from user_profile table'
       properties:
@@ -260,11 +257,7 @@ components:
           example: 70000
           description: 'User weight in grams'
         gender:
-          type: string
-          nullable: true
-          example: 'male'
-          description: 'User gender (male/female/other)'
-          enum: [ 'male', 'female', 'other' ]
+          $ref: "#/components/schemas/UserProfileGender"
         birthDate:
           type: string
           nullable: true
@@ -346,13 +339,13 @@ components:
         - updatedAt
         - tenantId
 
-    UserListResponse:
+    AuthUsersResponse:
       type: object
       required:
-        - users
+        - items
         - pagination
       properties:
-        users:
+        items:
           type: array
           items:
             $ref: '#/components/schemas/AuthUserResponse'
@@ -373,7 +366,7 @@ components:
             type: string
           description: List of role names assigned to the user
 
-    AssignRoleRequest:
+    AssignUserRoleRequest:
       type: object
       required:
         - roleName
@@ -383,3 +376,10 @@ components:
           nullable: false
           description: Name of the role to assign
           enum: [ user, admin, moderator ]
+
+    UserProfileGender:
+      type: string
+      enum:
+        - male
+        - female
+        - other

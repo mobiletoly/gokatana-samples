@@ -15,12 +15,12 @@ func runTenantManagementTests(t *testing.T, env *TestEnvironment) {
 
 	t.Run("Tenant Management API (Sysadmin-only routes)", func(t *testing.T) {
 		// Create sysadmin user using sample data
-		sysadminSigninReq := &swagger.SigninRequest{
+		sysadminSigninReq := &swagger.SignInRequest{
 			Email:    "john.doe.sysadmin@example.com",
 			Password: "qazwsxedc",
 			TenantId: "default-tenant",
 		}
-		sysadminAuthResp, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.SigninRequest, swagger.AuthResponse](
+		sysadminAuthResp, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.SignInRequest, swagger.SignInResponse](
 			ctx, &appConfig.Server, "api/v1/auth/signin", nil, sysadminSigninReq)
 		assert.NoError(t, err)
 		assert.NotNil(t, sysadminAuthResp)
@@ -30,12 +30,12 @@ func runTenantManagementTests(t *testing.T, env *TestEnvironment) {
 		}
 
 		// Create admin user using sample data (should not have access to tenant management)
-		adminSigninReq := &swagger.SigninRequest{
+		adminSigninReq := &swagger.SignInRequest{
 			Email:    "testadmin@example.com",
 			Password: "qazwsxedc",
 			TenantId: "default-tenant",
 		}
-		adminAuthResp, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.SigninRequest, swagger.AuthResponse](
+		adminAuthResp, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.SignInRequest, swagger.SignInResponse](
 			ctx, &appConfig.Server, "api/v1/auth/signin", nil, adminSigninReq)
 		assert.NoError(t, err)
 		assert.NotNil(t, adminAuthResp)
@@ -45,12 +45,12 @@ func runTenantManagementTests(t *testing.T, env *TestEnvironment) {
 		}
 
 		// Create regular user using sample data (should not have access to tenant management)
-		userSigninReq := &swagger.SigninRequest{
+		userSigninReq := &swagger.SignInRequest{
 			Email:    "testuser@example.com",
 			Password: "qazwsxedc",
 			TenantId: "default-tenant",
 		}
-		userAuthResp, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.SigninRequest, swagger.AuthResponse](
+		userAuthResp, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.SignInRequest, swagger.SignInResponse](
 			ctx, &appConfig.Server, "api/v1/auth/signin", nil, userSigninReq)
 		assert.NoError(t, err)
 		assert.NotNil(t, userAuthResp)
@@ -61,35 +61,35 @@ func runTenantManagementTests(t *testing.T, env *TestEnvironment) {
 
 		t.Run("GET /tenants", func(t *testing.T) {
 			t.Run("sysadmin user must succeed", func(t *testing.T) {
-				tenantListResp, _, err := kathttpc.LocalHttpJsonGetRequest[swagger.TenantListResponse](
+				tenantListResp, _, err := kathttpc.LocalHttpJsonGetRequest[swagger.TenantsResponse](
 					ctx, &appConfig.Server, "api/v1/tenants", sysadminHeaders)
 				assert.NoError(t, err)
 				assert.NotNil(t, tenantListResp)
-				assert.NotNil(t, tenantListResp.Tenants)
-				assert.Greater(t, len(tenantListResp.Tenants), 0)
+				assert.NotNil(t, tenantListResp.Items)
+				assert.Greater(t, len(tenantListResp.Items), 0)
 				// Should contain at least default-tenant and test-tenant
-				assert.GreaterOrEqual(t, len(tenantListResp.Tenants), 2)
+				assert.GreaterOrEqual(t, len(tenantListResp.Items), 2)
 			})
 			t.Run("admin user must return its own single tenant", func(t *testing.T) {
-				tenantListResp, _, err := kathttpc.LocalHttpJsonGetRequest[swagger.TenantListResponse](
+				tenantListResp, _, err := kathttpc.LocalHttpJsonGetRequest[swagger.TenantsResponse](
 					ctx, &appConfig.Server, "api/v1/tenants", adminHeaders)
 				assert.NoError(t, err)
 				assert.NotNil(t, tenantListResp)
-				assert.NotNil(t, tenantListResp.Tenants)
-				assert.Equal(t, 1, len(tenantListResp.Tenants))
-				assert.Equal(t, "default-tenant", tenantListResp.Tenants[0].Id)
+				assert.NotNil(t, tenantListResp.Items)
+				assert.Equal(t, 1, len(tenantListResp.Items))
+				assert.Equal(t, "default-tenant", tenantListResp.Items[0].Id)
 			})
 			t.Run("regular user must return its own single tenant", func(t *testing.T) {
-				tenantListResp, _, err := kathttpc.LocalHttpJsonGetRequest[swagger.TenantListResponse](
+				tenantListResp, _, err := kathttpc.LocalHttpJsonGetRequest[swagger.TenantsResponse](
 					ctx, &appConfig.Server, "api/v1/tenants", userHeaders)
 				assert.NoError(t, err)
 				assert.NotNil(t, tenantListResp)
-				assert.NotNil(t, tenantListResp.Tenants)
-				assert.Equal(t, 1, len(tenantListResp.Tenants))
-				assert.Equal(t, "default-tenant", tenantListResp.Tenants[0].Id)
+				assert.NotNil(t, tenantListResp.Items)
+				assert.Equal(t, 1, len(tenantListResp.Items))
+				assert.Equal(t, "default-tenant", tenantListResp.Items[0].Id)
 			})
 			t.Run("unauthenticated request must fail with 401 Unauthorized", func(t *testing.T) {
-				_, _, err := kathttpc.LocalHttpJsonGetRequest[swagger.TenantListResponse](
+				_, _, err := kathttpc.LocalHttpJsonGetRequest[swagger.TenantsResponse](
 					ctx, &appConfig.Server, "api/v1/tenants", nil)
 				kathttpc.AssertStatusUnauthorized(t, err)
 			})
@@ -97,12 +97,12 @@ func runTenantManagementTests(t *testing.T, env *TestEnvironment) {
 
 		t.Run("POST /tenants", func(t *testing.T) {
 			t.Run("sysadmin user must succeed in creating tenant", func(t *testing.T) {
-				createTenantReq := &swagger.TenantCreateRequest{
+				createTenantReq := &swagger.CreateTenantRequest{
 					Id:          "integration-test-tenant",
 					Name:        "Integration Test Tenant",
 					Description: "Tenant created during integration tests",
 				}
-				tenantResp, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.TenantCreateRequest, swagger.TenantResponse](
+				tenantResp, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.CreateTenantRequest, swagger.TenantResponse](
 					ctx, &appConfig.Server, "api/v1/tenants", sysadminHeaders, createTenantReq)
 				assert.NoError(t, err)
 				assert.NotNil(t, tenantResp)
@@ -113,62 +113,62 @@ func runTenantManagementTests(t *testing.T, env *TestEnvironment) {
 				assert.NotNil(t, tenantResp.UpdatedAt)
 			})
 			t.Run("sysadmin user must fail with duplicate tenant ID", func(t *testing.T) {
-				duplicateTenantReq := &swagger.TenantCreateRequest{
+				duplicateTenantReq := &swagger.CreateTenantRequest{
 					Id:          "integration-test-tenant", // Same ID as above
 					Name:        "Duplicate Tenant",
 					Description: "This should fail",
 				}
-				_, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.TenantCreateRequest, swagger.TenantResponse](
+				_, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.CreateTenantRequest, swagger.TenantResponse](
 					ctx, &appConfig.Server, "api/v1/tenants", sysadminHeaders, duplicateTenantReq)
 				kathttpc.AssertStatusConflict(t, err)
 			})
 			t.Run("sysadmin user must fail with invalid tenant ID", func(t *testing.T) {
-				invalidTenantReq := &swagger.TenantCreateRequest{
+				invalidTenantReq := &swagger.CreateTenantRequest{
 					Id:          "ab", // Too short (less than 3 characters)
 					Name:        "Invalid Tenant",
 					Description: "This should fail",
 				}
-				_, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.TenantCreateRequest, swagger.TenantResponse](
+				_, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.CreateTenantRequest, swagger.TenantResponse](
 					ctx, &appConfig.Server, "api/v1/tenants", sysadminHeaders, invalidTenantReq)
 				kathttpc.AssertStatusBadRequest(t, err)
 			})
 			t.Run("sysadmin user must fail with missing required fields", func(t *testing.T) {
-				incompleteTenantReq := &swagger.TenantCreateRequest{
+				incompleteTenantReq := &swagger.CreateTenantRequest{
 					Id: "incomplete-tenant",
 					// Missing Name field
 					Description: "This should fail",
 				}
-				_, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.TenantCreateRequest, swagger.TenantResponse](
+				_, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.CreateTenantRequest, swagger.TenantResponse](
 					ctx, &appConfig.Server, "api/v1/tenants", sysadminHeaders, incompleteTenantReq)
 				kathttpc.AssertStatusBadRequest(t, err)
 			})
 			t.Run("admin user must fail with 403 Forbidden", func(t *testing.T) {
-				createTenantReq := &swagger.TenantCreateRequest{
+				createTenantReq := &swagger.CreateTenantRequest{
 					Id:          "admin-test-tenant",
 					Name:        "Admin Test Tenant",
 					Description: "This should fail",
 				}
-				_, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.TenantCreateRequest, swagger.TenantResponse](
+				_, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.CreateTenantRequest, swagger.TenantResponse](
 					ctx, &appConfig.Server, "api/v1/tenants", adminHeaders, createTenantReq)
 				kathttpc.AssertStatusForbidden(t, err)
 			})
 			t.Run("regular user must fail with 403 Forbidden", func(t *testing.T) {
-				createTenantReq := &swagger.TenantCreateRequest{
+				createTenantReq := &swagger.CreateTenantRequest{
 					Id:          "user-test-tenant",
 					Name:        "User Test Tenant",
 					Description: "This should fail",
 				}
-				_, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.TenantCreateRequest, swagger.TenantResponse](
+				_, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.CreateTenantRequest, swagger.TenantResponse](
 					ctx, &appConfig.Server, "api/v1/tenants", userHeaders, createTenantReq)
 				kathttpc.AssertStatusForbidden(t, err)
 			})
 			t.Run("unauthenticated request must fail with 401 Unauthorized", func(t *testing.T) {
-				createTenantReq := &swagger.TenantCreateRequest{
+				createTenantReq := &swagger.CreateTenantRequest{
 					Id:          "unauth-test-tenant",
 					Name:        "Unauth Test Tenant",
 					Description: "This should fail",
 				}
-				_, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.TenantCreateRequest, swagger.TenantResponse](
+				_, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.CreateTenantRequest, swagger.TenantResponse](
 					ctx, &appConfig.Server, "api/v1/tenants", nil, createTenantReq)
 				kathttpc.AssertStatusUnauthorized(t, err)
 			})
@@ -231,11 +231,11 @@ func runTenantManagementTests(t *testing.T, env *TestEnvironment) {
 		t.Run("PUT /tenants/{tenantId}", func(t *testing.T) {
 			tenantID := "integration-test-tenant" // Created in POST test above
 			t.Run("sysadmin user must succeed in updating tenant", func(t *testing.T) {
-				updateTenantReq := &swagger.TenantUpdateRequest{
+				updateTenantReq := &swagger.UpdateTenantRequest{
 					Name:        "Updated Integration Test Tenant",
 					Description: "Updated description for integration test tenant",
 				}
-				tenantResp, _, err := kathttpc.LocalHttpJsonPutRequest[swagger.TenantUpdateRequest, swagger.TenantResponse](
+				tenantResp, _, err := kathttpc.LocalHttpJsonPutRequest[swagger.UpdateTenantRequest, swagger.TenantResponse](
 					ctx, &appConfig.Server, "api/v1/tenants/"+tenantID, sysadminHeaders, updateTenantReq)
 				assert.NoError(t, err)
 				assert.NotNil(t, tenantResp)
@@ -245,47 +245,47 @@ func runTenantManagementTests(t *testing.T, env *TestEnvironment) {
 				assert.NotNil(t, tenantResp.UpdatedAt)
 			})
 			t.Run("sysadmin user must fail with non-existent tenant", func(t *testing.T) {
-				updateTenantReq := &swagger.TenantUpdateRequest{
+				updateTenantReq := &swagger.UpdateTenantRequest{
 					Name:        "Non-existent Tenant",
 					Description: "This should fail",
 				}
-				_, _, err := kathttpc.LocalHttpJsonPutRequest[swagger.TenantUpdateRequest, swagger.TenantResponse](
+				_, _, err := kathttpc.LocalHttpJsonPutRequest[swagger.UpdateTenantRequest, swagger.TenantResponse](
 					ctx, &appConfig.Server, "api/v1/tenants/non-existent-tenant", sysadminHeaders, updateTenantReq)
 				kathttpc.AssertStatusNotFound(t, err)
 			})
 			t.Run("sysadmin user must fail with missing required fields", func(t *testing.T) {
-				incompleteUpdateReq := &swagger.TenantUpdateRequest{
+				incompleteUpdateReq := &swagger.UpdateTenantRequest{
 					// Missing Name field
 					Description: "This should fail",
 				}
-				_, _, err := kathttpc.LocalHttpJsonPutRequest[swagger.TenantUpdateRequest, swagger.TenantResponse](
+				_, _, err := kathttpc.LocalHttpJsonPutRequest[swagger.UpdateTenantRequest, swagger.TenantResponse](
 					ctx, &appConfig.Server, "api/v1/tenants/"+tenantID, sysadminHeaders, incompleteUpdateReq)
 				kathttpc.AssertStatusBadRequest(t, err)
 			})
 			t.Run("admin user must fail with 403 Forbidden", func(t *testing.T) {
-				updateTenantReq := &swagger.TenantUpdateRequest{
+				updateTenantReq := &swagger.UpdateTenantRequest{
 					Name:        "Admin Update",
 					Description: "This should fail",
 				}
-				_, _, err := kathttpc.LocalHttpJsonPutRequest[swagger.TenantUpdateRequest, swagger.TenantResponse](
+				_, _, err := kathttpc.LocalHttpJsonPutRequest[swagger.UpdateTenantRequest, swagger.TenantResponse](
 					ctx, &appConfig.Server, "api/v1/tenants/"+tenantID, adminHeaders, updateTenantReq)
 				kathttpc.AssertStatusForbidden(t, err)
 			})
 			t.Run("regular user must fail with 403 Forbidden", func(t *testing.T) {
-				updateTenantReq := &swagger.TenantUpdateRequest{
+				updateTenantReq := &swagger.UpdateTenantRequest{
 					Name:        "User Update",
 					Description: "This should fail",
 				}
-				_, _, err := kathttpc.LocalHttpJsonPutRequest[swagger.TenantUpdateRequest, swagger.TenantResponse](
+				_, _, err := kathttpc.LocalHttpJsonPutRequest[swagger.UpdateTenantRequest, swagger.TenantResponse](
 					ctx, &appConfig.Server, "api/v1/tenants/"+tenantID, userHeaders, updateTenantReq)
 				kathttpc.AssertStatusForbidden(t, err)
 			})
 			t.Run("unauthenticated request must fail with 401 Unauthorized", func(t *testing.T) {
-				updateTenantReq := &swagger.TenantUpdateRequest{
+				updateTenantReq := &swagger.UpdateTenantRequest{
 					Name:        "Unauth Update",
 					Description: "This should fail",
 				}
-				_, _, err := kathttpc.LocalHttpJsonPutRequest[swagger.TenantUpdateRequest, swagger.TenantResponse](
+				_, _, err := kathttpc.LocalHttpJsonPutRequest[swagger.UpdateTenantRequest, swagger.TenantResponse](
 					ctx, &appConfig.Server, "api/v1/tenants/"+tenantID, nil, updateTenantReq)
 				kathttpc.AssertStatusUnauthorized(t, err)
 			})
@@ -293,12 +293,12 @@ func runTenantManagementTests(t *testing.T, env *TestEnvironment) {
 
 		t.Run("DELETE /tenants/{tenantId}", func(t *testing.T) {
 			// First create a tenant specifically for deletion testing
-			createTenantReq := &swagger.TenantCreateRequest{
+			createTenantReq := &swagger.CreateTenantRequest{
 				Id:          "delete-test-tenant",
 				Name:        "Delete Test Tenant",
 				Description: "Tenant created for deletion testing",
 			}
-			_, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.TenantCreateRequest, swagger.TenantResponse](
+			_, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.CreateTenantRequest, swagger.TenantResponse](
 				ctx, &appConfig.Server, "api/v1/tenants", sysadminHeaders, createTenantReq)
 			assert.NoError(t, err)
 

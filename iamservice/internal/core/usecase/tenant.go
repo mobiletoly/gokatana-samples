@@ -12,7 +12,7 @@ import (
 )
 
 // GetAllTenants returns all tenants
-func (a *AuthMgm) GetAllTenants(ctx context.Context, principal *UserPrincipal) (*swagger.TenantListResponse, error) {
+func (a *AuthMgm) GetAllTenants(ctx context.Context, principal *UserPrincipal) (*swagger.TenantsResponse, error) {
 	katapp.Logger(ctx).Debug("getting all tenants",
 		"principal", principal.String(),
 	)
@@ -41,9 +41,9 @@ func (a *AuthMgm) GetAllTenants(ctx context.Context, principal *UserPrincipal) (
 	page := 1
 	limit := 20
 	tenants, pagination := internal.Paginate(filteredTenants, page, limit)
-	response := swagger.NewTenantListResponseBuilder().
+	response := swagger.NewTenantsResponseBuilder().
+		Items(tenantResponses).
 		Pagination(*pagination).
-		Tenants(tenantResponses).
 		Build()
 
 	return response, nil
@@ -83,7 +83,7 @@ func (a *AuthMgm) GetTenantByID(
 
 // CreateTenant creates a new tenant (sysadmin only)
 func (a *AuthMgm) CreateTenant(
-	ctx context.Context, principal *UserPrincipal, req *swagger.TenantCreateRequest,
+	ctx context.Context, principal *UserPrincipal, req *swagger.CreateTenantRequest,
 ) (*swagger.TenantResponse, error) {
 	katapp.Logger(ctx).Info("creating tenant",
 		"principal", principal.String(),
@@ -132,7 +132,7 @@ func (a *AuthMgm) CreateTenant(
 
 // UpdateTenant updates an existing tenant
 func (a *AuthMgm) UpdateTenant(
-	ctx context.Context, principal *UserPrincipal, tenantID string, req *swagger.TenantUpdateRequest,
+	ctx context.Context, principal *UserPrincipal, tenantID string, req *swagger.UpdateTenantRequest,
 ) (*swagger.TenantResponse, error) {
 	katapp.Logger(ctx).Info("updating tenant",
 		"principal", principal.String(),

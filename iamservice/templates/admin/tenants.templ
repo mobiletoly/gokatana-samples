@@ -4,7 +4,7 @@ import "github.com/mobiletoly/gokatana-samples/iamservice/templates/common"
 
 import "github.com/mobiletoly/gokatana-samples/iamservice/internal/core/swagger"
 
-templ TenantsList(tenantsListResponse *swagger.TenantListResponse) {
+templ TenantsList(tenantsResponse *swagger.TenantsResponse) {
 	<div class="space-y-6">
 		<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
 			<h2 class="text-2xl font-bold text-gray-900">Tenants</h2>
@@ -12,12 +12,12 @@ templ TenantsList(tenantsListResponse *swagger.TenantListResponse) {
 		</div>
 
 		<div id="tenants-list">
-			if len(tenantsListResponse.Tenants) == 0 {
+			if len(tenantsResponse.Items) == 0 {
 				@common.EmptyState("office-building", "No tenants", "Get started by creating your first tenant.",
 					common.LinkButton("primary", "md", "/web/admin/tenants/new", "Add your first tenant", "plus"))
 			} else {
 				<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-					for _, tenant := range tenantsListResponse.Tenants {
+					for _, tenant := range tenantsResponse.Items {
 						@TenantCard(&tenant)
 					}
 				</div>

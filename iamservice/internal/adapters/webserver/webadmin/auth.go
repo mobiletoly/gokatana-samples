@@ -45,7 +45,7 @@ func (h *AuthWebHandlers) SignInSubmitHandler(c echo.Context) error {
 	tenantId := strings.TrimSpace(c.FormValue("tenantId"))
 	email := strings.TrimSpace(c.FormValue("email"))
 	password := strings.TrimSpace(c.FormValue("password"))
-	signinReq := &swagger.SigninRequest{
+	signinReq := &swagger.SignInRequest{
 		Email:    email,
 		Password: password,
 		TenantId: tenantId,

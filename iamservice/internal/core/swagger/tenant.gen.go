@@ -7,8 +7,8 @@ import (
 	"time"
 )
 
-// TenantCreateRequest Request payload for creating a new tenant
-type TenantCreateRequest struct {
+// CreateTenantRequest Request payload for creating a new tenant
+type CreateTenantRequest struct {
 	// Description Optional description of the tenant
 	Description string `json:"description"`
 
@@ -17,12 +17,6 @@ type TenantCreateRequest struct {
 
 	// Name Human-readable tenant name
 	Name string `json:"name"`
-}
-
-// TenantListResponse defines model for TenantListResponse.
-type TenantListResponse struct {
-	Pagination PaginationInfo   `json:"pagination"`
-	Tenants    []TenantResponse `json:"tenants"`
 }
 
 // TenantResponse Tenant information response
@@ -43,8 +37,14 @@ type TenantResponse struct {
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
-// TenantUpdateRequest Request payload for updating a tenant
-type TenantUpdateRequest struct {
+// TenantsResponse defines model for TenantsResponse.
+type TenantsResponse struct {
+	Items      []TenantResponse `json:"items"`
+	Pagination PaginationInfo   `json:"pagination"`
+}
+
+// UpdateTenantRequest Request payload for updating a tenant
+type UpdateTenantRequest struct {
 	// Description Optional description of the tenant
 	Description string `json:"description"`
 
@@ -52,8 +52,8 @@ type TenantUpdateRequest struct {
 	Name string `json:"name"`
 }
 
-// GetAllTenantsParams defines parameters for GetAllTenants.
-type GetAllTenantsParams struct {
+// ListAllTenantsParams defines parameters for ListAllTenants.
+type ListAllTenantsParams struct {
 	// Page Page number for pagination
 	Page *int `form:"page,omitempty" json:"page,omitempty"`
 
@@ -65,7 +65,7 @@ type GetAllTenantsParams struct {
 }
 
 // CreateTenantJSONRequestBody defines body for CreateTenant for application/json ContentType.
-type CreateTenantJSONRequestBody = TenantCreateRequest
+type CreateTenantJSONRequestBody = CreateTenantRequest
 
 // UpdateTenantByIdJSONRequestBody defines body for UpdateTenantById for application/json ContentType.
-type UpdateTenantByIdJSONRequestBody = TenantUpdateRequest
+type UpdateTenantByIdJSONRequestBody = UpdateTenantRequest

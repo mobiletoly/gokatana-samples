@@ -138,7 +138,7 @@ func assignUserRoleHandler(uc *usecase.UserMgm) func(c echo.Context) error {
 		userID := c.Param("userId")
 
 		// Parse request body
-		var req swagger.AssignRoleRequest
+		var req swagger.AssignUserRoleRequest
 		if err := c.Bind(&req); err != nil {
 			return kathttp_echo.ReportBadRequest(errors.New("invalid request body"))
 		}
@@ -197,7 +197,7 @@ func updateUserProfileHandler(uc *usecase.UserProfileMgm) func(c echo.Context) e
 		userID := c.Param("userId")
 
 		// Parse request body
-		var req swagger.UserProfileUpdateRequest
+		var req swagger.UpdateUserProfileRequest
 		if err := c.Bind(&req); err != nil {
 			return kathttp_echo.ReportBadRequest(errors.New("invalid request body"))
 		}

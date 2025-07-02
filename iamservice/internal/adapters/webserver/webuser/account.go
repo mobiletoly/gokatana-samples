@@ -116,7 +116,7 @@ func (h *AccountWebHandlers) UpdateProfileSubmitHandler(c echo.Context) error {
 	isMetricStr := strings.TrimSpace(c.FormValue("isMetric"))
 
 	// Create update request
-	updateReq := &swagger.UserProfileUpdateRequest{}
+	updateReq := &swagger.UpdateUserProfileRequest{}
 
 	// Determine if user is switching to metric or imperial
 	var isMetric bool = true // Default to metric
@@ -150,7 +150,8 @@ func (h *AccountWebHandlers) UpdateProfileSubmitHandler(c echo.Context) error {
 	}
 
 	if gender != "" {
-		updateReq.Gender = &gender
+		s := swagger.UserProfileGender(gender)
+		updateReq.Gender = &s
 	}
 	updateReq.IsMetric = &isMetric
 

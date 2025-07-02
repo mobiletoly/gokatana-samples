@@ -43,7 +43,7 @@ func NewAuthUser(
 }
 
 // RefreshToken generates new tokens using a refresh token
-func (a *AuthMgm) RefreshToken(ctx context.Context, req *swagger.RefreshRequest) (*swagger.AuthResponse, error) {
+func (a *AuthMgm) RefreshToken(ctx context.Context, req *swagger.RefreshRequest) (*swagger.SignInResponse, error) {
 	if req.RefreshToken == "" {
 		return nil, katapp.NewErr(katapp.ErrInvalidInput, "refresh token is required")
 	}
@@ -76,7 +76,7 @@ func (a *AuthMgm) RefreshToken(ctx context.Context, req *swagger.RefreshRequest)
 
 	// Build response
 	tokenType := "Bearer"
-	return swagger.NewAuthResponseBuilder().
+	return swagger.NewSignInResponseBuilder().
 			AccessToken(accessToken).
 			ExpiresIn(expiresIn).
 			RefreshToken(refreshToken).

@@ -8,24 +8,24 @@ import (
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
-func NewAssignRoleRequestBuilder() AssignRoleRequest_Builder_RoleName {
-	return AssignRoleRequest_Builder_RoleName{root: &AssignRoleRequest{}}
+func NewAssignUserRoleRequestBuilder() AssignUserRoleRequest_Builder_RoleName {
+	return AssignUserRoleRequest_Builder_RoleName{root: &AssignUserRoleRequest{}}
 }
 
-type AssignRoleRequest_Builder_RoleName struct {
-	root *AssignRoleRequest
+type AssignUserRoleRequest_Builder_RoleName struct {
+	root *AssignUserRoleRequest
 }
 
-type AssignRoleRequest_Builder_GobFinalizer struct {
-	root *AssignRoleRequest
+type AssignUserRoleRequest_Builder_GobFinalizer struct {
+	root *AssignUserRoleRequest
 }
 
-func (b AssignRoleRequest_Builder_RoleName) RoleName(arg AssignRoleRequestRoleName) AssignRoleRequest_Builder_GobFinalizer {
+func (b AssignUserRoleRequest_Builder_RoleName) RoleName(arg AssignUserRoleRequestRoleName) AssignUserRoleRequest_Builder_GobFinalizer {
 	b.root.RoleName = arg
-	return AssignRoleRequest_Builder_GobFinalizer{root: b.root}
+	return AssignUserRoleRequest_Builder_GobFinalizer{root: b.root}
 }
 
-func (b AssignRoleRequest_Builder_GobFinalizer) Build() *AssignRoleRequest {
+func (b AssignUserRoleRequest_Builder_GobFinalizer) Build() *AssignUserRoleRequest {
 	return b.root
 }
 
@@ -104,183 +104,183 @@ func (b AuthUserResponse_Builder_GobFinalizer) Build() *AuthUserResponse {
 	return b.root
 }
 
-func NewUserListResponseBuilder() UserListResponse_Builder_Pagination {
-	return UserListResponse_Builder_Pagination{root: &UserListResponse{}}
+func NewAuthUsersResponseBuilder() AuthUsersResponse_Builder_Items {
+	return AuthUsersResponse_Builder_Items{root: &AuthUsersResponse{}}
 }
 
-type UserListResponse_Builder_Pagination struct {
-	root *UserListResponse
+type AuthUsersResponse_Builder_Items struct {
+	root *AuthUsersResponse
 }
 
-type UserListResponse_Builder_Users struct {
-	root *UserListResponse
+type AuthUsersResponse_Builder_Pagination struct {
+	root *AuthUsersResponse
 }
 
-func (b UserListResponse_Builder_Pagination) Pagination(arg PaginationInfo) UserListResponse_Builder_Users {
+func (b AuthUsersResponse_Builder_Items) Items(arg []AuthUserResponse) AuthUsersResponse_Builder_Pagination {
+	b.root.Items = arg
+	return AuthUsersResponse_Builder_Pagination{root: b.root}
+}
+
+type AuthUsersResponse_Builder_GobFinalizer struct {
+	root *AuthUsersResponse
+}
+
+func (b AuthUsersResponse_Builder_Pagination) Pagination(arg PaginationInfo) AuthUsersResponse_Builder_GobFinalizer {
 	b.root.Pagination = arg
-	return UserListResponse_Builder_Users{root: b.root}
+	return AuthUsersResponse_Builder_GobFinalizer{root: b.root}
 }
 
-type UserListResponse_Builder_GobFinalizer struct {
-	root *UserListResponse
-}
-
-func (b UserListResponse_Builder_Users) Users(arg []AuthUserResponse) UserListResponse_Builder_GobFinalizer {
-	b.root.Users = arg
-	return UserListResponse_Builder_GobFinalizer{root: b.root}
-}
-
-func (b UserListResponse_Builder_GobFinalizer) Build() *UserListResponse {
+func (b AuthUsersResponse_Builder_GobFinalizer) Build() *AuthUsersResponse {
 	return b.root
 }
 
-func NewUserProfileBuilder() UserProfile_Builder_BirthDate {
-	return UserProfile_Builder_BirthDate{root: &UserProfile{}}
+func NewUpdateUserProfileRequestBuilder() UpdateUserProfileRequest_Builder_BirthDate {
+	return UpdateUserProfileRequest_Builder_BirthDate{root: &UpdateUserProfileRequest{}}
 }
 
-type UserProfile_Builder_BirthDate struct {
-	root *UserProfile
+type UpdateUserProfileRequest_Builder_BirthDate struct {
+	root *UpdateUserProfileRequest
 }
 
-type UserProfile_Builder_CreatedAt struct {
-	root *UserProfile
+type UpdateUserProfileRequest_Builder_Gender struct {
+	root *UpdateUserProfileRequest
 }
 
-func (b UserProfile_Builder_BirthDate) BirthDate(arg *openapi_types.Date) UserProfile_Builder_CreatedAt {
+func (b UpdateUserProfileRequest_Builder_BirthDate) BirthDate(arg *openapi_types.Date) UpdateUserProfileRequest_Builder_Gender {
 	b.root.BirthDate = arg
-	return UserProfile_Builder_CreatedAt{root: b.root}
+	return UpdateUserProfileRequest_Builder_Gender{root: b.root}
 }
 
-type UserProfile_Builder_Gender struct {
-	root *UserProfile
+type UpdateUserProfileRequest_Builder_Height struct {
+	root *UpdateUserProfileRequest
 }
 
-func (b UserProfile_Builder_CreatedAt) CreatedAt(arg time.Time) UserProfile_Builder_Gender {
+func (b UpdateUserProfileRequest_Builder_Gender) Gender(arg *UserProfileGender) UpdateUserProfileRequest_Builder_Height {
+	b.root.Gender = arg
+	return UpdateUserProfileRequest_Builder_Height{root: b.root}
+}
+
+type UpdateUserProfileRequest_Builder_IsMetric struct {
+	root *UpdateUserProfileRequest
+}
+
+func (b UpdateUserProfileRequest_Builder_Height) Height(arg *int) UpdateUserProfileRequest_Builder_IsMetric {
+	b.root.Height = arg
+	return UpdateUserProfileRequest_Builder_IsMetric{root: b.root}
+}
+
+type UpdateUserProfileRequest_Builder_Weight struct {
+	root *UpdateUserProfileRequest
+}
+
+func (b UpdateUserProfileRequest_Builder_IsMetric) IsMetric(arg *bool) UpdateUserProfileRequest_Builder_Weight {
+	b.root.IsMetric = arg
+	return UpdateUserProfileRequest_Builder_Weight{root: b.root}
+}
+
+type UpdateUserProfileRequest_Builder_GobFinalizer struct {
+	root *UpdateUserProfileRequest
+}
+
+func (b UpdateUserProfileRequest_Builder_Weight) Weight(arg *int) UpdateUserProfileRequest_Builder_GobFinalizer {
+	b.root.Weight = arg
+	return UpdateUserProfileRequest_Builder_GobFinalizer{root: b.root}
+}
+
+func (b UpdateUserProfileRequest_Builder_GobFinalizer) Build() *UpdateUserProfileRequest {
+	return b.root
+}
+
+func NewUserProfileResponseBuilder() UserProfileResponse_Builder_BirthDate {
+	return UserProfileResponse_Builder_BirthDate{root: &UserProfileResponse{}}
+}
+
+type UserProfileResponse_Builder_BirthDate struct {
+	root *UserProfileResponse
+}
+
+type UserProfileResponse_Builder_CreatedAt struct {
+	root *UserProfileResponse
+}
+
+func (b UserProfileResponse_Builder_BirthDate) BirthDate(arg *openapi_types.Date) UserProfileResponse_Builder_CreatedAt {
+	b.root.BirthDate = arg
+	return UserProfileResponse_Builder_CreatedAt{root: b.root}
+}
+
+type UserProfileResponse_Builder_Gender struct {
+	root *UserProfileResponse
+}
+
+func (b UserProfileResponse_Builder_CreatedAt) CreatedAt(arg time.Time) UserProfileResponse_Builder_Gender {
 	b.root.CreatedAt = arg
-	return UserProfile_Builder_Gender{root: b.root}
+	return UserProfileResponse_Builder_Gender{root: b.root}
 }
 
-type UserProfile_Builder_Height struct {
-	root *UserProfile
+type UserProfileResponse_Builder_Height struct {
+	root *UserProfileResponse
 }
 
-func (b UserProfile_Builder_Gender) Gender(arg *UserProfileGender) UserProfile_Builder_Height {
+func (b UserProfileResponse_Builder_Gender) Gender(arg *UserProfileGender) UserProfileResponse_Builder_Height {
 	b.root.Gender = arg
-	return UserProfile_Builder_Height{root: b.root}
+	return UserProfileResponse_Builder_Height{root: b.root}
 }
 
-type UserProfile_Builder_Id struct {
-	root *UserProfile
+type UserProfileResponse_Builder_Id struct {
+	root *UserProfileResponse
 }
 
-func (b UserProfile_Builder_Height) Height(arg *int) UserProfile_Builder_Id {
+func (b UserProfileResponse_Builder_Height) Height(arg *int) UserProfileResponse_Builder_Id {
 	b.root.Height = arg
-	return UserProfile_Builder_Id{root: b.root}
+	return UserProfileResponse_Builder_Id{root: b.root}
 }
 
-type UserProfile_Builder_IsMetric struct {
-	root *UserProfile
+type UserProfileResponse_Builder_IsMetric struct {
+	root *UserProfileResponse
 }
 
-func (b UserProfile_Builder_Id) Id(arg int) UserProfile_Builder_IsMetric {
+func (b UserProfileResponse_Builder_Id) Id(arg int) UserProfileResponse_Builder_IsMetric {
 	b.root.Id = arg
-	return UserProfile_Builder_IsMetric{root: b.root}
+	return UserProfileResponse_Builder_IsMetric{root: b.root}
 }
 
-type UserProfile_Builder_UpdatedAt struct {
-	root *UserProfile
+type UserProfileResponse_Builder_UpdatedAt struct {
+	root *UserProfileResponse
 }
 
-func (b UserProfile_Builder_IsMetric) IsMetric(arg bool) UserProfile_Builder_UpdatedAt {
+func (b UserProfileResponse_Builder_IsMetric) IsMetric(arg bool) UserProfileResponse_Builder_UpdatedAt {
 	b.root.IsMetric = arg
-	return UserProfile_Builder_UpdatedAt{root: b.root}
+	return UserProfileResponse_Builder_UpdatedAt{root: b.root}
 }
 
-type UserProfile_Builder_UserId struct {
-	root *UserProfile
+type UserProfileResponse_Builder_UserId struct {
+	root *UserProfileResponse
 }
 
-func (b UserProfile_Builder_UpdatedAt) UpdatedAt(arg time.Time) UserProfile_Builder_UserId {
+func (b UserProfileResponse_Builder_UpdatedAt) UpdatedAt(arg time.Time) UserProfileResponse_Builder_UserId {
 	b.root.UpdatedAt = arg
-	return UserProfile_Builder_UserId{root: b.root}
+	return UserProfileResponse_Builder_UserId{root: b.root}
 }
 
-type UserProfile_Builder_Weight struct {
-	root *UserProfile
+type UserProfileResponse_Builder_Weight struct {
+	root *UserProfileResponse
 }
 
-func (b UserProfile_Builder_UserId) UserId(arg string) UserProfile_Builder_Weight {
+func (b UserProfileResponse_Builder_UserId) UserId(arg string) UserProfileResponse_Builder_Weight {
 	b.root.UserId = arg
-	return UserProfile_Builder_Weight{root: b.root}
+	return UserProfileResponse_Builder_Weight{root: b.root}
 }
 
-type UserProfile_Builder_GobFinalizer struct {
-	root *UserProfile
+type UserProfileResponse_Builder_GobFinalizer struct {
+	root *UserProfileResponse
 }
 
-func (b UserProfile_Builder_Weight) Weight(arg *int) UserProfile_Builder_GobFinalizer {
+func (b UserProfileResponse_Builder_Weight) Weight(arg *int) UserProfileResponse_Builder_GobFinalizer {
 	b.root.Weight = arg
-	return UserProfile_Builder_GobFinalizer{root: b.root}
+	return UserProfileResponse_Builder_GobFinalizer{root: b.root}
 }
 
-func (b UserProfile_Builder_GobFinalizer) Build() *UserProfile {
-	return b.root
-}
-
-func NewUserProfileUpdateRequestBuilder() UserProfileUpdateRequest_Builder_BirthDate {
-	return UserProfileUpdateRequest_Builder_BirthDate{root: &UserProfileUpdateRequest{}}
-}
-
-type UserProfileUpdateRequest_Builder_BirthDate struct {
-	root *UserProfileUpdateRequest
-}
-
-type UserProfileUpdateRequest_Builder_Gender struct {
-	root *UserProfileUpdateRequest
-}
-
-func (b UserProfileUpdateRequest_Builder_BirthDate) BirthDate(arg *openapi_types.Date) UserProfileUpdateRequest_Builder_Gender {
-	b.root.BirthDate = arg
-	return UserProfileUpdateRequest_Builder_Gender{root: b.root}
-}
-
-type UserProfileUpdateRequest_Builder_Height struct {
-	root *UserProfileUpdateRequest
-}
-
-func (b UserProfileUpdateRequest_Builder_Gender) Gender(arg *string) UserProfileUpdateRequest_Builder_Height {
-	b.root.Gender = arg
-	return UserProfileUpdateRequest_Builder_Height{root: b.root}
-}
-
-type UserProfileUpdateRequest_Builder_IsMetric struct {
-	root *UserProfileUpdateRequest
-}
-
-func (b UserProfileUpdateRequest_Builder_Height) Height(arg *int) UserProfileUpdateRequest_Builder_IsMetric {
-	b.root.Height = arg
-	return UserProfileUpdateRequest_Builder_IsMetric{root: b.root}
-}
-
-type UserProfileUpdateRequest_Builder_Weight struct {
-	root *UserProfileUpdateRequest
-}
-
-func (b UserProfileUpdateRequest_Builder_IsMetric) IsMetric(arg *bool) UserProfileUpdateRequest_Builder_Weight {
-	b.root.IsMetric = arg
-	return UserProfileUpdateRequest_Builder_Weight{root: b.root}
-}
-
-type UserProfileUpdateRequest_Builder_GobFinalizer struct {
-	root *UserProfileUpdateRequest
-}
-
-func (b UserProfileUpdateRequest_Builder_Weight) Weight(arg *int) UserProfileUpdateRequest_Builder_GobFinalizer {
-	b.root.Weight = arg
-	return UserProfileUpdateRequest_Builder_GobFinalizer{root: b.root}
-}
-
-func (b UserProfileUpdateRequest_Builder_GobFinalizer) Build() *UserProfileUpdateRequest {
+func (b UserProfileResponse_Builder_GobFinalizer) Build() *UserProfileResponse {
 	return b.root
 }
 

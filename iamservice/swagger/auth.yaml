@@ -46,14 +46,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SigninRequest'
+              $ref: '#/components/schemas/SignInRequest'
       responses:
         '200':
           description: 'User successfully authenticated'
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AuthResponse'
+                $ref: '#/components/schemas/SignInResponse'
         '400':
           description: 'Invalid input data'
         '401':
@@ -90,7 +90,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AuthResponse'
+                $ref: '#/components/schemas/SignInResponse'
         '400':
           description: 'Invalid refresh token'
         '401':
@@ -174,7 +174,7 @@ components:
         - tenantId
         - source
 
-    SigninRequest:
+    SignInRequest:
       type: object
       properties:
         email:
@@ -242,7 +242,7 @@ components:
       required:
         - message
 
-    AuthResponse:
+    SignInResponse:
       type: object
       properties:
         accessToken:

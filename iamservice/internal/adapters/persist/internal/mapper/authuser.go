@@ -2,6 +2,8 @@ package mapper
 
 import (
 	"github.com/mobiletoly/gokatana-samples/iamservice/internal/core/model"
+	"github.com/oapi-codegen/runtime/types"
+	"github.com/samber/lo"
 	"time"
 
 	"github.com/mobiletoly/gokatana-samples/iamservice/internal/adapters/persist/internal/repo"
@@ -64,7 +66,7 @@ func TenantModelToTenantResponse(tenant *model.Tenant) *swagger.TenantResponse {
 }
 
 // TenantCreateRequestToTenantEntity converts swagger.TenantCreateRequest to repo.TenantEntity
-func TenantCreateRequestToTenantEntity(req *swagger.TenantCreateRequest) *repo.TenantEntity {
+func TenantCreateRequestToTenantEntity(req *swagger.CreateTenantRequest) *repo.TenantEntity {
 	now := time.Now()
 	return repo.NewTenantEntityBuilder().
 		ID(req.Id).
@@ -76,7 +78,7 @@ func TenantCreateRequestToTenantEntity(req *swagger.TenantCreateRequest) *repo.T
 }
 
 // TenantUpdateRequestToTenantEntity converts swagger.TenantUpdateRequest to repo.TenantEntity
-func TenantUpdateRequestToTenantEntity(tenantID string, req *swagger.TenantUpdateRequest) *repo.TenantEntity {
+func TenantUpdateRequestToTenantEntity(tenantID string, req *swagger.UpdateTenantRequest) *repo.TenantEntity {
 	return &repo.TenantEntity{
 		ID:          tenantID,
 		Name:        req.Name,
@@ -85,24 +87,27 @@ func TenantUpdateRequestToTenantEntity(tenantID string, req *swagger.TenantUpdat
 	}
 }
 
-// UserProfileEntityToUserProfileModel converts repo.UserProfileEntity to model.UserProfile
-func UserProfileEntityToUserProfileModel(entity *repo.UserProfileEntity) *model.UserProfile {
-	var birthDate *string
+// UserProfileEntityToSwagger converts repo.UserProfileEntity to model.UserProfile
+func UserProfileEntityToSwagger(entity *repo.UserProfileEntity) *swagger.UserProfileResponse {
+	var birthDate *types.Date
 	if entity.BirthDate != nil {
-		// Convert time.Time to string in YYYY-MM-DD format
-		dateStr := entity.BirthDate.Format("2006-01-02")
-		birthDate = &dateStr
+		birthDate = &types.Date{Time: *entity.BirthDate}
 	}
 
-	return model.NewUserProfileBuilder().
-		ID(*entity.ID).
-		UserID(entity.UserID).
-		Height(entity.Height).
-		Weight(entity.Weight).
-		Gender(entity.Gender).
+	var gender *swagger.UserProfileGender
+	if entity.Gender != nil {
+		gender = lo.ToPtr(swagger.UserProfileGender(*entity.Gender))
+	}
+
+	return swagger.NewUserProfileResponseBuilder().
 		BirthDate(birthDate).
-		IsMetric(entity.IsMetric).
 		CreatedAt(entity.CreatedAt).
+		Gender(gender).
+		Height(entity.Height).
+		Id(*entity.ID).
+		IsMetric(entity.IsMetric).
 		UpdatedAt(entity.UpdatedAt).
+		UserId(entity.UserID).
+		Weight(entity.Weight).
 		Build()
 }

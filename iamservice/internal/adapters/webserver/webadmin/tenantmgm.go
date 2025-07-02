@@ -86,11 +86,11 @@ func (h *TenantMgmWebHandlers) CreateTenantSubmitHandler(c echo.Context) error {
 	id := strings.TrimSpace(c.FormValue("id"))
 	name := strings.TrimSpace(c.FormValue("name"))
 	description := strings.TrimSpace(c.FormValue("description"))
-	createReq := &swagger.TenantCreateRequest{
-		Id:          id,
-		Name:        name,
-		Description: description,
-	}
+	createReq := swagger.NewCreateTenantRequestBuilder().
+		Description(description).
+		Id(id).
+		Name(name).
+		Build()
 
 	if tenant, err := h.authMgm.CreateTenant(ctx, principal, createReq); err != nil {
 		return err
@@ -109,10 +109,10 @@ func (h *TenantMgmWebHandlers) UpdateTenantSubmitHandler(c echo.Context) error {
 	tenantID := c.Param("id")
 	name := strings.TrimSpace(c.FormValue("name"))
 	description := strings.TrimSpace(c.FormValue("description"))
-	updateReq := &swagger.TenantUpdateRequest{
-		Name:        name,
-		Description: description,
-	}
+	updateReq := swagger.NewUpdateTenantRequestBuilder().
+		Description(description).
+		Name(name).
+		Build()
 
 	if tenant, err := h.authMgm.UpdateTenant(ctx, principal, tenantID, updateReq); err != nil {
 		return err

@@ -60,7 +60,7 @@ func (u *UserMgm) LoadUserByID(
 // if userPrincipal is user role only, then only the user's own profile is returned
 func (u *UserMgm) ListAllUsersByTenant(
 	ctx context.Context, userPrincipal *UserPrincipal, tenantID string, page, limit int,
-) (*swagger.UserListResponse, error) {
+) (*swagger.AuthUsersResponse, error) {
 	katapp.Logger(ctx).Info("listing users by tenant",
 		"principal", userPrincipal.String(),
 		"tenantID", tenantID,
@@ -107,16 +107,16 @@ func (u *UserMgm) ListAllUsersByTenant(
 	}
 
 	paginatedUsers, pagination := internal.Paginate(userResponses, page, limit)
-	return swagger.NewUserListResponseBuilder().
+	return swagger.NewAuthUsersResponseBuilder().
+		Items(paginatedUsers).
 		Pagination(*pagination).
-		Users(paginatedUsers).
 		Build(), nil
 }
 
 // ListAllUsers returns a paginated list of all users in the system (sysadmin role only)
 func (u *UserMgm) ListAllUsers(
 	ctx context.Context, principal *UserPrincipal, page, limit int,
-) (*swagger.UserListResponse, error) {
+) (*swagger.AuthUsersResponse, error) {
 	katapp.Logger(ctx).Info("listing all users",
 		"principal", principal.String(),
 		"page", page,
@@ -149,9 +149,9 @@ func (u *UserMgm) ListAllUsers(
 	}
 
 	paginatedUsers, pagination := internal.Paginate(userResponses, page, limit)
-	return swagger.NewUserListResponseBuilder().
+	return swagger.NewAuthUsersResponseBuilder().
+		Items(paginatedUsers).
 		Pagination(*pagination).
-		Users(paginatedUsers).
 		Build(), nil
 }
 

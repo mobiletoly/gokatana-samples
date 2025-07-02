@@ -9,11 +9,11 @@ import (
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
-// Defines values for AssignRoleRequestRoleName.
+// Defines values for AssignUserRoleRequestRoleName.
 const (
-	Admin     AssignRoleRequestRoleName = "admin"
-	Moderator AssignRoleRequestRoleName = "moderator"
-	User      AssignRoleRequestRoleName = "user"
+	Admin     AssignUserRoleRequestRoleName = "admin"
+	Moderator AssignUserRoleRequestRoleName = "moderator"
+	User      AssignUserRoleRequestRoleName = "user"
 )
 
 // Defines values for UserProfileGender.
@@ -23,14 +23,14 @@ const (
 	Other  UserProfileGender = "other"
 )
 
-// AssignRoleRequest defines model for AssignRoleRequest.
-type AssignRoleRequest struct {
+// AssignUserRoleRequest defines model for AssignUserRoleRequest.
+type AssignUserRoleRequest struct {
 	// RoleName Name of the role to assign
-	RoleName AssignRoleRequestRoleName `json:"roleName"`
+	RoleName AssignUserRoleRequestRoleName `json:"roleName"`
 }
 
-// AssignRoleRequestRoleName Name of the role to assign
-type AssignRoleRequestRoleName string
+// AssignUserRoleRequestRoleName Name of the role to assign
+type AssignUserRoleRequestRoleName string
 
 // AuthUserResponse Authentication user data from auth_user table (excluding sensitive fields)
 type AuthUserResponse struct {
@@ -56,22 +56,39 @@ type AuthUserResponse struct {
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
-// UserListResponse defines model for UserListResponse.
-type UserListResponse struct {
+// AuthUsersResponse defines model for AuthUsersResponse.
+type AuthUsersResponse struct {
+	Items      []AuthUserResponse `json:"items"`
 	Pagination PaginationInfo     `json:"pagination"`
-	Users      []AuthUserResponse `json:"users"`
 }
 
-// UserProfile User profile data from user_profile table
-type UserProfile struct {
+// UpdateUserProfileRequest User profile update request data
+type UpdateUserProfileRequest struct {
+	// BirthDate User birth date in YYYY-MM-DD format
+	BirthDate *openapi_types.Date `json:"birthDate"`
+	Gender    *UserProfileGender  `json:"gender,omitempty"`
+
+	// Height User height in centimeters
+	Height *int `json:"height"`
+
+	// IsMetric Whether to use metric units (true) or imperial units (false)
+	IsMetric *bool `json:"isMetric"`
+
+	// Weight User weight in grams
+	Weight *int `json:"weight"`
+}
+
+// UserProfileGender defines model for UserProfileGender.
+type UserProfileGender string
+
+// UserProfileResponse User profile data from user_profile table
+type UserProfileResponse struct {
 	// BirthDate User birth date
 	BirthDate *openapi_types.Date `json:"birthDate"`
 
 	// CreatedAt Profile creation timestamp
-	CreatedAt time.Time `json:"createdAt"`
-
-	// Gender User gender (male/female/other)
-	Gender *UserProfileGender `json:"gender"`
+	CreatedAt time.Time          `json:"createdAt"`
+	Gender    *UserProfileGender `json:"gender,omitempty"`
 
 	// Height User height in centimeters
 	Height *int `json:"height"`
@@ -87,27 +104,6 @@ type UserProfile struct {
 
 	// UserId User unique identifier (foreign key to auth_user table)
 	UserId string `json:"userId"`
-
-	// Weight User weight in grams
-	Weight *int `json:"weight"`
-}
-
-// UserProfileGender User gender (male/female/other)
-type UserProfileGender string
-
-// UserProfileUpdateRequest User profile update request data
-type UserProfileUpdateRequest struct {
-	// BirthDate User birth date in YYYY-MM-DD format
-	BirthDate *openapi_types.Date `json:"birthDate"`
-
-	// Gender User gender
-	Gender *string `json:"gender"`
-
-	// Height User height in centimeters
-	Height *int `json:"height"`
-
-	// IsMetric Whether to use metric units (true) or imperial units (false)
-	IsMetric *bool `json:"isMetric"`
 
 	// Weight User weight in grams
 	Weight *int `json:"weight"`
@@ -139,7 +135,7 @@ type ListUsersByTenantParams struct {
 }
 
 // UpdateUserProfileJSONRequestBody defines body for UpdateUserProfile for application/json ContentType.
-type UpdateUserProfileJSONRequestBody = UserProfileUpdateRequest
+type UpdateUserProfileJSONRequestBody = UpdateUserProfileRequest
 
 // AssignUserRoleJSONRequestBody defines body for AssignUserRole for application/json ContentType.
-type AssignUserRoleJSONRequestBody = AssignRoleRequest
+type AssignUserRoleJSONRequestBody = AssignUserRoleRequest

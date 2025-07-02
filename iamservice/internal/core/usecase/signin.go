@@ -12,7 +12,7 @@ import (
 )
 
 // SignIn authenticates a user and returns tokens
-func (a *AuthMgm) SignIn(ctx context.Context, req *swagger.SigninRequest) (*swagger.AuthResponse, error) {
+func (a *AuthMgm) SignIn(ctx context.Context, req *swagger.SignInRequest) (*swagger.SignInResponse, error) {
 	if err := a.validateSigninRequest(req); err != nil {
 		return nil, err
 	}
@@ -57,7 +57,7 @@ func (a *AuthMgm) SignIn(ctx context.Context, req *swagger.SigninRequest) (*swag
 
 	// Build response
 	tokenType := "Bearer"
-	return swagger.NewAuthResponseBuilder().
+	return swagger.NewSignInResponseBuilder().
 		AccessToken(accessToken).
 		ExpiresIn(expiresIn).
 		RefreshToken(refreshToken).
@@ -66,7 +66,7 @@ func (a *AuthMgm) SignIn(ctx context.Context, req *swagger.SigninRequest) (*swag
 		Build(), nil
 }
 
-func (a *AuthMgm) validateSigninRequest(req *swagger.SigninRequest) error {
+func (a *AuthMgm) validateSigninRequest(req *swagger.SignInRequest) error {
 	if req.Email == "" {
 		return katapp.NewErr(katapp.ErrInvalidInput, "email is required")
 	}

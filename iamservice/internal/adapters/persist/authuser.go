@@ -277,7 +277,9 @@ func (a *AuthUserAdapter) GetAllTenants(ctx context.Context, tx pgx.Tx) ([]*mode
 }
 
 // CreateTenant creates a new tenant
-func (a *AuthUserAdapter) CreateTenant(ctx context.Context, tx pgx.Tx, req *swagger.TenantCreateRequest) (*model.Tenant, error) {
+func (a *AuthUserAdapter) CreateTenant(
+	ctx context.Context, tx pgx.Tx, req *swagger.CreateTenantRequest,
+) (*model.Tenant, error) {
 	katapp.Logger(ctx).Info("creating tenant", "tenantID", req.Id, "name", req.Name)
 
 	tenantEntity := mapper.TenantCreateRequestToTenantEntity(req)
@@ -294,7 +296,9 @@ func (a *AuthUserAdapter) CreateTenant(ctx context.Context, tx pgx.Tx, req *swag
 }
 
 // UpdateTenant updates an existing tenant
-func (a *AuthUserAdapter) UpdateTenant(ctx context.Context, tx pgx.Tx, tenantID string, req *swagger.TenantUpdateRequest) (*model.Tenant, error) {
+func (a *AuthUserAdapter) UpdateTenant(
+	ctx context.Context, tx pgx.Tx, tenantID string, req *swagger.UpdateTenantRequest,
+) (*model.Tenant, error) {
 	katapp.Logger(ctx).Info("updating tenant", "tenantID", tenantID)
 
 	// Check if tenant exists

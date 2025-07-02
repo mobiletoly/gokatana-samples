@@ -2,63 +2,6 @@
 
 package swagger
 
-func NewAuthResponseBuilder() AuthResponse_Builder_AccessToken {
-	return AuthResponse_Builder_AccessToken{root: &AuthResponse{}}
-}
-
-type AuthResponse_Builder_AccessToken struct {
-	root *AuthResponse
-}
-
-type AuthResponse_Builder_ExpiresIn struct {
-	root *AuthResponse
-}
-
-func (b AuthResponse_Builder_AccessToken) AccessToken(arg string) AuthResponse_Builder_ExpiresIn {
-	b.root.AccessToken = arg
-	return AuthResponse_Builder_ExpiresIn{root: b.root}
-}
-
-type AuthResponse_Builder_RefreshToken struct {
-	root *AuthResponse
-}
-
-func (b AuthResponse_Builder_ExpiresIn) ExpiresIn(arg int64) AuthResponse_Builder_RefreshToken {
-	b.root.ExpiresIn = arg
-	return AuthResponse_Builder_RefreshToken{root: b.root}
-}
-
-type AuthResponse_Builder_TokenType struct {
-	root *AuthResponse
-}
-
-func (b AuthResponse_Builder_RefreshToken) RefreshToken(arg string) AuthResponse_Builder_TokenType {
-	b.root.RefreshToken = arg
-	return AuthResponse_Builder_TokenType{root: b.root}
-}
-
-type AuthResponse_Builder_UserId struct {
-	root *AuthResponse
-}
-
-func (b AuthResponse_Builder_TokenType) TokenType(arg string) AuthResponse_Builder_UserId {
-	b.root.TokenType = arg
-	return AuthResponse_Builder_UserId{root: b.root}
-}
-
-type AuthResponse_Builder_GobFinalizer struct {
-	root *AuthResponse
-}
-
-func (b AuthResponse_Builder_UserId) UserId(arg string) AuthResponse_Builder_GobFinalizer {
-	b.root.UserId = arg
-	return AuthResponse_Builder_GobFinalizer{root: b.root}
-}
-
-func (b AuthResponse_Builder_GobFinalizer) Build() *AuthResponse {
-	return b.root
-}
-
 func NewEmailConfirmationResponseBuilder() EmailConfirmationResponse_Builder_Message {
 	return EmailConfirmationResponse_Builder_Message{root: &EmailConfirmationResponse{}}
 }
@@ -101,42 +44,99 @@ func (b RefreshRequest_Builder_GobFinalizer) Build() *RefreshRequest {
 	return b.root
 }
 
-func NewSigninRequestBuilder() SigninRequest_Builder_Email {
-	return SigninRequest_Builder_Email{root: &SigninRequest{}}
+func NewSignInRequestBuilder() SignInRequest_Builder_Email {
+	return SignInRequest_Builder_Email{root: &SignInRequest{}}
 }
 
-type SigninRequest_Builder_Email struct {
-	root *SigninRequest
+type SignInRequest_Builder_Email struct {
+	root *SignInRequest
 }
 
-type SigninRequest_Builder_Password struct {
-	root *SigninRequest
+type SignInRequest_Builder_Password struct {
+	root *SignInRequest
 }
 
-func (b SigninRequest_Builder_Email) Email(arg string) SigninRequest_Builder_Password {
+func (b SignInRequest_Builder_Email) Email(arg string) SignInRequest_Builder_Password {
 	b.root.Email = arg
-	return SigninRequest_Builder_Password{root: b.root}
+	return SignInRequest_Builder_Password{root: b.root}
 }
 
-type SigninRequest_Builder_TenantId struct {
-	root *SigninRequest
+type SignInRequest_Builder_TenantId struct {
+	root *SignInRequest
 }
 
-func (b SigninRequest_Builder_Password) Password(arg string) SigninRequest_Builder_TenantId {
+func (b SignInRequest_Builder_Password) Password(arg string) SignInRequest_Builder_TenantId {
 	b.root.Password = arg
-	return SigninRequest_Builder_TenantId{root: b.root}
+	return SignInRequest_Builder_TenantId{root: b.root}
 }
 
-type SigninRequest_Builder_GobFinalizer struct {
-	root *SigninRequest
+type SignInRequest_Builder_GobFinalizer struct {
+	root *SignInRequest
 }
 
-func (b SigninRequest_Builder_TenantId) TenantId(arg string) SigninRequest_Builder_GobFinalizer {
+func (b SignInRequest_Builder_TenantId) TenantId(arg string) SignInRequest_Builder_GobFinalizer {
 	b.root.TenantId = arg
-	return SigninRequest_Builder_GobFinalizer{root: b.root}
+	return SignInRequest_Builder_GobFinalizer{root: b.root}
 }
 
-func (b SigninRequest_Builder_GobFinalizer) Build() *SigninRequest {
+func (b SignInRequest_Builder_GobFinalizer) Build() *SignInRequest {
+	return b.root
+}
+
+func NewSignInResponseBuilder() SignInResponse_Builder_AccessToken {
+	return SignInResponse_Builder_AccessToken{root: &SignInResponse{}}
+}
+
+type SignInResponse_Builder_AccessToken struct {
+	root *SignInResponse
+}
+
+type SignInResponse_Builder_ExpiresIn struct {
+	root *SignInResponse
+}
+
+func (b SignInResponse_Builder_AccessToken) AccessToken(arg string) SignInResponse_Builder_ExpiresIn {
+	b.root.AccessToken = arg
+	return SignInResponse_Builder_ExpiresIn{root: b.root}
+}
+
+type SignInResponse_Builder_RefreshToken struct {
+	root *SignInResponse
+}
+
+func (b SignInResponse_Builder_ExpiresIn) ExpiresIn(arg int64) SignInResponse_Builder_RefreshToken {
+	b.root.ExpiresIn = arg
+	return SignInResponse_Builder_RefreshToken{root: b.root}
+}
+
+type SignInResponse_Builder_TokenType struct {
+	root *SignInResponse
+}
+
+func (b SignInResponse_Builder_RefreshToken) RefreshToken(arg string) SignInResponse_Builder_TokenType {
+	b.root.RefreshToken = arg
+	return SignInResponse_Builder_TokenType{root: b.root}
+}
+
+type SignInResponse_Builder_UserId struct {
+	root *SignInResponse
+}
+
+func (b SignInResponse_Builder_TokenType) TokenType(arg string) SignInResponse_Builder_UserId {
+	b.root.TokenType = arg
+	return SignInResponse_Builder_UserId{root: b.root}
+}
+
+type SignInResponse_Builder_GobFinalizer struct {
+	root *SignInResponse
+}
+
+func (b SignInResponse_Builder_UserId) UserId(arg string) SignInResponse_Builder_GobFinalizer {
+	b.root.UserId = arg
+	return SignInResponse_Builder_GobFinalizer{root: b.root}
+}
+
+func (b SignInResponse_Builder_GobFinalizer) Build() *SignInResponse {
 	return b.root
 }
 

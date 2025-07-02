@@ -10,8 +10,32 @@ const (
 	Web     SignupRequestSource = "web"
 )
 
-// AuthResponse defines model for AuthResponse.
-type AuthResponse struct {
+// EmailConfirmationResponse Response after successful email confirmation
+type EmailConfirmationResponse struct {
+	// Message Success message
+	Message string `json:"message"`
+}
+
+// RefreshRequest defines model for RefreshRequest.
+type RefreshRequest struct {
+	// RefreshToken Refresh token
+	RefreshToken string `json:"refreshToken"`
+}
+
+// SignInRequest defines model for SignInRequest.
+type SignInRequest struct {
+	// Email User email address
+	Email string `json:"email"`
+
+	// Password User password
+	Password string `json:"password"`
+
+	// TenantId Tenant identifier for multi-tenant support
+	TenantId string `json:"tenantId"`
+}
+
+// SignInResponse defines model for SignInResponse.
+type SignInResponse struct {
 	// AccessToken JWT access token
 	AccessToken string `json:"accessToken"`
 
@@ -26,30 +50,6 @@ type AuthResponse struct {
 
 	// UserId User unique identifier
 	UserId string `json:"userId"`
-}
-
-// EmailConfirmationResponse Response after successful email confirmation
-type EmailConfirmationResponse struct {
-	// Message Success message
-	Message string `json:"message"`
-}
-
-// RefreshRequest defines model for RefreshRequest.
-type RefreshRequest struct {
-	// RefreshToken Refresh token
-	RefreshToken string `json:"refreshToken"`
-}
-
-// SigninRequest defines model for SigninRequest.
-type SigninRequest struct {
-	// Email User email address
-	Email string `json:"email"`
-
-	// Password User password
-	Password string `json:"password"`
-
-	// TenantId Tenant identifier for multi-tenant support
-	TenantId string `json:"tenantId"`
 }
 
 // SignupRequest Request payload for creating new auth_user record
@@ -101,7 +101,7 @@ type ConfirmEmailParams struct {
 type RefreshTokenJSONRequestBody = RefreshRequest
 
 // SignInJSONRequestBody defines body for SignIn for application/json ContentType.
-type SignInJSONRequestBody = SigninRequest
+type SignInJSONRequestBody = SignInRequest
 
 // SignUpJSONRequestBody defines body for SignUp for application/json ContentType.
 type SignUpJSONRequestBody = SignupRequest

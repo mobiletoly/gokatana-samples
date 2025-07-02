@@ -27,8 +27,8 @@ type AuthUserPersist interface {
 	// Tenant operations
 	GetTenantByID(ctx context.Context, tx pgx.Tx, tenantID string) (*model.Tenant, error)
 	GetAllTenants(ctx context.Context, tx pgx.Tx) ([]*model.Tenant, error)
-	CreateTenant(ctx context.Context, tx pgx.Tx, tenant *swagger.TenantCreateRequest) (*model.Tenant, error)
-	UpdateTenant(ctx context.Context, tx pgx.Tx, tenantID string, tenant *swagger.TenantUpdateRequest) (*model.Tenant, error)
+	CreateTenant(ctx context.Context, tx pgx.Tx, tenant *swagger.CreateTenantRequest) (*model.Tenant, error)
+	UpdateTenant(ctx context.Context, tx pgx.Tx, tenantID string, tenant *swagger.UpdateTenantRequest) (*model.Tenant, error)
 	DeleteTenant(ctx context.Context, tx pgx.Tx, tenantID string) error
 
 	// Email confirmation

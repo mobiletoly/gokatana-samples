@@ -69,7 +69,7 @@ func (h *UserMgmWebHandlers) UsersListLoadHandler(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	users := userListResponse.Users
+	users := userListResponse.Items
 
 	// If sysadmin, show tenant selector
 	if principal.IsSysAdmin() {
@@ -83,7 +83,7 @@ func (h *UserMgmWebHandlers) UsersListLoadHandler(c echo.Context) error {
 			return admin.UsersListContent(users, canCreateUser).Render(ctx, c.Response().Writer)
 		}
 		return renderTemplateComponent(c, "Users",
-			admin.UsersListWithTenantSelector(users, tenantsListResponse.Tenants, tenantID, true, canCreateUser))
+			admin.UsersListWithTenantSelector(users, tenantsListResponse.Items, tenantID, true, canCreateUser))
 	}
 	return renderTemplateComponent(c, "Users", admin.UsersList(users, canCreateUser))
 }

@@ -6,72 +6,42 @@ import (
 	"time"
 )
 
-func NewTenantCreateRequestBuilder() TenantCreateRequest_Builder_Description {
-	return TenantCreateRequest_Builder_Description{root: &TenantCreateRequest{}}
+func NewCreateTenantRequestBuilder() CreateTenantRequest_Builder_Description {
+	return CreateTenantRequest_Builder_Description{root: &CreateTenantRequest{}}
 }
 
-type TenantCreateRequest_Builder_Description struct {
-	root *TenantCreateRequest
+type CreateTenantRequest_Builder_Description struct {
+	root *CreateTenantRequest
 }
 
-type TenantCreateRequest_Builder_Id struct {
-	root *TenantCreateRequest
+type CreateTenantRequest_Builder_Id struct {
+	root *CreateTenantRequest
 }
 
-func (b TenantCreateRequest_Builder_Description) Description(arg string) TenantCreateRequest_Builder_Id {
+func (b CreateTenantRequest_Builder_Description) Description(arg string) CreateTenantRequest_Builder_Id {
 	b.root.Description = arg
-	return TenantCreateRequest_Builder_Id{root: b.root}
+	return CreateTenantRequest_Builder_Id{root: b.root}
 }
 
-type TenantCreateRequest_Builder_Name struct {
-	root *TenantCreateRequest
+type CreateTenantRequest_Builder_Name struct {
+	root *CreateTenantRequest
 }
 
-func (b TenantCreateRequest_Builder_Id) Id(arg string) TenantCreateRequest_Builder_Name {
+func (b CreateTenantRequest_Builder_Id) Id(arg string) CreateTenantRequest_Builder_Name {
 	b.root.Id = arg
-	return TenantCreateRequest_Builder_Name{root: b.root}
+	return CreateTenantRequest_Builder_Name{root: b.root}
 }
 
-type TenantCreateRequest_Builder_GobFinalizer struct {
-	root *TenantCreateRequest
+type CreateTenantRequest_Builder_GobFinalizer struct {
+	root *CreateTenantRequest
 }
 
-func (b TenantCreateRequest_Builder_Name) Name(arg string) TenantCreateRequest_Builder_GobFinalizer {
+func (b CreateTenantRequest_Builder_Name) Name(arg string) CreateTenantRequest_Builder_GobFinalizer {
 	b.root.Name = arg
-	return TenantCreateRequest_Builder_GobFinalizer{root: b.root}
+	return CreateTenantRequest_Builder_GobFinalizer{root: b.root}
 }
 
-func (b TenantCreateRequest_Builder_GobFinalizer) Build() *TenantCreateRequest {
-	return b.root
-}
-
-func NewTenantListResponseBuilder() TenantListResponse_Builder_Pagination {
-	return TenantListResponse_Builder_Pagination{root: &TenantListResponse{}}
-}
-
-type TenantListResponse_Builder_Pagination struct {
-	root *TenantListResponse
-}
-
-type TenantListResponse_Builder_Tenants struct {
-	root *TenantListResponse
-}
-
-func (b TenantListResponse_Builder_Pagination) Pagination(arg PaginationInfo) TenantListResponse_Builder_Tenants {
-	b.root.Pagination = arg
-	return TenantListResponse_Builder_Tenants{root: b.root}
-}
-
-type TenantListResponse_Builder_GobFinalizer struct {
-	root *TenantListResponse
-}
-
-func (b TenantListResponse_Builder_Tenants) Tenants(arg []TenantResponse) TenantListResponse_Builder_GobFinalizer {
-	b.root.Tenants = arg
-	return TenantListResponse_Builder_GobFinalizer{root: b.root}
-}
-
-func (b TenantListResponse_Builder_GobFinalizer) Build() *TenantListResponse {
+func (b CreateTenantRequest_Builder_GobFinalizer) Build() *CreateTenantRequest {
 	return b.root
 }
 
@@ -132,71 +102,101 @@ func (b TenantResponse_Builder_GobFinalizer) Build() *TenantResponse {
 	return b.root
 }
 
-func NewTenantUpdateRequestBuilder() TenantUpdateRequest_Builder_Description {
-	return TenantUpdateRequest_Builder_Description{root: &TenantUpdateRequest{}}
+func NewTenantsResponseBuilder() TenantsResponse_Builder_Items {
+	return TenantsResponse_Builder_Items{root: &TenantsResponse{}}
 }
 
-type TenantUpdateRequest_Builder_Description struct {
-	root *TenantUpdateRequest
+type TenantsResponse_Builder_Items struct {
+	root *TenantsResponse
 }
 
-type TenantUpdateRequest_Builder_Name struct {
-	root *TenantUpdateRequest
+type TenantsResponse_Builder_Pagination struct {
+	root *TenantsResponse
 }
 
-func (b TenantUpdateRequest_Builder_Description) Description(arg string) TenantUpdateRequest_Builder_Name {
-	b.root.Description = arg
-	return TenantUpdateRequest_Builder_Name{root: b.root}
+func (b TenantsResponse_Builder_Items) Items(arg []TenantResponse) TenantsResponse_Builder_Pagination {
+	b.root.Items = arg
+	return TenantsResponse_Builder_Pagination{root: b.root}
 }
 
-type TenantUpdateRequest_Builder_GobFinalizer struct {
-	root *TenantUpdateRequest
+type TenantsResponse_Builder_GobFinalizer struct {
+	root *TenantsResponse
 }
 
-func (b TenantUpdateRequest_Builder_Name) Name(arg string) TenantUpdateRequest_Builder_GobFinalizer {
-	b.root.Name = arg
-	return TenantUpdateRequest_Builder_GobFinalizer{root: b.root}
+func (b TenantsResponse_Builder_Pagination) Pagination(arg PaginationInfo) TenantsResponse_Builder_GobFinalizer {
+	b.root.Pagination = arg
+	return TenantsResponse_Builder_GobFinalizer{root: b.root}
 }
 
-func (b TenantUpdateRequest_Builder_GobFinalizer) Build() *TenantUpdateRequest {
+func (b TenantsResponse_Builder_GobFinalizer) Build() *TenantsResponse {
 	return b.root
 }
 
-func NewGetAllTenantsParamsBuilder() GetAllTenantsParams_Builder_Page {
-	return GetAllTenantsParams_Builder_Page{root: &GetAllTenantsParams{}}
+func NewUpdateTenantRequestBuilder() UpdateTenantRequest_Builder_Description {
+	return UpdateTenantRequest_Builder_Description{root: &UpdateTenantRequest{}}
 }
 
-type GetAllTenantsParams_Builder_Page struct {
-	root *GetAllTenantsParams
+type UpdateTenantRequest_Builder_Description struct {
+	root *UpdateTenantRequest
 }
 
-type GetAllTenantsParams_Builder_Limit struct {
-	root *GetAllTenantsParams
+type UpdateTenantRequest_Builder_Name struct {
+	root *UpdateTenantRequest
 }
 
-func (b GetAllTenantsParams_Builder_Page) Page(arg *int) GetAllTenantsParams_Builder_Limit {
+func (b UpdateTenantRequest_Builder_Description) Description(arg string) UpdateTenantRequest_Builder_Name {
+	b.root.Description = arg
+	return UpdateTenantRequest_Builder_Name{root: b.root}
+}
+
+type UpdateTenantRequest_Builder_GobFinalizer struct {
+	root *UpdateTenantRequest
+}
+
+func (b UpdateTenantRequest_Builder_Name) Name(arg string) UpdateTenantRequest_Builder_GobFinalizer {
+	b.root.Name = arg
+	return UpdateTenantRequest_Builder_GobFinalizer{root: b.root}
+}
+
+func (b UpdateTenantRequest_Builder_GobFinalizer) Build() *UpdateTenantRequest {
+	return b.root
+}
+
+func NewListAllTenantsParamsBuilder() ListAllTenantsParams_Builder_Page {
+	return ListAllTenantsParams_Builder_Page{root: &ListAllTenantsParams{}}
+}
+
+type ListAllTenantsParams_Builder_Page struct {
+	root *ListAllTenantsParams
+}
+
+type ListAllTenantsParams_Builder_Limit struct {
+	root *ListAllTenantsParams
+}
+
+func (b ListAllTenantsParams_Builder_Page) Page(arg *int) ListAllTenantsParams_Builder_Limit {
 	b.root.Page = arg
-	return GetAllTenantsParams_Builder_Limit{root: b.root}
+	return ListAllTenantsParams_Builder_Limit{root: b.root}
 }
 
-type GetAllTenantsParams_Builder_Active struct {
-	root *GetAllTenantsParams
+type ListAllTenantsParams_Builder_Active struct {
+	root *ListAllTenantsParams
 }
 
-func (b GetAllTenantsParams_Builder_Limit) Limit(arg *int) GetAllTenantsParams_Builder_Active {
+func (b ListAllTenantsParams_Builder_Limit) Limit(arg *int) ListAllTenantsParams_Builder_Active {
 	b.root.Limit = arg
-	return GetAllTenantsParams_Builder_Active{root: b.root}
+	return ListAllTenantsParams_Builder_Active{root: b.root}
 }
 
-type GetAllTenantsParams_Builder_GobFinalizer struct {
-	root *GetAllTenantsParams
+type ListAllTenantsParams_Builder_GobFinalizer struct {
+	root *ListAllTenantsParams
 }
 
-func (b GetAllTenantsParams_Builder_Active) Active(arg *bool) GetAllTenantsParams_Builder_GobFinalizer {
+func (b ListAllTenantsParams_Builder_Active) Active(arg *bool) ListAllTenantsParams_Builder_GobFinalizer {
 	b.root.Active = arg
-	return GetAllTenantsParams_Builder_GobFinalizer{root: b.root}
+	return ListAllTenantsParams_Builder_GobFinalizer{root: b.root}
 }
 
-func (b GetAllTenantsParams_Builder_GobFinalizer) Build() *GetAllTenantsParams {
+func (b ListAllTenantsParams_Builder_GobFinalizer) Build() *ListAllTenantsParams {
 	return b.root
 }

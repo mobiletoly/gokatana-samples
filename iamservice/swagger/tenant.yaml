@@ -7,7 +7,7 @@ info:
 paths:
   /api/v1/tenants:
     get:
-      operationId: getAllTenants
+      operationId: listAllTenants
       summary: List all tenants (Sysadmin only)
       description: Returns a list of all tenants in the system. Requires sysadmin role.
       tags:
@@ -42,7 +42,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TenantListResponse'
+                $ref: '#/components/schemas/TenantsResponse'
         '401':
           description: Unauthorized
         '403':
@@ -62,7 +62,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/TenantCreateRequest'
+              $ref: '#/components/schemas/CreateTenantRequest'
       responses:
         '201':
           description: Tenant successfully created
@@ -130,7 +130,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/TenantUpdateRequest'
+              $ref: '#/components/schemas/UpdateTenantRequest'
       responses:
         '200':
           description: Tenant successfully updated
@@ -176,7 +176,7 @@ paths:
 
 components:
   schemas:
-    TenantCreateRequest:
+    CreateTenantRequest:
       type: object
       description: 'Request payload for creating a new tenant'
       properties:
@@ -200,7 +200,7 @@ components:
         - name
         - description
 
-    TenantUpdateRequest:
+    UpdateTenantRequest:
       type: object
       description: 'Request payload for updating a tenant'
       properties:
@@ -256,13 +256,13 @@ components:
         - createdAt
         - updatedAt
 
-    TenantListResponse:
+    TenantsResponse:
       type: object
       required:
-        - tenants
+        - items
         - pagination
       properties:
-        tenants:
+        items:
           type: array
           items:
             $ref: '#/components/schemas/TenantResponse'

@@ -50,8 +50,8 @@ func createAndConfirmUser(t *testing.T, env *TestEnvironment, email string, pass
 	return signupResp.UserId
 }
 
-// validateAuthResponse validates all required fields in AuthResponse
-func validateAuthResponse(t *testing.T, authResp *swagger.AuthResponse) {
+// validateSignInResponse validates all required fields in AuthResponse
+func validateSignInResponse(t *testing.T, authResp *swagger.SignInResponse) {
 	assert.NotNil(t, authResp)
 	assert.NotEmpty(t, authResp.AccessToken)
 	assert.NotEmpty(t, authResp.RefreshToken)
@@ -173,44 +173,44 @@ func runAuthenticationTests(t *testing.T, env *TestEnvironment) {
 		// First create and confirm a user
 		createAndConfirmUser(t, env, "signin@example.com", "qazwsxedc", "Signin", "User")
 
-		signinReq := &swagger.SigninRequest{
+		signinReq := &swagger.SignInRequest{
 			Email:    "signin@example.com",
 			Password: "qazwsxedc",
 			TenantId: "default-tenant",
 		}
 		t.Run("valid credentials must succeed", func(t *testing.T) {
-			authResp, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.SigninRequest, swagger.AuthResponse](
+			authResp, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.SignInRequest, swagger.SignInResponse](
 				ctx, &appConfig.Server, "api/v1/auth/signin", nil, signinReq)
 			assert.NoError(t, err)
-			validateAuthResponse(t, authResp)
+			validateSignInResponse(t, authResp)
 		})
 		t.Run("invalid credentials must fail with 401 Unauthorized", func(t *testing.T) {
-			invalidReq := &swagger.SigninRequest{
+			invalidReq := &swagger.SignInRequest{
 				Email:    "signin@example.com",
 				Password: "wrongpassword",
 				TenantId: "default-tenant",
 			}
-			_, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.SigninRequest, swagger.AuthResponse](
+			_, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.SignInRequest, swagger.SignInResponse](
 				ctx, &appConfig.Server, "api/v1/auth/signin", nil, invalidReq)
 			kathttpc.AssertStatusUnauthorized(t, err)
 		})
 		t.Run("non-existent user must fail with 401 Unauthorized", func(t *testing.T) {
-			nonExistentReq := &swagger.SigninRequest{
+			nonExistentReq := &swagger.SignInRequest{
 				Email:    "nonexistent@example.com",
 				Password: "qazwsxedc",
 				TenantId: "default-tenant",
 			}
-			_, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.SigninRequest, swagger.AuthResponse](
+			_, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.SignInRequest, swagger.SignInResponse](
 				ctx, &appConfig.Server, "api/v1/auth/signin", nil, nonExistentReq)
 			kathttpc.AssertStatusUnauthorized(t, err)
 		})
 		t.Run("non-existing tenant must fail with 401 Unauthorized", func(t *testing.T) {
-			nonExistentTenantReq := &swagger.SigninRequest{
+			nonExistentTenantReq := &swagger.SignInRequest{
 				Email:    "signin@example.com",
 				Password: "qazwsxedc",
 				TenantId: "non-existent-tenant",
 			}
-			_, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.SigninRequest, swagger.AuthResponse](
+			_, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.SignInRequest, swagger.SignInResponse](
 				ctx, &appConfig.Server, "api/v1/auth/signin", nil, nonExistentTenantReq)
 			kathttpc.AssertStatusNotFound(t, err)
 		})
@@ -220,24 +220,24 @@ func runAuthenticationTests(t *testing.T, env *TestEnvironment) {
 		// First create and confirm a user, then sign in to get tokens
 		createAndConfirmUser(t, env, "refresh@example.com", "qazwsxedc", "Refresh", "User")
 
-		signinReq := &swagger.SigninRequest{
+		signinReq := &swagger.SignInRequest{
 			Email:    "refresh@example.com",
 			Password: "qazwsxedc",
 			TenantId: "default-tenant",
 		}
-		authResp, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.SigninRequest, swagger.AuthResponse](
+		authResp, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.SignInRequest, swagger.SignInResponse](
 			ctx, &appConfig.Server, "api/v1/auth/signin", nil, signinReq)
 		assert.NoError(t, err)
-		validateAuthResponse(t, authResp)
+		validateSignInResponse(t, authResp)
 
 		refreshReq := &swagger.RefreshRequest{
 			RefreshToken: authResp.RefreshToken,
 		}
 		t.Run("with valid refresh token must succeed", func(t *testing.T) {
-			newAuthResp, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.RefreshRequest, swagger.AuthResponse](
+			newAuthResp, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.RefreshRequest, swagger.SignInResponse](
 				ctx, &appConfig.Server, "api/v1/auth/refresh", nil, refreshReq)
 			assert.NoError(t, err)
-			validateAuthResponse(t, newAuthResp)
+			validateSignInResponse(t, newAuthResp)
 			// New tokens should be different from original
 			assert.NotEqual(t, authResp.AccessToken, newAuthResp.AccessToken)
 			assert.NotEqual(t, authResp.RefreshToken, newAuthResp.RefreshToken)
@@ -248,7 +248,7 @@ func runAuthenticationTests(t *testing.T, env *TestEnvironment) {
 			invalidRefreshReq := &swagger.RefreshRequest{
 				RefreshToken: "invalid-token",
 			}
-			_, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.RefreshRequest, swagger.AuthResponse](
+			_, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.RefreshRequest, swagger.SignInResponse](
 				ctx, &appConfig.Server, "api/v1/auth/refresh", nil, invalidRefreshReq)
 			kathttpc.AssertStatusUnauthorized(t, err)
 		})
@@ -258,15 +258,15 @@ func runAuthenticationTests(t *testing.T, env *TestEnvironment) {
 		// First create and confirm a user, then sign in to get tokens
 		createAndConfirmUser(t, env, "signout@example.com", "qazwsxedc", "Signout", "User")
 
-		signinReq := &swagger.SigninRequest{
+		signinReq := &swagger.SignInRequest{
 			Email:    "signout@example.com",
 			Password: "qazwsxedc",
 			TenantId: "default-tenant",
 		}
-		authResp, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.SigninRequest, swagger.AuthResponse](
+		authResp, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.SignInRequest, swagger.SignInResponse](
 			ctx, &appConfig.Server, "api/v1/auth/signin", nil, signinReq)
 		assert.NoError(t, err)
-		validateAuthResponse(t, authResp)
+		validateSignInResponse(t, authResp)
 
 		t.Run("must succeed", func(t *testing.T) {
 			headers := map[string][]string{

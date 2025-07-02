@@ -30,7 +30,7 @@ func signupHandler(uc *usecase.AuthMgm) func(c echo.Context) error {
 func signinHandler(uc *usecase.AuthMgm) func(c echo.Context) error {
 	return func(c echo.Context) error {
 		ctx := c.Request().Context()
-		var signinReq swagger.SigninRequest
+		var signinReq swagger.SignInRequest
 		if err := c.Bind(&signinReq); err != nil {
 			return kathttp_echo.ReportHTTPError(err)
 		}

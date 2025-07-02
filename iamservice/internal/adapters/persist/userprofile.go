@@ -7,7 +7,6 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/mobiletoly/gokatana-samples/iamservice/internal/adapters/persist/internal/mapper"
 	"github.com/mobiletoly/gokatana-samples/iamservice/internal/adapters/persist/internal/repo"
-	"github.com/mobiletoly/gokatana-samples/iamservice/internal/core/model"
 	"github.com/mobiletoly/gokatana-samples/iamservice/internal/core/outport"
 	"github.com/mobiletoly/gokatana-samples/iamservice/internal/core/swagger"
 	"github.com/mobiletoly/gokatana/katapp"
@@ -16,6 +15,7 @@ import (
 
 // UserProfileAdapter implements the outport.UserProfilePersist outport interface
 type UserProfileAdapter struct {
+	outport.UserProfilePersist
 	db *katpg.DBLink
 }
 
@@ -23,7 +23,7 @@ func NewUserProfileAdapter(db *katpg.DBLink) outport.UserProfilePersist {
 	return &UserProfileAdapter{db: db}
 }
 
-func (a *UserProfileAdapter) GetUserProfileByUserID(ctx context.Context, tx pgx.Tx, userID string) (*model.UserProfile, error) {
+func (a *UserProfileAdapter) GetUserProfileByUserID(ctx context.Context, tx pgx.Tx, userID string) (*swagger.UserProfileResponse, error) {
 	katapp.Logger(ctx).Debug("getting user profile by user ID", "userID", userID)
 
 	profileEntity, err := repo.SelectUserProfileByUserID(ctx, tx, userID)
@@ -35,10 +35,10 @@ func (a *UserProfileAdapter) GetUserProfileByUserID(ctx context.Context, tx pgx.
 	if profileEntity == nil {
 		return nil, nil
 	}
-	return mapper.UserProfileEntityToUserProfileModel(profileEntity), nil
+	return mapper.UserProfileEntityToSwagger(profileEntity), nil
 }
 
-func (a *UserProfileAdapter) CreateUserProfile(ctx context.Context, tx pgx.Tx, userID string) (*model.UserProfile, error) {
+func (a *UserProfileAdapter) CreateUserProfile(ctx context.Context, tx pgx.Tx, userID string) (*swagger.UserProfileResponse, error) {
 	katapp.Logger(ctx).Info("creating user profile", "userID", userID)
 
 	now := time.Now()
@@ -64,10 +64,12 @@ func (a *UserProfileAdapter) CreateUserProfile(ctx context.Context, tx pgx.Tx, u
 		}
 		return nil, appErr
 	}
-	return mapper.UserProfileEntityToUserProfileModel(createdEntity), nil
+	return mapper.UserProfileEntityToSwagger(createdEntity), nil
 }
 
-func (a *UserProfileAdapter) UpdateUserProfile(ctx context.Context, tx pgx.Tx, userID string, req *swagger.UserProfileUpdateRequest) (*model.UserProfile, error) {
+func (a *UserProfileAdapter) UpdateUserProfile(
+	ctx context.Context, tx pgx.Tx, userID string, req *swagger.UpdateUserProfileRequest,
+) (*swagger.UserProfileResponse, error) {
 	katapp.Logger(ctx).Info("updating user profile", "userID", userID)
 
 	// Get the existing profile first
@@ -81,28 +83,17 @@ func (a *UserProfileAdapter) UpdateUserProfile(ctx context.Context, tx pgx.Tx, u
 		return nil, katapp.NewErr(katapp.ErrNotFound, "user profile not found")
 	}
 
-	// Convert swagger request to update fields
-	var height *int
-	var weight *int
 	var gender *string
-	var birthDate *time.Time
-	isMetric := existingEntity.IsMetric // Default to existing value
-
-	if req.Height != nil {
-		h := int(*req.Height)
-		height = &h
-	}
-	if req.Weight != nil {
-		w := *req.Weight
-		weight = &w
-	}
 	if req.Gender != nil {
-		gender = req.Gender
+		s := string(*req.Gender)
+		gender = &s
 	}
+	var birthDate *time.Time
 	if req.BirthDate != nil {
 		parsedTime := *req.BirthDate
 		birthDate = &parsedTime.Time
 	}
+	isMetric := existingEntity.IsMetric
 	if req.IsMetric != nil {
 		isMetric = *req.IsMetric
 	}
@@ -112,8 +103,8 @@ func (a *UserProfileAdapter) UpdateUserProfile(ctx context.Context, tx pgx.Tx, u
 	updatedEntity := repo.NewUserProfileEntityBuilder().
 		ID(existingEntity.ID).
 		UserID(existingEntity.UserID).
-		Height(height).
-		Weight(weight).
+		Height(req.Height).
+		Weight(req.Weight).
 		Gender(gender).
 		BirthDate(birthDate).
 		IsMetric(isMetric).
@@ -129,5 +120,5 @@ func (a *UserProfileAdapter) UpdateUserProfile(ctx context.Context, tx pgx.Tx, u
 		return nil, katpg.PgToAppError(err, msg)
 	}
 
-	return mapper.UserProfileEntityToUserProfileModel(resultEntity), nil
+	return mapper.UserProfileEntityToSwagger(resultEntity), nil
 }
