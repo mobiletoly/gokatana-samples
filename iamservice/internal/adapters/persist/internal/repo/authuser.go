@@ -169,7 +169,9 @@ func GetEmailConfirmationTokenByUserIDAndHash(ctx context.Context, tx pgx.Tx, us
 	)
 
 	if err != nil {
-		if err == pgx.ErrNoRows {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, nil
+		}
 			return nil, nil
 		}
 		return nil, err
