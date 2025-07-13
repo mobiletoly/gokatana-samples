@@ -53,3 +53,23 @@ func (t *EmailConfirmationToken) IsUsed() bool {
 func (t *EmailConfirmationToken) IsValid() bool {
 	return !t.IsExpired() && !t.IsUsed()
 }
+
+// RefreshToken represents a refresh token in the authentication system
+type RefreshToken struct { //+gob:Constructor
+	ID        string
+	UserID    string
+	TokenHash string // SHA-256 hash of the refresh token
+	IssuedAt  time.Time
+	ExpiresAt time.Time
+	Revoked   bool
+}
+
+// IsExpired checks if the refresh token has expired
+func (rt *RefreshToken) IsExpired() bool {
+	return time.Now().After(rt.ExpiresAt)
+}
+
+// IsValid checks if the refresh token is valid (not expired and not revoked)
+func (rt *RefreshToken) IsValid() bool {
+	return !rt.IsExpired() && !rt.Revoked
+}

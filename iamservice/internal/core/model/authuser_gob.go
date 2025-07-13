@@ -248,3 +248,69 @@ func (b EmailConfirmationToken_Builder_CreatedAt) CreatedAt(arg time.Time) Email
 func (b EmailConfirmationToken_Builder_GobFinalizer) Build() *EmailConfirmationToken {
 	return b.root
 }
+
+func NewRefreshTokenBuilder() RefreshToken_Builder_ID {
+	return RefreshToken_Builder_ID{root: &RefreshToken{}}
+}
+
+type RefreshToken_Builder_ID struct {
+	root *RefreshToken
+}
+
+type RefreshToken_Builder_UserID struct {
+	root *RefreshToken
+}
+
+func (b RefreshToken_Builder_ID) ID(arg string) RefreshToken_Builder_UserID {
+	b.root.ID = arg
+	return RefreshToken_Builder_UserID{root: b.root}
+}
+
+type RefreshToken_Builder_TokenHash struct {
+	root *RefreshToken
+}
+
+func (b RefreshToken_Builder_UserID) UserID(arg string) RefreshToken_Builder_TokenHash {
+	b.root.UserID = arg
+	return RefreshToken_Builder_TokenHash{root: b.root}
+}
+
+type RefreshToken_Builder_IssuedAt struct {
+	root *RefreshToken
+}
+
+func (b RefreshToken_Builder_TokenHash) TokenHash(arg string) RefreshToken_Builder_IssuedAt {
+	b.root.TokenHash = arg
+	return RefreshToken_Builder_IssuedAt{root: b.root}
+}
+
+type RefreshToken_Builder_ExpiresAt struct {
+	root *RefreshToken
+}
+
+func (b RefreshToken_Builder_IssuedAt) IssuedAt(arg time.Time) RefreshToken_Builder_ExpiresAt {
+	b.root.IssuedAt = arg
+	return RefreshToken_Builder_ExpiresAt{root: b.root}
+}
+
+type RefreshToken_Builder_Revoked struct {
+	root *RefreshToken
+}
+
+func (b RefreshToken_Builder_ExpiresAt) ExpiresAt(arg time.Time) RefreshToken_Builder_Revoked {
+	b.root.ExpiresAt = arg
+	return RefreshToken_Builder_Revoked{root: b.root}
+}
+
+type RefreshToken_Builder_GobFinalizer struct {
+	root *RefreshToken
+}
+
+func (b RefreshToken_Builder_Revoked) Revoked(arg bool) RefreshToken_Builder_GobFinalizer {
+	b.root.Revoked = arg
+	return RefreshToken_Builder_GobFinalizer{root: b.root}
+}
+
+func (b RefreshToken_Builder_GobFinalizer) Build() *RefreshToken {
+	return b.root
+}

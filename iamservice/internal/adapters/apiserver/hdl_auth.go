@@ -1,19 +1,19 @@
 package apiserver
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 	"github.com/mobiletoly/gokatana-samples/iamservice/internal/core/swagger"
 	"github.com/mobiletoly/gokatana-samples/iamservice/internal/core/usecase"
-	"github.com/mobiletoly/gokatana/katapp"
 	"github.com/mobiletoly/gokatana/kathttp_echo"
 )
 
 func signupHandler(uc *usecase.AuthMgm) func(c echo.Context) error {
 	return func(c echo.Context) error {
 		ctx := c.Request().Context()
-		var signupReq swagger.SignupRequest
+		var signupReq swagger.SignUpRequest
 		if err := c.Bind(&signupReq); err != nil {
 			return kathttp_echo.ReportHTTPError(err)
 		}
@@ -46,15 +46,33 @@ func signinHandler(uc *usecase.AuthMgm) func(c echo.Context) error {
 
 func signoutHandler(uc *usecase.AuthMgm) func(c echo.Context) error {
 	return func(c echo.Context) error {
-		// TODO implement it
-		return c.JSON(http.StatusOK, struct{}{})
+		ctx := c.Request().Context()
+
+		// Get user ID from the JWT token in the Authorization header
+		authHeader := c.Request().Header.Get("Authorization")
+		if authHeader == "" {
+			return kathttp_echo.ReportBadRequest(errors.New("authorization header is required"))
+		}
+
+		userID, err := uc.ValidateAccessToken(authHeader)
+		if err != nil {
+			return kathttp_echo.ReportHTTPError(err)
+		}
+
+		// Revoke all refresh tokens for the user
+		err = uc.SignOut(ctx, userID)
+		if err != nil {
+			return kathttp_echo.ReportHTTPError(err)
+		}
+
+		return c.JSON(http.StatusOK, map[string]string{"message": "Successfully signed out"})
 	}
 }
 
 func refreshTokenHandler(uc *usecase.AuthMgm) func(c echo.Context) error {
 	return func(c echo.Context) error {
 		ctx := c.Request().Context()
-		var refreshReq swagger.RefreshRequest
+		var refreshReq swagger.TokenRefreshRequest
 		if err := c.Bind(&refreshReq); err != nil {
 			return kathttp_echo.ReportHTTPError(err)
 		}
@@ -71,14 +89,12 @@ func refreshTokenHandler(uc *usecase.AuthMgm) func(c echo.Context) error {
 func confirmEmailHandler(uc *usecase.AuthMgm) func(c echo.Context) error {
 	return func(c echo.Context) error {
 		ctx := c.Request().Context()
-		userID := c.QueryParam("userId")
-		code := c.QueryParam("code")
-
-		if userID == "" || code == "" {
-			return kathttp_echo.ReportBadRequest(katapp.NewErr(katapp.ErrInvalidInput, "user ID and confirmation code are required"))
+		var confirmReq swagger.EmailConfirmationRequest
+		if err := c.Bind(&confirmReq); err != nil {
+			return kathttp_echo.ReportHTTPError(err)
 		}
 
-		err := uc.ConfirmEmail(ctx, userID, code)
+		err := uc.ConfirmEmail(ctx, confirmReq.UserId, confirmReq.Code)
 		if err != nil {
 			return kathttp_echo.ReportHTTPError(err)
 		}

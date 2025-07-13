@@ -2,7 +2,7 @@ openapi: 3.0.3
 info:
   version: '1.0.0'
   title: 'IAMService User Authentication'
-  description: 'User authentication APIs for IAMService application using auth_user table'
+  description: 'User authentication APIs for IAMService application'
 
 servers:
   - url: '/api/v1/auth'
@@ -20,14 +20,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SignupRequest'
+              $ref: '#/components/schemas/SignUpRequest'
       responses:
         '201':
           description: 'User successfully created, email confirmation required'
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SignupResponse'
+                $ref: '#/components/schemas/SignUpResponse'
         '400':
           description: 'Invalid input data'
         '409':
@@ -83,7 +83,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RefreshRequest'
+              $ref: '#/components/schemas/TokenRefreshRequest'
       responses:
         '200':
           description: 'Token refreshed successfully'
@@ -97,23 +97,17 @@ paths:
           description: 'Refresh token expired or invalid'
 
   /confirm-email:
-    get:
+    post:
       operationId: confirmEmail
       summary: 'Confirm user email address'
       description: 'Confirm user email address using the confirmation code sent via email'
-      parameters:
-        - name: 'userId'
-          in: 'query'
-          description: 'User ID to confirm email for'
-          required: true
-          schema:
-            type: string
-        - name: 'code'
-          in: 'query'
-          description: 'Email confirmation code (6-digit for mobile, long token for web)'
-          required: true
-          schema:
-            type: string
+      requestBody:
+        description: 'Email confirmation data'
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailConfirmationRequest'
       responses:
         '200':
           description: 'Email confirmed successfully'
@@ -130,7 +124,7 @@ paths:
 
 components:
   schemas:
-    SignupRequest:
+    SignUpRequest:
       type: object
       description: 'Request payload for creating new auth_user record'
       properties:
@@ -197,7 +191,7 @@ components:
         - password
         - tenantId
 
-    RefreshRequest:
+    TokenRefreshRequest:
       type: object
       properties:
         refreshToken:
@@ -208,7 +202,7 @@ components:
       required:
         - refreshToken
 
-    SignupResponse:
+    SignUpResponse:
       type: object
       description: 'Response after successful user signup indicating email confirmation is required'
       properties:
@@ -277,3 +271,21 @@ components:
         - tokenType
         - expiresIn
         - userId
+
+    EmailConfirmationRequest:
+      type: object
+      description: 'Request payload for email confirmation'
+      properties:
+        userId:
+          type: string
+          nullable: false
+          example: 'uuid-123-456-789'
+          description: 'User ID to confirm email for'
+        code:
+          type: string
+          nullable: false
+          example: '123456'
+          description: 'Email confirmation code (6-digit for mobile, long token for web)'
+      required:
+        - userId
+        - code

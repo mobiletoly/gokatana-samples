@@ -16,9 +16,9 @@ import (
 )
 
 // SignUp creates a new user account
-func (a *AuthMgm) SignUp(ctx context.Context, req *swagger.SignupRequest) (*swagger.SignupResponse, error) {
+func (a *AuthMgm) SignUp(ctx context.Context, req *swagger.SignUpRequest) (*swagger.SignUpResponse, error) {
 	katapp.Logger(ctx).Info("signing up user", "email", string(req.Email), "tenantID", req.TenantId)
-	if err := a.validateSignupRequest(req); err != nil {
+	if err := a.validateSignUpRequest(req); err != nil {
 		return nil, err
 	}
 
@@ -107,21 +107,23 @@ func (a *AuthMgm) SignUp(ctx context.Context, req *swagger.SignupRequest) (*swag
 			string(req.Source),
 			expiresAt)
 		if err != nil {
-			katapp.Logger(ctx).Error("failed to create email confirmation token",
+			msg := "failed to create email confirmation token"
+			katapp.Logger(ctx).Error(msg,
 				"userID", user.ID,
 				"source", req.Source,
 				"error", err)
-			return nil, katapp.NewErr(katapp.ErrInternal, "failed to create email confirmation token")
+			return nil, katapp.NewErr(katapp.ErrInternal, msg)
 		}
 
 		// Send confirmation email based on source
 		err = a.sendConfirmationEmail(ctx, user, tokenForEmail, string(req.Source))
 		if err != nil {
-			katapp.Logger(ctx).Error("failed to send confirmation email",
+			msg := "failed to send confirmation email"
+			katapp.Logger(ctx).Error(msg,
 				"userID", user.ID,
 				"source", req.Source,
 				"error", err)
-			return nil, katapp.NewErr(katapp.ErrInternal, "failed to send confirmation email")
+			return nil, katapp.NewErr(katapp.ErrInternal, msg)
 		}
 
 		katapp.Logger(ctx).Info("email confirmation token created and email sent",
@@ -136,14 +138,14 @@ func (a *AuthMgm) SignUp(ctx context.Context, req *swagger.SignupRequest) (*swag
 
 	// Return a response indicating that email confirmation is required
 	message := "User account created successfully. Please check your email to confirm your account."
-	return &swagger.SignupResponse{
+	return &swagger.SignUpResponse{
 		Message: message,
 		Email:   req.Email,
 		UserId:  user.ID,
 	}, nil
 }
 
-func (a *AuthMgm) validateSignupRequest(req *swagger.SignupRequest) error {
+func (a *AuthMgm) validateSignUpRequest(req *swagger.SignUpRequest) error {
 	if req.Email == "" {
 		return katapp.NewErr(katapp.ErrInvalidInput, "email is required")
 	}
@@ -245,7 +247,7 @@ func (a *AuthMgm) sendConfirmationEmail(ctx context.Context, user *model.AuthUse
 // sendWebConfirmationEmail sends a clickable confirmation link for web users
 func (a *AuthMgm) sendWebConfirmationEmail(ctx context.Context, user *model.AuthUser, token string) error {
 	baseURL := a.serverConfig.Domain
-	confirmationURL := fmt.Sprintf("%s/api/v1/auth/confirm-email?userId=%s&code=%s", baseURL, user.ID, token)
+	confirmationURL := fmt.Sprintf("%s/web/user/auth/confirm-email?userId=%s&code=%s", baseURL, user.ID, token)
 
 	data := &email.WebConfirmationData{
 		User:            user,

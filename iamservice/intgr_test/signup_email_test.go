@@ -1,7 +1,6 @@
 package intgr_test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/mobiletoly/gokatana-samples/iamservice/internal/core/swagger"
@@ -20,7 +19,7 @@ func runSignupEmailTests(t *testing.T, env *TestEnvironment) {
 		clearMockEmails()
 
 		t.Run("Web signup must send confirmation email", func(t *testing.T) {
-			signupReq := &swagger.SignupRequest{
+			signupReq := &swagger.SignUpRequest{
 				Email:     "web-test@example.com",
 				Password:  "qazwsxedc",
 				FirstName: "Web",
@@ -30,7 +29,7 @@ func runSignupEmailTests(t *testing.T, env *TestEnvironment) {
 			}
 
 			// Perform signup
-			signupResp, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.SignupRequest, swagger.SignupResponse](
+			signupResp, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.SignUpRequest, swagger.SignUpResponse](
 				ctx, &appConfig.Server, "api/v1/auth/signup", nil, signupReq)
 			require.NoError(t, err)
 			assert.NotNil(t, signupResp)
@@ -56,9 +55,15 @@ func runSignupEmailTests(t *testing.T, env *TestEnvironment) {
 			assert.NotEmpty(t, confirmationURL)
 			assert.Contains(t, confirmationURL, signupResp.UserId)
 
-			// Test the confirmation URL
-			confirmResp, _, err := kathttpc.LocalHttpJsonGetRequest[swagger.EmailConfirmationResponse](
-				ctx, &appConfig.Server, confirmationURL, nil)
+			// Extract parameters from URL and make POST request to API
+			userID := extractUserIDFromConfirmationURL(confirmationURL)
+			code := extractCodeFromConfirmationURL(confirmationURL)
+			confirmReq := &swagger.EmailConfirmationRequest{
+				UserId: userID,
+				Code:   code,
+			}
+			confirmResp, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.EmailConfirmationRequest, swagger.EmailConfirmationResponse](
+				ctx, &appConfig.Server, "api/v1/auth/confirm-email", nil, confirmReq)
 			require.NoError(t, err)
 			assert.Contains(t, confirmResp.Message, "confirmed successfully")
 		})
@@ -66,7 +71,7 @@ func runSignupEmailTests(t *testing.T, env *TestEnvironment) {
 		t.Run("Android signup must send confirmation email with 6-digit code", func(t *testing.T) {
 			clearMockEmails()
 
-			signupReq := &swagger.SignupRequest{
+			signupReq := &swagger.SignUpRequest{
 				Email:     "android-test@example.com",
 				Password:  "qazwsxedc",
 				FirstName: "Android",
@@ -76,7 +81,7 @@ func runSignupEmailTests(t *testing.T, env *TestEnvironment) {
 			}
 
 			// Perform signup
-			signupResp, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.SignupRequest, swagger.SignupResponse](
+			signupResp, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.SignUpRequest, swagger.SignUpResponse](
 				ctx, &appConfig.Server, "api/v1/auth/signup", nil, signupReq)
 			require.NoError(t, err)
 
@@ -99,9 +104,12 @@ func runSignupEmailTests(t *testing.T, env *TestEnvironment) {
 			assert.Regexp(t, `^\d{6}$`, confirmationCode)
 
 			// Test the confirmation with code
-			confirmURL := fmt.Sprintf("api/v1/auth/confirm-email?userId=%s&code=%s", signupResp.UserId, confirmationCode)
-			confirmResp, _, err := kathttpc.LocalHttpJsonGetRequest[swagger.EmailConfirmationResponse](
-				ctx, &appConfig.Server, confirmURL, nil)
+			confirmReq := &swagger.EmailConfirmationRequest{
+				UserId: signupResp.UserId,
+				Code:   confirmationCode,
+			}
+			confirmResp, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.EmailConfirmationRequest, swagger.EmailConfirmationResponse](
+				ctx, &appConfig.Server, "api/v1/auth/confirm-email", nil, confirmReq)
 			require.NoError(t, err)
 			assert.Contains(t, confirmResp.Message, "confirmed successfully")
 		})
@@ -109,7 +117,7 @@ func runSignupEmailTests(t *testing.T, env *TestEnvironment) {
 		t.Run("iOS signup must send confirmation email with 6-digit code", func(t *testing.T) {
 			clearMockEmails()
 
-			signupReq := &swagger.SignupRequest{
+			signupReq := &swagger.SignUpRequest{
 				Email:     "ios-test@example.com",
 				Password:  "qazwsxedc",
 				FirstName: "iOS",
@@ -119,7 +127,7 @@ func runSignupEmailTests(t *testing.T, env *TestEnvironment) {
 			}
 
 			// Perform signup
-			signupResp, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.SignupRequest, swagger.SignupResponse](
+			signupResp, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.SignUpRequest, swagger.SignUpResponse](
 				ctx, &appConfig.Server, "api/v1/auth/signup", nil, signupReq)
 			require.NoError(t, err)
 
@@ -134,9 +142,12 @@ func runSignupEmailTests(t *testing.T, env *TestEnvironment) {
 
 			// Extract and test confirmation code
 			confirmationCode := extractSixDigitCode(email.Body)
-			confirmURL := fmt.Sprintf("api/v1/auth/confirm-email?userId=%s&code=%s", signupResp.UserId, confirmationCode)
-			confirmResp, _, err := kathttpc.LocalHttpJsonGetRequest[swagger.EmailConfirmationResponse](
-				ctx, &appConfig.Server, confirmURL, nil)
+			confirmReq := &swagger.EmailConfirmationRequest{
+				UserId: signupResp.UserId,
+				Code:   confirmationCode,
+			}
+			confirmResp, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.EmailConfirmationRequest, swagger.EmailConfirmationResponse](
+				ctx, &appConfig.Server, "api/v1/auth/confirm-email", nil, confirmReq)
 			require.NoError(t, err)
 			assert.Contains(t, confirmResp.Message, "confirmed successfully")
 		})
@@ -146,7 +157,7 @@ func runSignupEmailTests(t *testing.T, env *TestEnvironment) {
 			email := "resignup-test@example.com"
 
 			// First signup
-			signupReq1 := &swagger.SignupRequest{
+			signupReq1 := &swagger.SignUpRequest{
 				Email:     email,
 				Password:  "password1",
 				FirstName: "First",
@@ -155,7 +166,7 @@ func runSignupEmailTests(t *testing.T, env *TestEnvironment) {
 				Source:    "web",
 			}
 
-			signupResp1, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.SignupRequest, swagger.SignupResponse](
+			signupResp1, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.SignUpRequest, swagger.SignUpResponse](
 				ctx, &appConfig.Server, "api/v1/auth/signup", nil, signupReq1)
 			require.NoError(t, err)
 
@@ -164,7 +175,7 @@ func runSignupEmailTests(t *testing.T, env *TestEnvironment) {
 			require.NoError(t, err)
 
 			// Second signup (should replace first)
-			signupReq2 := &swagger.SignupRequest{
+			signupReq2 := &swagger.SignUpRequest{
 				Email:     email,
 				Password:  "password2",
 				FirstName: "Second",
@@ -173,7 +184,7 @@ func runSignupEmailTests(t *testing.T, env *TestEnvironment) {
 				Source:    "android",
 			}
 
-			signupResp2, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.SignupRequest, swagger.SignupResponse](
+			signupResp2, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.SignUpRequest, swagger.SignUpResponse](
 				ctx, &appConfig.Server, "api/v1/auth/signup", nil, signupReq2)
 			require.NoError(t, err)
 
@@ -197,9 +208,12 @@ func runSignupEmailTests(t *testing.T, env *TestEnvironment) {
 
 			// Only the second confirmation should work
 			secondCode := extractSixDigitCode(emails[1].Body)
-			confirmURL := fmt.Sprintf("api/v1/auth/confirm-email?userId=%s&code=%s", signupResp2.UserId, secondCode)
-			confirmResp, _, err := kathttpc.LocalHttpJsonGetRequest[swagger.EmailConfirmationResponse](
-				ctx, &appConfig.Server, confirmURL, nil)
+			confirmReq := &swagger.EmailConfirmationRequest{
+				UserId: signupResp2.UserId,
+				Code:   secondCode,
+			}
+			confirmResp, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.EmailConfirmationRequest, swagger.EmailConfirmationResponse](
+				ctx, &appConfig.Server, "api/v1/auth/confirm-email", nil, confirmReq)
 			require.NoError(t, err)
 			assert.Contains(t, confirmResp.Message, "confirmed successfully")
 		})
@@ -208,7 +222,7 @@ func runSignupEmailTests(t *testing.T, env *TestEnvironment) {
 			clearMockEmails()
 
 			// Create a user first
-			signupReq := &swagger.SignupRequest{
+			signupReq := &swagger.SignUpRequest{
 				Email:     "invalid-test@example.com",
 				Password:  "qazwsxedc",
 				FirstName: "Invalid",
@@ -217,34 +231,40 @@ func runSignupEmailTests(t *testing.T, env *TestEnvironment) {
 				Source:    "android",
 			}
 
-			signupResp, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.SignupRequest, swagger.SignupResponse](
+			signupResp, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.SignUpRequest, swagger.SignUpResponse](
 				ctx, &appConfig.Server, "api/v1/auth/signup", nil, signupReq)
 			require.NoError(t, err)
 
 			t.Run("Invalid user ID must fail", func(t *testing.T) {
-				confirmURL := "api/v1/auth/confirm-email?userId=invalid-user-id&code=123456"
-				_, _, err := kathttpc.LocalHttpJsonGetRequest[swagger.EmailConfirmationResponse](
-					ctx, &appConfig.Server, confirmURL, nil)
+				confirmReq := &swagger.EmailConfirmationRequest{
+					UserId: "invalid-user-id",
+					Code:   "123456",
+				}
+				_, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.EmailConfirmationRequest, swagger.EmailConfirmationResponse](
+					ctx, &appConfig.Server, "api/v1/auth/confirm-email", nil, confirmReq)
 				kathttpc.AssertStatusNotFound(t, err)
 			})
 
 			t.Run("Invalid confirmation code must fail", func(t *testing.T) {
-				confirmURL := fmt.Sprintf("api/v1/auth/confirm-email?userId=%s&code=999999", signupResp.UserId)
-				_, _, err := kathttpc.LocalHttpJsonGetRequest[swagger.EmailConfirmationResponse](
-					ctx, &appConfig.Server, confirmURL, nil)
+				confirmReq := &swagger.EmailConfirmationRequest{
+					UserId: signupResp.UserId,
+					Code:   "999999",
+				}
+				_, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.EmailConfirmationRequest, swagger.EmailConfirmationResponse](
+					ctx, &appConfig.Server, "api/v1/auth/confirm-email", nil, confirmReq)
 				kathttpc.AssertStatusNotFound(t, err)
 			})
 
 			t.Run("Missing parameters must fail", func(t *testing.T) {
-				testCases := []string{
-					"api/v1/auth/confirm-email",
-					"api/v1/auth/confirm-email?userId=test-id",
-					"api/v1/auth/confirm-email?code=123456",
+				testCases := []*swagger.EmailConfirmationRequest{
+					{},                  // Empty request
+					{UserId: "test-id"}, // Missing code
+					{Code: "123456"},    // Missing userId
 				}
 
-				for _, confirmURL := range testCases {
-					_, _, err := kathttpc.LocalHttpJsonGetRequest[swagger.EmailConfirmationResponse](
-						ctx, &appConfig.Server, confirmURL, nil)
+				for _, confirmReq := range testCases {
+					_, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.EmailConfirmationRequest, swagger.EmailConfirmationResponse](
+						ctx, &appConfig.Server, "api/v1/auth/confirm-email", nil, confirmReq)
 					kathttpc.AssertStatusBadRequest(t, err)
 				}
 			})

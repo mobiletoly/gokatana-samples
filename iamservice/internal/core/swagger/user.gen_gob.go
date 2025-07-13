@@ -134,6 +134,36 @@ func (b AuthUsersResponse_Builder_GobFinalizer) Build() *AuthUsersResponse {
 	return b.root
 }
 
+func NewUpdateAuthUserRequestBuilder() UpdateAuthUserRequest_Builder_FirstName {
+	return UpdateAuthUserRequest_Builder_FirstName{root: &UpdateAuthUserRequest{}}
+}
+
+type UpdateAuthUserRequest_Builder_FirstName struct {
+	root *UpdateAuthUserRequest
+}
+
+type UpdateAuthUserRequest_Builder_LastName struct {
+	root *UpdateAuthUserRequest
+}
+
+func (b UpdateAuthUserRequest_Builder_FirstName) FirstName(arg string) UpdateAuthUserRequest_Builder_LastName {
+	b.root.FirstName = arg
+	return UpdateAuthUserRequest_Builder_LastName{root: b.root}
+}
+
+type UpdateAuthUserRequest_Builder_GobFinalizer struct {
+	root *UpdateAuthUserRequest
+}
+
+func (b UpdateAuthUserRequest_Builder_LastName) LastName(arg string) UpdateAuthUserRequest_Builder_GobFinalizer {
+	b.root.LastName = arg
+	return UpdateAuthUserRequest_Builder_GobFinalizer{root: b.root}
+}
+
+func (b UpdateAuthUserRequest_Builder_GobFinalizer) Build() *UpdateAuthUserRequest {
+	return b.root
+}
+
 func NewUpdateUserProfileRequestBuilder() UpdateUserProfileRequest_Builder_BirthDate {
 	return UpdateUserProfileRequest_Builder_BirthDate{root: &UpdateUserProfileRequest{}}
 }
@@ -226,21 +256,12 @@ func (b UserProfileResponse_Builder_Gender) Gender(arg *UserProfileGender) UserP
 	return UserProfileResponse_Builder_Height{root: b.root}
 }
 
-type UserProfileResponse_Builder_Id struct {
-	root *UserProfileResponse
-}
-
-func (b UserProfileResponse_Builder_Height) Height(arg *int) UserProfileResponse_Builder_Id {
-	b.root.Height = arg
-	return UserProfileResponse_Builder_Id{root: b.root}
-}
-
 type UserProfileResponse_Builder_IsMetric struct {
 	root *UserProfileResponse
 }
 
-func (b UserProfileResponse_Builder_Id) Id(arg int) UserProfileResponse_Builder_IsMetric {
-	b.root.Id = arg
+func (b UserProfileResponse_Builder_Height) Height(arg *int) UserProfileResponse_Builder_IsMetric {
+	b.root.Height = arg
 	return UserProfileResponse_Builder_IsMetric{root: b.root}
 }
 

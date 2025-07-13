@@ -64,7 +64,7 @@ func runUserManagementTests(t *testing.T, env *TestEnvironment) {
 		t.Run("GET /users/all", func(t *testing.T) {
 			t.Run("sysadmin user must succeed", func(t *testing.T) {
 				userListResp, _, err := kathttpc.LocalHttpJsonGetRequest[swagger.AuthUsersResponse](
-					ctx, &appConfig.Server, "api/v1/users/all", sysadminHeaders)
+					ctx, &appConfig.Server, "api/v1/users/all?limit=100", sysadminHeaders)
 				assert.NoError(t, err)
 				assert.NotNil(t, userListResp)
 				assert.NotNil(t, userListResp.Items)
@@ -145,6 +145,102 @@ func runUserManagementTests(t *testing.T, env *TestEnvironment) {
 			})
 		})
 
+		t.Run("User Profile API (Authenticated routes)", func(t *testing.T) {
+			// Create regular user using sample data
+			userSigninReq := &swagger.SignInRequest{
+				Email:    "testuser@example.com",
+				Password: "qazwsxedc",
+				TenantId: "default-tenant",
+			}
+			userAuthResp, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.SignInRequest, swagger.SignInResponse](
+				ctx, &appConfig.Server, "api/v1/auth/signin", nil, userSigninReq)
+			assert.NoError(t, err)
+			assert.NotNil(t, userAuthResp)
+			assert.NotNil(t, userAuthResp.AccessToken)
+			userHeaders := map[string][]string{
+				"Authorization": {"Bearer " + userAuthResp.AccessToken},
+			}
+
+			t.Run("GET /users/me", func(t *testing.T) {
+				t.Run("authenticated user must succeed", func(t *testing.T) {
+					authUserResponse, _, err := kathttpc.LocalHttpJsonGetRequest[swagger.AuthUserResponse](
+						ctx, &appConfig.Server, "api/v1/users/me", userHeaders)
+					assert.NoError(t, err)
+					assert.NotNil(t, authUserResponse)
+					assert.Equal(t, "testuser@example.com", string(authUserResponse.Email))
+					assert.Equal(t, "Test", authUserResponse.FirstName)
+					assert.Equal(t, "User", authUserResponse.LastName)
+				})
+				t.Run("unauthenticated request must fail with 401 Unauthorized", func(t *testing.T) {
+					_, _, err := kathttpc.LocalHttpJsonGetRequest[swagger.AuthUserResponse](
+						ctx, &appConfig.Server, "api/v1/users/me", nil)
+					kathttpc.AssertStatusUnauthorized(t, err)
+				})
+			})
+		})
+
+		t.Run("PUT /users/{userId}", func(t *testing.T) {
+			userID := "test-user-5"
+			t.Run("admin user must succeed", func(t *testing.T) {
+				// Create update request
+				updateReq := swagger.UpdateAuthUserRequest{
+					FirstName: "UpdatedFirst",
+					LastName:  "UpdatedLast",
+				}
+
+				// Update user details
+				updatedUser, _, err := kathttpc.LocalHttpJsonPutRequest[swagger.UpdateAuthUserRequest, swagger.AuthUserResponse](
+					ctx, &appConfig.Server, "api/v1/users/"+userID, adminHeaders, &updateReq)
+				assert.NoError(t, err)
+				assert.NotNil(t, updatedUser)
+				assert.Equal(t, userID, updatedUser.Id)
+				assert.Equal(t, "UpdatedFirst", updatedUser.FirstName)
+				assert.Equal(t, "UpdatedLast", updatedUser.LastName)
+			})
+			t.Run("admin user must fail with 403 Forbidden for user from other tenant", func(t *testing.T) {
+				updateReq := swagger.UpdateAuthUserRequest{
+					FirstName: "UpdatedFirst",
+					LastName:  "UpdatedLast",
+				}
+				_, _, err := kathttpc.LocalHttpJsonPutRequest[swagger.UpdateAuthUserRequest, swagger.AuthUserResponse](
+					ctx, &appConfig.Server, "api/v1/users/test-user-1", adminHeaders, &updateReq)
+				kathttpc.AssertStatusForbidden(t, err)
+			})
+			t.Run("regular user must be able to update itself", func(t *testing.T) {
+				updateReq := swagger.UpdateAuthUserRequest{
+					FirstName: "SelfUpdatedFirst",
+					LastName:  "SelfUpdatedLast",
+				}
+				// Use test-user-5 which corresponds to the userHeaders (testuser@example.com)
+				updatedUser, _, err := kathttpc.LocalHttpJsonPutRequest[swagger.UpdateAuthUserRequest, swagger.AuthUserResponse](
+					ctx, &appConfig.Server, "api/v1/users/test-user-5", userHeaders, &updateReq)
+				assert.NoError(t, err)
+				assert.NotNil(t, updatedUser)
+				assert.Equal(t, "test-user-5", updatedUser.Id)
+				assert.Equal(t, "SelfUpdatedFirst", updatedUser.FirstName)
+				assert.Equal(t, "SelfUpdatedLast", updatedUser.LastName)
+			})
+			t.Run("regular user must fail with 403 Forbidden for other user", func(t *testing.T) {
+				updateReq := swagger.UpdateAuthUserRequest{
+					FirstName: "UpdatedFirst",
+					LastName:  "UpdatedLast",
+				}
+				// Try to update a different user (default-user-1) - should fail
+				_, _, err := kathttpc.LocalHttpJsonPutRequest[swagger.UpdateAuthUserRequest, swagger.AuthUserResponse](
+					ctx, &appConfig.Server, "api/v1/users/default-user-1", userHeaders, &updateReq)
+				kathttpc.AssertStatusForbidden(t, err)
+			})
+			t.Run("invalid request body must fail with 400 Bad Request", func(t *testing.T) {
+				updateReq := swagger.UpdateAuthUserRequest{
+					FirstName: "", // Empty first name should fail
+					LastName:  "UpdatedLast",
+				}
+				_, _, err := kathttpc.LocalHttpJsonPutRequest[swagger.UpdateAuthUserRequest, swagger.AuthUserResponse](
+					ctx, &appConfig.Server, "api/v1/users/"+userID, adminHeaders, &updateReq)
+				kathttpc.AssertStatusBadRequest(t, err)
+			})
+		})
+
 		t.Run("GET /users/{userId}/profile", func(t *testing.T) {
 			userID := "test-user-5"
 			t.Run("admin user must succeed", func(t *testing.T) {
@@ -153,7 +249,6 @@ func runUserManagementTests(t *testing.T, env *TestEnvironment) {
 				assert.NoError(t, err)
 				assert.NotNil(t, userProfile)
 				assert.Equal(t, userID, userProfile.UserId)
-				assert.Greater(t, userProfile.Id, 0)
 				assert.NotNil(t, userProfile.CreatedAt)
 				assert.NotNil(t, userProfile.UpdatedAt)
 				assert.Equal(t, 175, *userProfile.Height)
@@ -172,7 +267,6 @@ func runUserManagementTests(t *testing.T, env *TestEnvironment) {
 				assert.NoError(t, err)
 				assert.NotNil(t, userProfile)
 				assert.Equal(t, userAuthResp.UserId, userProfile.UserId)
-				assert.Greater(t, userProfile.Id, 0)
 				assert.NotNil(t, userProfile.CreatedAt)
 				assert.NotNil(t, userProfile.UpdatedAt)
 			})
@@ -380,40 +474,6 @@ func runUserManagementTests(t *testing.T, env *TestEnvironment) {
 			t.Run("unauthenticated request must fail with 401 Unauthorized", func(t *testing.T) {
 				_, _, err := kathttpc.LocalHttpJsonDeleteRequest[any](
 					ctx, &appConfig.Server, "api/v1/users/"+userID+"/roles/"+roleName, nil)
-				kathttpc.AssertStatusUnauthorized(t, err)
-			})
-		})
-	})
-
-	t.Run("User Profile API (Authenticated routes)", func(t *testing.T) {
-		// Create regular user using sample data
-		userSigninReq := &swagger.SignInRequest{
-			Email:    "testuser@example.com",
-			Password: "qazwsxedc",
-			TenantId: "default-tenant",
-		}
-		userAuthResp, _, err := kathttpc.LocalHttpJsonPostRequest[swagger.SignInRequest, swagger.SignInResponse](
-			ctx, &appConfig.Server, "api/v1/auth/signin", nil, userSigninReq)
-		assert.NoError(t, err)
-		assert.NotNil(t, userAuthResp)
-		assert.NotNil(t, userAuthResp.AccessToken)
-		userHeaders := map[string][]string{
-			"Authorization": {"Bearer " + userAuthResp.AccessToken},
-		}
-
-		t.Run("GET /users/me", func(t *testing.T) {
-			t.Run("authenticated user must succeed", func(t *testing.T) {
-				authUserResponse, _, err := kathttpc.LocalHttpJsonGetRequest[swagger.AuthUserResponse](
-					ctx, &appConfig.Server, "api/v1/users/me", userHeaders)
-				assert.NoError(t, err)
-				assert.NotNil(t, authUserResponse)
-				assert.Equal(t, "testuser@example.com", string(authUserResponse.Email))
-				assert.Equal(t, "Test", authUserResponse.FirstName)
-				assert.Equal(t, "User", authUserResponse.LastName)
-			})
-			t.Run("unauthenticated request must fail with 401 Unauthorized", func(t *testing.T) {
-				_, _, err := kathttpc.LocalHttpJsonGetRequest[swagger.AuthUserResponse](
-					ctx, &appConfig.Server, "api/v1/users/me", nil)
 				kathttpc.AssertStatusUnauthorized(t, err)
 			})
 		})

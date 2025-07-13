@@ -30,6 +30,11 @@ func TestAPIRoutes(t *testing.T) {
 		runAuthenticationTests(t, env)
 	})
 
+	// Run refresh token tests
+	t.Run("Refresh Token API", func(t *testing.T) {
+		runRefreshTokenTests(t, env)
+	})
+
 	// Run signup and email confirmation tests with mock emails
 	t.Run("Signup with Email Confirmation", func(t *testing.T) {
 		runSignupEmailTests(t, env)

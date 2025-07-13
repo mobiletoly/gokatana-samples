@@ -2,6 +2,36 @@
 
 package swagger
 
+func NewEmailConfirmationRequestBuilder() EmailConfirmationRequest_Builder_Code {
+	return EmailConfirmationRequest_Builder_Code{root: &EmailConfirmationRequest{}}
+}
+
+type EmailConfirmationRequest_Builder_Code struct {
+	root *EmailConfirmationRequest
+}
+
+type EmailConfirmationRequest_Builder_UserId struct {
+	root *EmailConfirmationRequest
+}
+
+func (b EmailConfirmationRequest_Builder_Code) Code(arg string) EmailConfirmationRequest_Builder_UserId {
+	b.root.Code = arg
+	return EmailConfirmationRequest_Builder_UserId{root: b.root}
+}
+
+type EmailConfirmationRequest_Builder_GobFinalizer struct {
+	root *EmailConfirmationRequest
+}
+
+func (b EmailConfirmationRequest_Builder_UserId) UserId(arg string) EmailConfirmationRequest_Builder_GobFinalizer {
+	b.root.UserId = arg
+	return EmailConfirmationRequest_Builder_GobFinalizer{root: b.root}
+}
+
+func (b EmailConfirmationRequest_Builder_GobFinalizer) Build() *EmailConfirmationRequest {
+	return b.root
+}
+
 func NewEmailConfirmationResponseBuilder() EmailConfirmationResponse_Builder_Message {
 	return EmailConfirmationResponse_Builder_Message{root: &EmailConfirmationResponse{}}
 }
@@ -20,27 +50,6 @@ func (b EmailConfirmationResponse_Builder_Message) Message(arg string) EmailConf
 }
 
 func (b EmailConfirmationResponse_Builder_GobFinalizer) Build() *EmailConfirmationResponse {
-	return b.root
-}
-
-func NewRefreshRequestBuilder() RefreshRequest_Builder_RefreshToken {
-	return RefreshRequest_Builder_RefreshToken{root: &RefreshRequest{}}
-}
-
-type RefreshRequest_Builder_RefreshToken struct {
-	root *RefreshRequest
-}
-
-type RefreshRequest_Builder_GobFinalizer struct {
-	root *RefreshRequest
-}
-
-func (b RefreshRequest_Builder_RefreshToken) RefreshToken(arg string) RefreshRequest_Builder_GobFinalizer {
-	b.root.RefreshToken = arg
-	return RefreshRequest_Builder_GobFinalizer{root: b.root}
-}
-
-func (b RefreshRequest_Builder_GobFinalizer) Build() *RefreshRequest {
 	return b.root
 }
 
@@ -140,137 +149,128 @@ func (b SignInResponse_Builder_GobFinalizer) Build() *SignInResponse {
 	return b.root
 }
 
-func NewSignupRequestBuilder() SignupRequest_Builder_Email {
-	return SignupRequest_Builder_Email{root: &SignupRequest{}}
+func NewSignUpRequestBuilder() SignUpRequest_Builder_Email {
+	return SignUpRequest_Builder_Email{root: &SignUpRequest{}}
 }
 
-type SignupRequest_Builder_Email struct {
-	root *SignupRequest
+type SignUpRequest_Builder_Email struct {
+	root *SignUpRequest
 }
 
-type SignupRequest_Builder_FirstName struct {
-	root *SignupRequest
+type SignUpRequest_Builder_FirstName struct {
+	root *SignUpRequest
 }
 
-func (b SignupRequest_Builder_Email) Email(arg string) SignupRequest_Builder_FirstName {
+func (b SignUpRequest_Builder_Email) Email(arg string) SignUpRequest_Builder_FirstName {
 	b.root.Email = arg
-	return SignupRequest_Builder_FirstName{root: b.root}
+	return SignUpRequest_Builder_FirstName{root: b.root}
 }
 
-type SignupRequest_Builder_LastName struct {
-	root *SignupRequest
+type SignUpRequest_Builder_LastName struct {
+	root *SignUpRequest
 }
 
-func (b SignupRequest_Builder_FirstName) FirstName(arg string) SignupRequest_Builder_LastName {
+func (b SignUpRequest_Builder_FirstName) FirstName(arg string) SignUpRequest_Builder_LastName {
 	b.root.FirstName = arg
-	return SignupRequest_Builder_LastName{root: b.root}
+	return SignUpRequest_Builder_LastName{root: b.root}
 }
 
-type SignupRequest_Builder_Password struct {
-	root *SignupRequest
+type SignUpRequest_Builder_Password struct {
+	root *SignUpRequest
 }
 
-func (b SignupRequest_Builder_LastName) LastName(arg string) SignupRequest_Builder_Password {
+func (b SignUpRequest_Builder_LastName) LastName(arg string) SignUpRequest_Builder_Password {
 	b.root.LastName = arg
-	return SignupRequest_Builder_Password{root: b.root}
+	return SignUpRequest_Builder_Password{root: b.root}
 }
 
-type SignupRequest_Builder_Source struct {
-	root *SignupRequest
+type SignUpRequest_Builder_Source struct {
+	root *SignUpRequest
 }
 
-func (b SignupRequest_Builder_Password) Password(arg string) SignupRequest_Builder_Source {
+func (b SignUpRequest_Builder_Password) Password(arg string) SignUpRequest_Builder_Source {
 	b.root.Password = arg
-	return SignupRequest_Builder_Source{root: b.root}
+	return SignUpRequest_Builder_Source{root: b.root}
 }
 
-type SignupRequest_Builder_TenantId struct {
-	root *SignupRequest
+type SignUpRequest_Builder_TenantId struct {
+	root *SignUpRequest
 }
 
-func (b SignupRequest_Builder_Source) Source(arg SignupRequestSource) SignupRequest_Builder_TenantId {
+func (b SignUpRequest_Builder_Source) Source(arg SignUpRequestSource) SignUpRequest_Builder_TenantId {
 	b.root.Source = arg
-	return SignupRequest_Builder_TenantId{root: b.root}
+	return SignUpRequest_Builder_TenantId{root: b.root}
 }
 
-type SignupRequest_Builder_GobFinalizer struct {
-	root *SignupRequest
+type SignUpRequest_Builder_GobFinalizer struct {
+	root *SignUpRequest
 }
 
-func (b SignupRequest_Builder_TenantId) TenantId(arg string) SignupRequest_Builder_GobFinalizer {
+func (b SignUpRequest_Builder_TenantId) TenantId(arg string) SignUpRequest_Builder_GobFinalizer {
 	b.root.TenantId = arg
-	return SignupRequest_Builder_GobFinalizer{root: b.root}
+	return SignUpRequest_Builder_GobFinalizer{root: b.root}
 }
 
-func (b SignupRequest_Builder_GobFinalizer) Build() *SignupRequest {
+func (b SignUpRequest_Builder_GobFinalizer) Build() *SignUpRequest {
 	return b.root
 }
 
-func NewSignupResponseBuilder() SignupResponse_Builder_Email {
-	return SignupResponse_Builder_Email{root: &SignupResponse{}}
+func NewSignUpResponseBuilder() SignUpResponse_Builder_Email {
+	return SignUpResponse_Builder_Email{root: &SignUpResponse{}}
 }
 
-type SignupResponse_Builder_Email struct {
-	root *SignupResponse
+type SignUpResponse_Builder_Email struct {
+	root *SignUpResponse
 }
 
-type SignupResponse_Builder_Message struct {
-	root *SignupResponse
+type SignUpResponse_Builder_Message struct {
+	root *SignUpResponse
 }
 
-func (b SignupResponse_Builder_Email) Email(arg string) SignupResponse_Builder_Message {
+func (b SignUpResponse_Builder_Email) Email(arg string) SignUpResponse_Builder_Message {
 	b.root.Email = arg
-	return SignupResponse_Builder_Message{root: b.root}
+	return SignUpResponse_Builder_Message{root: b.root}
 }
 
-type SignupResponse_Builder_UserId struct {
-	root *SignupResponse
+type SignUpResponse_Builder_UserId struct {
+	root *SignUpResponse
 }
 
-func (b SignupResponse_Builder_Message) Message(arg string) SignupResponse_Builder_UserId {
+func (b SignUpResponse_Builder_Message) Message(arg string) SignUpResponse_Builder_UserId {
 	b.root.Message = arg
-	return SignupResponse_Builder_UserId{root: b.root}
+	return SignUpResponse_Builder_UserId{root: b.root}
 }
 
-type SignupResponse_Builder_GobFinalizer struct {
-	root *SignupResponse
+type SignUpResponse_Builder_GobFinalizer struct {
+	root *SignUpResponse
 }
 
-func (b SignupResponse_Builder_UserId) UserId(arg string) SignupResponse_Builder_GobFinalizer {
+func (b SignUpResponse_Builder_UserId) UserId(arg string) SignUpResponse_Builder_GobFinalizer {
 	b.root.UserId = arg
-	return SignupResponse_Builder_GobFinalizer{root: b.root}
+	return SignUpResponse_Builder_GobFinalizer{root: b.root}
 }
 
-func (b SignupResponse_Builder_GobFinalizer) Build() *SignupResponse {
+func (b SignUpResponse_Builder_GobFinalizer) Build() *SignUpResponse {
 	return b.root
 }
 
-func NewConfirmEmailParamsBuilder() ConfirmEmailParams_Builder_UserId {
-	return ConfirmEmailParams_Builder_UserId{root: &ConfirmEmailParams{}}
+func NewTokenRefreshRequestBuilder() TokenRefreshRequest_Builder_RefreshToken {
+	return TokenRefreshRequest_Builder_RefreshToken{root: &TokenRefreshRequest{}}
 }
 
-type ConfirmEmailParams_Builder_UserId struct {
-	root *ConfirmEmailParams
+type TokenRefreshRequest_Builder_RefreshToken struct {
+	root *TokenRefreshRequest
 }
 
-type ConfirmEmailParams_Builder_Code struct {
-	root *ConfirmEmailParams
+type TokenRefreshRequest_Builder_GobFinalizer struct {
+	root *TokenRefreshRequest
 }
 
-func (b ConfirmEmailParams_Builder_UserId) UserId(arg string) ConfirmEmailParams_Builder_Code {
-	b.root.UserId = arg
-	return ConfirmEmailParams_Builder_Code{root: b.root}
+func (b TokenRefreshRequest_Builder_RefreshToken) RefreshToken(arg string) TokenRefreshRequest_Builder_GobFinalizer {
+	b.root.RefreshToken = arg
+	return TokenRefreshRequest_Builder_GobFinalizer{root: b.root}
 }
 
-type ConfirmEmailParams_Builder_GobFinalizer struct {
-	root *ConfirmEmailParams
-}
-
-func (b ConfirmEmailParams_Builder_Code) Code(arg string) ConfirmEmailParams_Builder_GobFinalizer {
-	b.root.Code = arg
-	return ConfirmEmailParams_Builder_GobFinalizer{root: b.root}
-}
-
-func (b ConfirmEmailParams_Builder_GobFinalizer) Build() *ConfirmEmailParams {
+func (b TokenRefreshRequest_Builder_GobFinalizer) Build() *TokenRefreshRequest {
 	return b.root
 }

@@ -5,7 +5,7 @@ import (
 	"errors"
 	"github.com/jackc/pgx/v5"
 	"github.com/mobiletoly/gokatana-samples/iamservice/internal/core/usecase/internal"
-	openapi_types "github.com/oapi-codegen/runtime/types"
+	"github.com/oapi-codegen/runtime/types"
 	"time"
 
 	"github.com/mobiletoly/gokatana-samples/iamservice/internal/core/model"
@@ -439,7 +439,7 @@ func authUserToAuthUserResponse(user *model.AuthUser) *swagger.AuthUserResponse 
 
 	return swagger.NewAuthUserResponseBuilder().
 		CreatedAt(createdAt).
-		Email(openapi_types.Email(user.Email)).
+		Email(types.Email(user.Email)).
 		FirstName(user.FirstName).
 		Id(user.ID).
 		LastName(user.LastName).

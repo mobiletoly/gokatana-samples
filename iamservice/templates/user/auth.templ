@@ -143,3 +143,17 @@ templ SignUpSuccess() {
 			common.LinkButton("primary", "sm", "/web/user/auth/signin", "Sign In", ""))
 	</div>
 }
+
+templ EmailConfirmationSuccess() {
+	<div class="max-w-md mx-auto">
+		@common.Alert("success", "Email Confirmed Successfully!", "Your email address has been verified. You can now sign in to your account.",
+			common.LinkButton("primary", "sm", "/web/user/auth/signin", "Sign In", ""))
+	</div>
+}
+
+templ EmailConfirmationError(message string) {
+	<div class="max-w-md mx-auto">
+		@common.Alert("error", "Email Confirmation Failed", message,
+			common.LinkButton("primary", "sm", "/web/user/auth/signup", "Sign Up Again", ""))
+	</div>
+}

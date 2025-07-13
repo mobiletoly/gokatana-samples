@@ -1,11 +1,13 @@
 database:
-  host: some-postgres-host
+  host: some-db-host
   name: iamservice
-  user: postgres
+  user: neondb_owner
   sslmode: require
+  parameters:
+    channel_binding: require
 server:
-  domain: https://www.some-company-domain.com
+  domain: https://iamservice.some-hosting.dev
 gcloud:
   email:
-    user: user@some-company-domain.com
-    from: noreply@some-company-domain.com
+    user: toly@pluralfusion.com
+    from: noreply@pluralfusion.com

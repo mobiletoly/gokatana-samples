@@ -2,6 +2,7 @@ package repo
 
 import (
 	"context"
+	"errors"
 	"strings"
 	"time"
 
@@ -13,7 +14,7 @@ import (
 //go:generate go tool gobetter -input $GOFILE
 
 type AuthUserEntity struct { //+gob:Constructor
-	ID            *string   `db:"id"`
+	ID            string    `db:"id"`
 	Email         string    `db:"email"`
 	PasswordHash  string    `db:"password_hash"`
 	FirstName     string    `db:"first_name"`
@@ -42,6 +43,15 @@ type TenantEntity struct { //+gob:Constructor
 	Description string    `db:"description"`
 	CreatedAt   time.Time `db:"created_at"`
 	UpdatedAt   time.Time `db:"updated_at"`
+}
+
+type RefreshTokenEntity struct { //+gob:Constructor
+	ID        string    `db:"id"`
+	UserID    string    `db:"user_id"`
+	TokenHash string    `db:"token_hash"`
+	IssuedAt  time.Time `db:"issued_at"`
+	ExpiresAt time.Time `db:"expires_at"`
+	Revoked   bool      `db:"revoked"`
 }
 
 type UserProfileEntity struct { //+gob:Constructor
@@ -85,7 +95,7 @@ func SelectUserWithPasswordByEmail(ctx context.Context, tx pgx.Tx, email string,
 
 func InsertUser(ctx context.Context, tx pgx.Tx, user *AuthUserEntity) error {
 	_, err := tx.Exec(ctx, insertUserSql, pgx.NamedArgs{
-		"id":             *user.ID,
+		"id":             user.ID,
 		"email":          user.Email,
 		"password_hash":  user.PasswordHash,
 		"first_name":     user.FirstName,
@@ -113,7 +123,7 @@ func UpdateUser(ctx context.Context, tx pgx.Tx, userID string, updates map[strin
 		return nil // No updates to perform
 	}
 
-	query := "UPDATE auth_user SET " + strings.Join(setParts, ", ") + " WHERE id = @id"
+	query := "UPDATE iam.auth_user SET " + strings.Join(setParts, ", ") + " WHERE id = @id"
 	_, err := tx.Exec(ctx, query, args)
 	return err
 }
@@ -121,17 +131,6 @@ func UpdateUser(ctx context.Context, tx pgx.Tx, userID string, updates map[strin
 // Email confirmation token methods
 
 func InsertEmailConfirmationToken(ctx context.Context, tx pgx.Tx, token *model.EmailConfirmationToken) error {
-	query := `
-		INSERT INTO email_confirmation_token (id, user_id, email, token_hash, source, expires_at, created_at)
-		VALUES (@id, @user_id, @email, @token_hash, @source, @expires_at, @created_at)
-		ON CONFLICT (user_id) DO UPDATE SET
-			email = EXCLUDED.email,
-			token_hash = EXCLUDED.token_hash,
-			source = EXCLUDED.source,
-			expires_at = EXCLUDED.expires_at,
-			created_at = EXCLUDED.created_at,
-			used_at = NULL
-	`
 	args := pgx.NamedArgs{
 		"id":         token.ID,
 		"user_id":    token.UserID,
@@ -141,23 +140,18 @@ func InsertEmailConfirmationToken(ctx context.Context, tx pgx.Tx, token *model.E
 		"expires_at": token.ExpiresAt,
 		"created_at": token.CreatedAt,
 	}
-	_, err := tx.Exec(ctx, query, args)
+	_, err := tx.Exec(ctx, insertEmailConfirmationTokenSql, args)
 	return err
 }
 
 func GetEmailConfirmationTokenByUserIDAndHash(ctx context.Context, tx pgx.Tx, userID string, tokenHash string) (*model.EmailConfirmationToken, error) {
-	query := `
-		SELECT id, user_id, email, token_hash, source, expires_at, used_at, created_at
-		FROM email_confirmation_token
-		WHERE user_id = @user_id AND token_hash = @token_hash
-	`
 	args := pgx.NamedArgs{
 		"user_id":    userID,
 		"token_hash": tokenHash,
 	}
 
 	var confirmationToken model.EmailConfirmationToken
-	err := tx.QueryRow(ctx, query, args).Scan(
+	err := tx.QueryRow(ctx, selectEmailConfirmationTokenByUserIdAndHashSql, args).Scan(
 		&confirmationToken.ID,
 		&confirmationToken.UserID,
 		&confirmationToken.Email,
@@ -172,8 +166,6 @@ func GetEmailConfirmationTokenByUserIDAndHash(ctx context.Context, tx pgx.Tx, us
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, nil
 		}
-			return nil, nil
-		}
 		return nil, err
 	}
 
@@ -181,27 +173,17 @@ func GetEmailConfirmationTokenByUserIDAndHash(ctx context.Context, tx pgx.Tx, us
 }
 
 func MarkEmailConfirmationTokenAsUsed(ctx context.Context, tx pgx.Tx, tokenID string) error {
-	query := `
-		UPDATE email_confirmation_token
-		SET used_at = now()
-		WHERE id = @token_id
-	`
 	args := pgx.NamedArgs{"token_id": tokenID}
-	_, err := tx.Exec(ctx, query, args)
+	_, err := tx.Exec(ctx, markEmailConfirmationTokenAsUsedSql, args)
 	return err
 }
 
 func SetUserEmailVerified(ctx context.Context, tx pgx.Tx, userID string, verified bool) error {
-	query := `
-		UPDATE auth_user
-		SET email_verified = @verified, updated_at = now()
-		WHERE id = @user_id
-	`
 	args := pgx.NamedArgs{
 		"verified": verified,
 		"user_id":  userID,
 	}
-	_, err := tx.Exec(ctx, query, args)
+	_, err := tx.Exec(ctx, setUserEmailVerifiedSql, args)
 	return err
 }
 
@@ -331,14 +313,7 @@ func InsertUserProfile(ctx context.Context, tx pgx.Tx, userProfile *UserProfileE
 }
 
 func UpdateUserProfile(ctx context.Context, tx pgx.Tx, userProfile *UserProfileEntity) (*UserProfileEntity, error) {
-	query := `
-		UPDATE user_profile
-		SET height = @height, weight = @weight, gender = @gender, birth_date = @birth_date, is_metric = @is_metric, updated_at = @updated_at
-		WHERE user_id = @user_id
-		RETURNING id, user_id, height, weight, gender, birth_date, is_metric, created_at, updated_at
-	`
-
-	rows, _ := tx.Query(ctx, query, pgx.NamedArgs{
+	rows, _ := tx.Query(ctx, updateUserProfileSql, pgx.NamedArgs{
 		"user_id":    userProfile.UserID,
 		"height":     userProfile.Height,
 		"weight":     userProfile.Weight,
@@ -352,4 +327,53 @@ func UpdateUserProfile(ctx context.Context, tx pgx.Tx, userProfile *UserProfileE
 		return nil, err
 	}
 	return &ent, nil
+}
+
+// Refresh token methods
+
+func InsertRefreshToken(ctx context.Context, tx pgx.Tx, token *RefreshTokenEntity) error {
+	_, err := tx.Exec(ctx, insertRefreshTokenSql, pgx.NamedArgs{
+		"id":         token.ID,
+		"user_id":    token.UserID,
+		"token_hash": token.TokenHash,
+		"issued_at":  token.IssuedAt,
+		"expires_at": token.ExpiresAt,
+		"revoked":    token.Revoked,
+	})
+	return err
+}
+
+func SelectRefreshTokenByHash(ctx context.Context, tx pgx.Tx, tokenHash string) (*RefreshTokenEntity, error) {
+	rows, _ := tx.Query(ctx, selectRefreshTokenByHashSql, pgx.NamedArgs{"token_hash": tokenHash})
+	ent, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByName[RefreshTokenEntity])
+	if katpg.IsNoRows(err) {
+		return nil, nil
+	}
+	return &ent, err
+}
+
+func RevokeRefreshToken(ctx context.Context, tx pgx.Tx, tokenHash string) error {
+	_, err := tx.Exec(ctx, revokeRefreshTokenSql, pgx.NamedArgs{"token_hash": tokenHash})
+	return err
+}
+
+func RevokeAllUserRefreshTokens(ctx context.Context, tx pgx.Tx, userID string) error {
+	_, err := tx.Exec(ctx, revokeAllUserRefreshTokensSql, pgx.NamedArgs{"user_id": userID})
+	return err
+}
+
+func DeleteExpiredRefreshTokens(ctx context.Context, tx pgx.Tx) (int64, error) {
+	cmd, err := tx.Exec(ctx, deleteExpiredRefreshTokensSql)
+	if err != nil {
+		return 0, err
+	}
+	return cmd.RowsAffected(), nil
+}
+
+func CleanupUserRefreshTokens(ctx context.Context, tx pgx.Tx, userID string) (int64, error) {
+	cmd, err := tx.Exec(ctx, cleanupUserRefreshTokensSql, pgx.NamedArgs{"user_id": userID})
+	if err != nil {
+		return 0, err
+	}
+	return cmd.RowsAffected(), nil
 }

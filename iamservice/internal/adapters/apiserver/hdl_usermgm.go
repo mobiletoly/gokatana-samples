@@ -45,6 +45,36 @@ func getUserByIdHandler(uc *usecase.UserMgm) func(c echo.Context) error {
 	}
 }
 
+// updateAuthUserHandler handles updating user details (first name and last name)
+func updateAuthUserHandler(uc *usecase.UserMgm) func(c echo.Context) error {
+	return func(c echo.Context) error {
+		ctx := c.Request().Context()
+		principal, err := serverhelp.GetUserPrincipalFromToken(c)
+		if err != nil {
+			return kathttp_echo.ReportHTTPError(err)
+		}
+		userID := c.Param("userId")
+
+		// Parse request body
+		var req swagger.UpdateAuthUserRequest
+		if err := c.Bind(&req); err != nil {
+			return kathttp_echo.ReportBadRequest(errors.New("invalid request body"))
+		}
+
+		// Update user details
+		if err := uc.UpdateUserDetails(ctx, principal, userID, req.FirstName, req.LastName); err != nil {
+			return kathttp_echo.ReportHTTPError(err)
+		}
+
+		// Return updated user data
+		if authUserResponse, err := uc.LoadUserByID(ctx, principal, userID); err != nil {
+			return kathttp_echo.ReportHTTPError(err)
+		} else {
+			return c.JSON(http.StatusOK, authUserResponse)
+		}
+	}
+}
+
 // listAllUsersByTenantHandler handles listing all tenant users with pagination
 func listAllUsersByTenantHandler(uc *usecase.UserMgm) func(c echo.Context) error {
 	return func(c echo.Context) error {

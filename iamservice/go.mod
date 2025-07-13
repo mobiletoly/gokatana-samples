@@ -19,10 +19,10 @@ require (
 	github.com/oapi-codegen/runtime v1.1.1
 	golang.org/x/crypto v0.39.0
 	golang.org/x/oauth2 v0.30.0
-	google.golang.org/api v0.239.0
+	google.golang.org/api v0.238.0
 )
 
-//replace github.com/mobiletoly/gokatana => ../../gokatana
+//replace github.com/mobiletoly/gokatana => ./../gokatana
 
 require (
 	cloud.google.com/go/auth v0.16.2 // indirect
@@ -82,6 +82,7 @@ require (
 	github.com/huandu/xstrings v1.4.0 // indirect
 	github.com/imdario/mergo v0.3.16 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
+	github.com/invopop/yaml v0.3.1 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
 	github.com/jackc/puddle/v2 v2.2.2 // indirect
@@ -111,8 +112,6 @@ require (
 	github.com/morikuni/aec v1.0.0 // indirect
 	github.com/natefinch/atomic v1.0.1 // indirect
 	github.com/oapi-codegen/oapi-codegen/v2 v2.4.1 // indirect
-	github.com/oasdiff/yaml v0.0.0-20250309154309-f31be36b4037 // indirect
-	github.com/oasdiff/yaml3 v0.0.0-20250309153720-d2182401db90 // indirect
 	github.com/oklog/ulid v1.3.1 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.1.1 // indirect

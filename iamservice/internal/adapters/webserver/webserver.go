@@ -111,6 +111,7 @@ func setupUserRoutes(e *echo.Echo, uc *usecase.UseCases, authMiddleware *serverh
 	auth.GET("/signup", authWeb.SignUpLoadHandler)
 	auth.POST("/signup", authWeb.SignUpSubmitHandler)
 	auth.POST("/signout", authWeb.SignOutSubmitHandler)
+	auth.GET("/confirm-email", authWeb.ConfirmEmailHandler)
 
 	// User account routes (protected)
 	account := root.Group("/account", authLock)

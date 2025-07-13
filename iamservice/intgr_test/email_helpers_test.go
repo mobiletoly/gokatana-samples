@@ -108,8 +108,8 @@ func extractSixDigitCode(emailBody string) string {
 // extractConfirmationURL extracts the confirmation URL from email body
 func extractConfirmationURL(emailBody string) string {
 	// Look for the confirmation URL pattern in the email body
-	// Handle both regular & and HTML-encoded &amp; in URLs
-	re := regexp.MustCompile(`/api/v1/auth/confirm-email\?userId=[^"&\s]+(?:&amp;|&)code=[^"&\s]+`)
+	// Handle both API and web URLs, and both regular & and HTML-encoded &amp; in URLs
+	re := regexp.MustCompile(`/(?:api/v1/auth|web/user/auth)/confirm-email\?userId=[^"&\s]+(?:&amp;|&)code=[^"&\s]+`)
 	matches := re.FindString(emailBody)
 	// Replace HTML-encoded ampersands with regular ones
 	matches = strings.ReplaceAll(matches, "&amp;", "&")
@@ -133,6 +133,23 @@ func extractCodeFromConfirmationURL(confirmationURL string) string {
 	if len(matches) > 1 {
 		return matches[1]
 	}
+	return ""
+}
+
+// extractConfirmationCode extracts confirmation code from email body (handles both 6-digit codes and URL tokens)
+func extractConfirmationCode(emailBody string) string {
+	// First try to extract 6-digit code (mobile)
+	sixDigitCode := extractSixDigitCode(emailBody)
+	if len(sixDigitCode) == 6 {
+		return sixDigitCode
+	}
+
+	// If no 6-digit code, try to extract from URL (web)
+	confirmationURL := extractConfirmationURL(emailBody)
+	if confirmationURL != "" {
+		return extractCodeFromConfirmationURL(confirmationURL)
+	}
+
 	return ""
 }
 

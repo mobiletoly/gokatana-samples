@@ -10,7 +10,7 @@ import (
 
 // AuthUserPersist defines the outport interface for authentication operations
 type AuthUserPersist interface {
-	CreateUser(ctx context.Context, tx pgx.Tx, user *swagger.SignupRequest, tenantID string) (*model.AuthUser, error)
+	CreateUser(ctx context.Context, tx pgx.Tx, user *swagger.SignUpRequest, tenantID string) (*model.AuthUser, error)
 	GetUserByEmail(ctx context.Context, tx pgx.Tx, email string, tenantID string) (*model.AuthUser, error)
 	GetUserByID(ctx context.Context, tx pgx.Tx, userID string) (*model.AuthUser, error)
 	UpdateUser(ctx context.Context, tx pgx.Tx, userID string, updates map[string]interface{}) (*model.AuthUser, error)
@@ -36,4 +36,12 @@ type AuthUserPersist interface {
 	GetEmailConfirmationTokenByUserIDAndHash(ctx context.Context, tx pgx.Tx, userID string, tokenHash string) (*model.EmailConfirmationToken, error)
 	MarkEmailConfirmationTokenAsUsed(ctx context.Context, tx pgx.Tx, tokenID string) error
 	SetUserEmailVerified(ctx context.Context, tx pgx.Tx, userID string, verified bool) error
+
+	// Refresh tokens
+	CreateRefreshToken(ctx context.Context, tx pgx.Tx, userID string, tokenHash string, expiresAt time.Time) (*model.RefreshToken, error)
+	GetRefreshTokenByHash(ctx context.Context, tx pgx.Tx, tokenHash string) (*model.RefreshToken, error)
+	RevokeRefreshToken(ctx context.Context, tx pgx.Tx, tokenHash string) error
+	RevokeAllUserRefreshTokens(ctx context.Context, tx pgx.Tx, userID string) error
+	CleanupExpiredRefreshTokens(ctx context.Context, tx pgx.Tx) (int64, error)
+	CleanupUserRefreshTokens(ctx context.Context, tx pgx.Tx, userID string) (int64, error)
 }

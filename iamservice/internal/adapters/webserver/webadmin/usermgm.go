@@ -127,8 +127,8 @@ func (h *UserMgmWebHandlers) CreateUserLoadHandler(c echo.Context) error {
 	firstName := strings.TrimSpace(c.FormValue("firstName"))
 	lastName := strings.TrimSpace(c.FormValue("lastName"))
 
-	// Create SignupRequest using the builder pattern
-	signupReq := swagger.NewSignupRequestBuilder().
+	// Create SignUpRequest using the builder pattern
+	signupReq := swagger.NewSignUpRequestBuilder().
 		Email(email).
 		FirstName(firstName).
 		LastName(lastName).

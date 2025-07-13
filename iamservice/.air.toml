@@ -24,7 +24,7 @@ tmp_dir = "tmp"
   rerun_delay = 500
   send_interrupt = false
   stop_on_root = false
-  pre_cmd = ["templ generate"]
+  pre_cmd = ["go tool templ generate"]
 
 [color]
   app = ""

@@ -24,11 +24,11 @@ func NewAuthUserAdapter(db *katpg.DBLink) outport.AuthUserPersist {
 	return &AuthUserAdapter{}
 }
 
-func (a *AuthUserAdapter) CreateUser(ctx context.Context, tx pgx.Tx, req *swagger.SignupRequest, tenantID string) (*model.AuthUser, error) {
+func (a *AuthUserAdapter) CreateUser(ctx context.Context, tx pgx.Tx, req *swagger.SignUpRequest, tenantID string) (*model.AuthUser, error) {
 	katapp.Logger(ctx).Info("creating user", "email", string(req.Email), "tenantID", tenantID)
 
 	userID := uuid.NewString()
-	userEntity := mapper.SwaggerSignupRequestToAuthUserEntity(req, userID, req.Password, tenantID)
+	userEntity := mapper.SwaggerSignUpRequestToAuthUserEntity(req, userID, req.Password, tenantID)
 	err := repo.InsertUser(ctx, tx, userEntity)
 	if err != nil {
 		msg := "failed to create user"
@@ -400,4 +400,95 @@ func (a *AuthUserAdapter) SetUserEmailVerified(ctx context.Context, tx pgx.Tx, u
 	}
 
 	return nil
+}
+
+// Refresh token methods
+
+func (a *AuthUserAdapter) CreateRefreshToken(ctx context.Context, tx pgx.Tx, userID string, tokenHash string, expiresAt time.Time) (*model.RefreshToken, error) {
+	katapp.Logger(ctx).Info("creating refresh token", "userID", userID)
+
+	tokenID := uuid.NewString()
+	refreshToken := model.NewRefreshTokenBuilder().
+		ID(tokenID).
+		UserID(userID).
+		TokenHash(tokenHash).
+		IssuedAt(time.Now()).
+		ExpiresAt(expiresAt).
+		Revoked(false).
+		Build()
+
+	tokenEntity := mapper.RefreshTokenModelToRefreshTokenEntity(refreshToken)
+	err := repo.InsertRefreshToken(ctx, tx, tokenEntity)
+	if err != nil {
+		katapp.Logger(ctx).Error("failed to create refresh token", "userID", userID, "error", err)
+		return nil, katpg.PgToAppError(err, "failed to create refresh token")
+	}
+
+	return refreshToken, nil
+}
+
+func (a *AuthUserAdapter) GetRefreshTokenByHash(ctx context.Context, tx pgx.Tx, tokenHash string) (*model.RefreshToken, error) {
+	katapp.Logger(ctx).Debug("getting refresh token by hash")
+
+	tokenEntity, err := repo.SelectRefreshTokenByHash(ctx, tx, tokenHash)
+	if err != nil {
+		katapp.Logger(ctx).Error("failed to get refresh token by hash", "error", err)
+		return nil, katpg.PgToAppError(err, "failed to get refresh token")
+	}
+
+	if tokenEntity == nil {
+		return nil, nil
+	}
+
+	return mapper.RefreshTokenEntityToRefreshTokenModel(tokenEntity), nil
+}
+
+func (a *AuthUserAdapter) RevokeRefreshToken(ctx context.Context, tx pgx.Tx, tokenHash string) error {
+	katapp.Logger(ctx).Info("revoking refresh token")
+
+	err := repo.RevokeRefreshToken(ctx, tx, tokenHash)
+	if err != nil {
+		katapp.Logger(ctx).Error("failed to revoke refresh token", "error", err)
+		return katpg.PgToAppError(err, "failed to revoke refresh token")
+	}
+
+	return nil
+}
+
+func (a *AuthUserAdapter) RevokeAllUserRefreshTokens(ctx context.Context, tx pgx.Tx, userID string) error {
+	katapp.Logger(ctx).Info("revoking all user refresh tokens", "userID", userID)
+
+	err := repo.RevokeAllUserRefreshTokens(ctx, tx, userID)
+	if err != nil {
+		katapp.Logger(ctx).Error("failed to revoke all user refresh tokens", "userID", userID, "error", err)
+		return katpg.PgToAppError(err, "failed to revoke all user refresh tokens")
+	}
+
+	return nil
+}
+
+func (a *AuthUserAdapter) CleanupExpiredRefreshTokens(ctx context.Context, tx pgx.Tx) (int64, error) {
+	katapp.Logger(ctx).Debug("cleaning up expired refresh tokens")
+
+	rowsAffected, err := repo.DeleteExpiredRefreshTokens(ctx, tx)
+	if err != nil {
+		katapp.Logger(ctx).Error("failed to cleanup expired refresh tokens", "error", err)
+		return 0, katpg.PgToAppError(err, "failed to cleanup expired refresh tokens")
+	}
+
+	katapp.Logger(ctx).Info("cleaned up expired refresh tokens", "rowsAffected", rowsAffected)
+	return rowsAffected, nil
+}
+
+func (a *AuthUserAdapter) CleanupUserRefreshTokens(ctx context.Context, tx pgx.Tx, userID string) (int64, error) {
+	katapp.Logger(ctx).Debug("cleaning up user refresh tokens", "userID", userID)
+
+	rowsAffected, err := repo.CleanupUserRefreshTokens(ctx, tx, userID)
+	if err != nil {
+		katapp.Logger(ctx).Error("failed to cleanup user refresh tokens", "userID", userID, "error", err)
+		return 0, katpg.PgToAppError(err, "failed to cleanup user refresh tokens")
+	}
+
+	katapp.Logger(ctx).Info("cleaned up user refresh tokens", "userID", userID, "rowsAffected", rowsAffected)
+	return rowsAffected, nil
 }

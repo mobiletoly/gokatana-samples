@@ -32,18 +32,18 @@ type AssignUserRoleRequest struct {
 // AssignUserRoleRequestRoleName Name of the role to assign
 type AssignUserRoleRequestRoleName string
 
-// AuthUserResponse Authentication user data from auth_user table (excluding sensitive fields)
+// AuthUserResponse Authentication user data
 type AuthUserResponse struct {
 	// CreatedAt Account creation timestamp
 	CreatedAt time.Time `json:"createdAt"`
 
-	// Email User email address (unique in auth_user table)
+	// Email User email address
 	Email openapi_types.Email `json:"email"`
 
 	// FirstName User first name
 	FirstName string `json:"firstName"`
 
-	// Id User unique identifier (primary key from auth_user table)
+	// Id User unique identifier
 	Id string `json:"id"`
 
 	// LastName User last name
@@ -60,6 +60,15 @@ type AuthUserResponse struct {
 type AuthUsersResponse struct {
 	Items      []AuthUserResponse `json:"items"`
 	Pagination PaginationInfo     `json:"pagination"`
+}
+
+// UpdateAuthUserRequest defines model for UpdateAuthUserRequest.
+type UpdateAuthUserRequest struct {
+	// FirstName User's first name
+	FirstName string `json:"firstName"`
+
+	// LastName User's last name
+	LastName string `json:"lastName"`
 }
 
 // UpdateUserProfileRequest User profile update request data
@@ -81,7 +90,7 @@ type UpdateUserProfileRequest struct {
 // UserProfileGender defines model for UserProfileGender.
 type UserProfileGender string
 
-// UserProfileResponse User profile data from user_profile table
+// UserProfileResponse User profile data
 type UserProfileResponse struct {
 	// BirthDate User birth date
 	BirthDate *openapi_types.Date `json:"birthDate"`
@@ -93,16 +102,13 @@ type UserProfileResponse struct {
 	// Height User height in centimeters
 	Height *int `json:"height"`
 
-	// Id Profile unique identifier (primary key from user_profile table)
-	Id int `json:"id"`
-
 	// IsMetric Whether to use metric units (true) or imperial units (false)
 	IsMetric bool `json:"isMetric"`
 
 	// UpdatedAt Last profile update timestamp
 	UpdatedAt time.Time `json:"updatedAt"`
 
-	// UserId User unique identifier (foreign key to auth_user table)
+	// UserId User unique identifier
 	UserId string `json:"userId"`
 
 	// Weight User weight in grams
@@ -133,6 +139,9 @@ type ListUsersByTenantParams struct {
 	// Limit Number of users per page
 	Limit *int `form:"limit,omitempty" json:"limit,omitempty"`
 }
+
+// UpdateAuthUserJSONRequestBody defines body for UpdateAuthUser for application/json ContentType.
+type UpdateAuthUserJSONRequestBody = UpdateAuthUserRequest
 
 // UpdateUserProfileJSONRequestBody defines body for UpdateUserProfile for application/json ContentType.
 type UpdateUserProfileJSONRequestBody = UpdateUserProfileRequest

@@ -114,27 +114,27 @@ func MobileConfirmation(data *MobileConfirmationData) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</div><div class=\"code-note\">Enter this code in your app</div></div><div class=\"instructions\"><h3>How to confirm your email:</h3><ol><li>Open the IAMService app on your ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</div><div class=\"code-note\">Enter this code in your app</div></div><div class=\"instructions\"><h3>How to confirm your email:</h3><ol><li>In your ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(data.Platform)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/email/mobile_confirmation.templ`, Line: 190, Col: 58}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/email/mobile_confirmation.templ`, Line: 190, Col: 34}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, " device</li><li>Navigate to the email confirmation screen</li><li>Enter the 6-digit code shown above</li><li>Tap \"Confirm\" to complete your registration</li></ol></div><div class=\"security-note\"><p><strong>Security Note:</strong> This confirmation code will expire in ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, " app locate the Sign Up confirmation box</li><li>Enter the 6-digit code shown above</li><li>Tap [Confirm] to complete your registration</li></ol></div><div class=\"security-note\"><p><strong>Security Note:</strong> This confirmation code will expire in ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(data.ExpiresIn)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/email/mobile_confirmation.templ`, Line: 199, Col: 93}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/email/mobile_confirmation.templ`, Line: 198, Col: 93}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
@@ -147,13 +147,13 @@ func MobileConfirmation(data *MobileConfirmationData) templ.Component {
 		var templ_7745c5c3_Var10 string
 		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(data.User.Email)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/email/mobile_confirmation.templ`, Line: 207, Col: 46}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/email/mobile_confirmation.templ`, Line: 206, Col: 46}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, " because you signed up for a IAMService account.</p><p>If you have any questions, please contact our support team.</p><p>© 2025 IAMService. All rights reserved.</p></div></div></body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, " because you signed up for a IAMService account.</p><p>If you have any questions, please contact our support team.</p><p>© 2024 IAMService. All rights reserved.</p></div></div></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

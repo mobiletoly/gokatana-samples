@@ -16,10 +16,5 @@ Tech stack:
 ## Hot reload while developing and changing template files
 
 1. install `air` (https://github.com/air-verse/air)
-2. launch:
-   ```shell
-   IAMSERVICE_DATABASE_PASSWORD=postgres \
-   IAMSERVICE_DATABASE_USER=postgres \
-   
-   air run --deployment=local
-    ```
+2. edit `./run-air.sh` and provide correct credentials for your database and GCP service account
+3. launch `./run-air.sh`

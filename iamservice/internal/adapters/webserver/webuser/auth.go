@@ -85,7 +85,7 @@ func (a *AuthWebHandlers) SignUpSubmitHandler(c echo.Context) error {
 	email := strings.TrimSpace(c.FormValue("email"))
 	password := strings.TrimSpace(c.FormValue("password"))
 
-	signupReq := &swagger.SignupRequest{
+	signupReq := &swagger.SignUpRequest{
 		TenantId:  tenantId,
 		FirstName: firstName,
 		LastName:  lastName,
@@ -98,6 +98,24 @@ func (a *AuthWebHandlers) SignUpSubmitHandler(c echo.Context) error {
 		return err
 	}
 	return user.SignUpSuccess().Render(ctx, c.Response().Writer)
+}
+
+// ConfirmEmailHandler handles email confirmation from web links
+func (a *AuthWebHandlers) ConfirmEmailHandler(c echo.Context) error {
+	ctx := c.Request().Context()
+	userID := c.QueryParam("userId")
+	code := c.QueryParam("code")
+
+	if userID == "" || code == "" {
+		return renderTemplateComponent(c, "Email Confirmation", user.EmailConfirmationError("Invalid confirmation link"))
+	}
+
+	err := a.authMgm.ConfirmEmail(ctx, userID, code)
+	if err != nil {
+		return renderTemplateComponent(c, "Email Confirmation", user.EmailConfirmationError("Email confirmation failed. The link may be expired or invalid."))
+	}
+
+	return renderTemplateComponent(c, "Email Confirmation", user.EmailConfirmationSuccess())
 }
 
 // SignOutSubmitHandler handles sign-out

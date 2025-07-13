@@ -5,4 +5,4 @@ database:
   parameters:
     channel_binding: require
 server:
-  domain: https://www.some-company-domain.com
+  domain: https://iamservice-http.some-hosting.dev

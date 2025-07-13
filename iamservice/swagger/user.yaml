@@ -107,6 +107,43 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AuthUserResponse'
+    put:
+      operationId: updateAuthUser
+      summary: Update user details
+      description: Update user first name and last name. Users can update their own details, admins can update any user.
+      tags:
+        - Users
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: The ID of the user to update
+          schema:
+            type: string
+      requestBody:
+        description: User details to update
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAuthUserRequest'
+      responses:
+        '200':
+          description: User details updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthUserResponse'
+        '400':
+          description: Invalid input data
+        '401':
+          description: Unauthorized - invalid or missing token
+        '403':
+          description: Forbidden - insufficient permissions
+        '404':
+          description: User not found
+        '500':
+          description: Internal server error
 
   /api/v1/users/{userId}/profile:
     get:
@@ -234,18 +271,13 @@ components:
 
     UserProfileResponse:
       type: object
-      description: 'User profile data from user_profile table'
+      description: 'User profile data'
       properties:
-        id:
-          type: integer
-          nullable: false
-          example: 1
-          description: 'Profile unique identifier (primary key from user_profile table)'
         userId:
           type: string
           nullable: false
           example: 'uuid-123-456-789'
-          description: 'User unique identifier (foreign key to auth_user table)'
+          description: 'User unique identifier'
         height:
           type: integer
           nullable: true
@@ -290,19 +322,19 @@ components:
 
     AuthUserResponse:
       type: object
-      description: 'Authentication user data from auth_user table (excluding sensitive fields)'
+      description: 'Authentication user data'
       properties:
         id:
           type: string
           nullable: false
           example: 'uuid-123-456-789'
-          description: 'User unique identifier (primary key from auth_user table)'
+          description: 'User unique identifier'
         email:
           type: string
           nullable: false
           format: email
           example: 'user@example.com'
-          description: 'User email address (unique in auth_user table)'
+          description: 'User email address'
         firstName:
           type: string
           nullable: false
@@ -376,6 +408,27 @@ components:
           nullable: false
           description: Name of the role to assign
           enum: [ user, admin, moderator ]
+
+    UpdateAuthUserRequest:
+      type: object
+      required:
+        - firstName
+        - lastName
+      properties:
+        firstName:
+          type: string
+          nullable: false
+          minLength: 1
+          maxLength: 100
+          description: User's first name
+          example: John
+        lastName:
+          type: string
+          nullable: false
+          minLength: 1
+          maxLength: 100
+          description: User's last name
+          example: Doe
 
     UserProfileGender:
       type: string

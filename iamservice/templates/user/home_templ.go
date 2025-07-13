@@ -36,7 +36,7 @@ func Home(userEmail string) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		if userEmail != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div class=\"text-center\"><h2 class=\"text-3xl font-bold text-gray-900\">Welcome to IAMService</h2><p class=\"mt-2 text-lg text-gray-600\">Your personal health dashboard</p></div><div class=\"grid gap-6 md:grid-cols-2 lg:grid-cols-3\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div class=\"text-center\"><h2 class=\"text-3xl font-bold text-gray-900\">Welcome to IAMService</h2><p class=\"mt-2 text-lg text-gray-600\">Your personal IAMService dashboard</p></div><div class=\"grid gap-6 md:grid-cols-2 lg:grid-cols-3\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

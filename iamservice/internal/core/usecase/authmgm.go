@@ -42,48 +42,61 @@ func NewAuthUser(
 	}
 }
 
-// RefreshToken generates new tokens using a refresh token
-func (a *AuthMgm) RefreshToken(ctx context.Context, req *swagger.RefreshRequest) (*swagger.SignInResponse, error) {
+// RefreshToken generates new tokens using a refresh token with rotation
+func (a *AuthMgm) RefreshToken(ctx context.Context, req *swagger.TokenRefreshRequest) (*swagger.SignInResponse, error) {
 	if req.RefreshToken == "" {
 		return nil, katapp.NewErr(katapp.ErrInvalidInput, "refresh token is required")
 	}
 
-	// Validate refresh token
-	userID, err := a.getUserIDFromRefreshToken(req.RefreshToken)
-	if err != nil {
-		return nil, katapp.NewErr(katapp.ErrUnauthorized, "invalid or expired refresh token")
-	}
+	// Hash the provided refresh token for database lookup
+	tokenHash := a.hashRefreshToken(req.RefreshToken)
 
-	user, err := outport.TxWithResult(ctx, a.txPort, func(tx pgx.Tx) (*model.AuthUser, error) {
-		return a.authUserPersist.GetUserByID(ctx, tx, userID)
+	// Validate refresh token and get user in a transaction
+	result, err := outport.TxWithResult(ctx, a.txPort, func(tx pgx.Tx) (*swagger.SignInResponse, error) {
+		// Get refresh token from database
+		refreshTokenRecord, err := a.authUserPersist.GetRefreshTokenByHash(ctx, tx, tokenHash)
+		if err != nil {
+			return nil, katapp.NewErr(katapp.ErrInternal, "failed to validate refresh token")
+		}
+		if refreshTokenRecord == nil || !refreshTokenRecord.IsValid() {
+			return nil, katapp.NewErr(katapp.ErrUnauthorized, "invalid or expired refresh token")
+		}
+
+		// Get user
+		user, err := a.authUserPersist.GetUserByID(ctx, tx, refreshTokenRecord.UserID)
+		if err != nil {
+			return nil, katapp.NewErr(katapp.ErrInternal, "failed to get user")
+		}
+		if user == nil {
+			return nil, katapp.NewErr(katapp.ErrNotFound, "user not found")
+		}
+
+		// Revoke the old refresh token immediately (rotation)
+		err = a.authUserPersist.RevokeRefreshToken(ctx, tx, tokenHash)
+		if err != nil {
+			katapp.Logger(ctx).Error("failed to revoke old refresh token", "error", err)
+			return nil, katapp.NewErr(katapp.ErrInternal, "failed to revoke old refresh token")
+		}
+
+		// Generate new tokens with roles
+		accessToken, newRefreshToken, expiresIn, err := a.generateJWTTokenForUserWithTx(ctx, tx, user)
+		if err != nil {
+			return nil, katapp.NewErr(katapp.ErrInternal, "failed to generate tokens")
+		}
+
+		// Build response
+		tokenType := "Bearer"
+		return swagger.NewSignInResponseBuilder().
+				AccessToken(accessToken).
+				ExpiresIn(expiresIn).
+				RefreshToken(newRefreshToken).
+				TokenType(tokenType).
+				UserId(user.ID).
+				Build(),
+			nil
 	})
-	if err != nil {
-		katapp.Logger(ctx).Error("failed to get user", "userID", userID, "error", err)
-		return nil, katapp.NewErr(katapp.ErrInternal, "failed to get user")
-	}
-	if user == nil {
-		return nil, katapp.NewErr(katapp.ErrNotFound, "user not found")
-	}
 
-	// Generate new tokens with roles
-	accessToken, refreshToken, expiresIn, err := a.generateJWTTokenForUser(ctx, user)
-	if err != nil {
-		return nil, katapp.NewErr(katapp.ErrInternal, "failed to generate tokens")
-	}
-
-	// Invalidate old refresh token
-	_ = a.invalidateRefreshToken(req.RefreshToken)
-
-	// Build response
-	tokenType := "Bearer"
-	return swagger.NewSignInResponseBuilder().
-			AccessToken(accessToken).
-			ExpiresIn(expiresIn).
-			RefreshToken(refreshToken).
-			TokenType(tokenType).
-			UserId(user.ID).
-			Build(),
-		nil
+	return result, err
 }
 
 // ValidateAccessToken validates an access token and returns the user ID
@@ -138,12 +151,32 @@ func (a *AuthMgm) ValidateUserPasswordMatches(
 func (a *AuthMgm) generateJWTTokenForUser(
 	ctx context.Context, user *model.AuthUser,
 ) (accessToken string, refreshToken string, expiresIn int64, err error) {
+	result, err := outport.TxWithResult(ctx, a.txPort, func(tx pgx.Tx) (struct {
+		AccessToken  string
+		RefreshToken string
+		ExpiresIn    int64
+	}, error) {
+		accessToken, refreshToken, expiresIn, err := a.generateJWTTokenForUserWithTx(ctx, tx, user)
+		return struct {
+			AccessToken  string
+			RefreshToken string
+			ExpiresIn    int64
+		}{accessToken, refreshToken, expiresIn}, err
+	})
+	if err != nil {
+		return "", "", 0, err
+	}
+	return result.AccessToken, result.RefreshToken, result.ExpiresIn, nil
+}
+
+// generateJWTTokenForUserWithTx generates JWT tokens within a transaction and persists refresh token
+func (a *AuthMgm) generateJWTTokenForUserWithTx(
+	ctx context.Context, tx pgx.Tx, user *model.AuthUser,
+) (accessToken string, refreshToken string, expiresIn int64, err error) {
 	now := time.Now()
 	expiresIn = 3600 // 1 hour
 
-	roles, err := outport.TxWithResult(ctx, a.txPort, func(tx pgx.Tx) ([]string, error) {
-		return a.authUserPersist.GetUserRoles(ctx, tx, user.ID)
-	})
+	roles, err := a.authUserPersist.GetUserRoles(ctx, tx, user.ID)
 	if err != nil {
 		katapp.Logger(ctx).Warn("failed to get user roles for token generation", "userID", user.ID, "error", err)
 		return "", "", 0, katapp.NewErr(katapp.ErrInternal, "failed to get user roles")
@@ -170,11 +203,12 @@ func (a *AuthMgm) generateJWTTokenForUser(
 		return "", "", 0, katapp.NewErr(katapp.ErrInternal, "failed to generate access token")
 	}
 
-	// Generate refresh token (valid for 7 days) - no roles needed in refresh token
+	// Generate refresh token (valid for 30 days) - no roles needed in refresh token
+	refreshExpiresAt := now.Add(30 * 24 * time.Hour)
 	refreshClaims := jwt.MapClaims{
 		"sub":   user.ID,
 		"iat":   now.Unix(),
-		"exp":   now.Add(7 * 24 * time.Hour).Unix(),
+		"exp":   refreshExpiresAt.Unix(),
 		"type":  "refresh",
 		"nonce": refreshNonce,
 	}
@@ -183,6 +217,22 @@ func (a *AuthMgm) generateJWTTokenForUser(
 	refreshToken, err = refreshTokenObj.SignedString(a.jwtSecret)
 	if err != nil {
 		return "", "", 0, katapp.NewErr(katapp.ErrInternal, "failed to generate refresh token")
+	}
+
+	// Clean up old refresh tokens: remove all revoked tokens and keep only the 2 most recent non-revoked tokens
+	rowsAffected, err := a.authUserPersist.CleanupUserRefreshTokens(ctx, tx, user.ID)
+	if err != nil {
+		katapp.Logger(ctx).Error("failed to cleanup user refresh tokens", "userID", user.ID, "error", err)
+		return "", "", 0, katapp.NewErr(katapp.ErrInternal, "failed to cleanup user refresh tokens")
+	}
+	katapp.Logger(ctx).Debug("cleaned up old refresh tokens", "userID", user.ID, "rowsAffected", rowsAffected)
+
+	// Persist refresh token in database
+	tokenHash := a.hashRefreshToken(refreshToken)
+	_, err = a.authUserPersist.CreateRefreshToken(ctx, tx, user.ID, tokenHash, refreshExpiresAt)
+	if err != nil {
+		katapp.Logger(ctx).Error("failed to persist refresh token", "userID", user.ID, "error", err)
+		return "", "", 0, katapp.NewErr(katapp.ErrInternal, "failed to persist refresh token")
 	}
 
 	return accessToken, refreshToken, expiresIn, nil
@@ -240,11 +290,22 @@ func (a *AuthMgm) getUserIDFromRefreshToken(tokenString string) (string, error) 
 	return "", katapp.NewErr(katapp.ErrUnauthorized, "invalid refresh token claims")
 }
 
-// invalidateRefreshToken invalidates a refresh token (placeholder implementation)
-func (a *AuthMgm) invalidateRefreshToken(token string) error {
-	// TODO In a production system, you would store invalidated tokens in a blacklist
-	// For now, this is a no-op since JWT tokens are stateless
-	return nil
+// SignOut revokes all refresh tokens for a user
+func (a *AuthMgm) SignOut(ctx context.Context, userID string) error {
+	return a.txPort.Run(ctx, func(tx pgx.Tx) error {
+		err := a.authUserPersist.RevokeAllUserRefreshTokens(ctx, tx, userID)
+		if err != nil {
+			katapp.Logger(ctx).Error("failed to revoke all user refresh tokens", "userID", userID, "error", err)
+			return katapp.NewErr(katapp.ErrInternal, "failed to sign out user")
+		}
+		return nil
+	})
+}
+
+// hashRefreshToken creates SHA-256 hash of the refresh token for secure database storage
+func (a *AuthMgm) hashRefreshToken(token string) string {
+	hash := sha256.Sum256([]byte(token))
+	return hex.EncodeToString(hash[:])
 }
 
 // generateTokenNonce generates a random nonce for token uniqueness

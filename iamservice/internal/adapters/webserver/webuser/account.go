@@ -3,7 +3,7 @@ package webuser
 import (
 	"github.com/mobiletoly/gokatana/katapp"
 	"github.com/mobiletoly/gokatana/kathttp_echo"
-	openapi_types "github.com/oapi-codegen/runtime/types"
+	"github.com/oapi-codegen/runtime/types"
 	"strconv"
 	"strings"
 	"time"
@@ -143,7 +143,7 @@ func (h *AccountWebHandlers) UpdateProfileSubmitHandler(c echo.Context) error {
 
 	if birthDateStr != "" {
 		if parsedTime, err := time.Parse("2006-01-02", birthDateStr); err == nil {
-			updateReq.BirthDate = &openapi_types.Date{Time: parsedTime}
+			updateReq.BirthDate = &types.Date{Time: parsedTime}
 		} else {
 			return katapp.NewErr(katapp.ErrInvalidInput, "invalid birth data format")
 		}

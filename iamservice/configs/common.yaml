@@ -1,7 +1,7 @@
 database:
   migrations:
     - service: iamservice
-      schema: public
+      schema: iam
       path: ./dbmigrate
   connectTimeout: 30
   port: 5432

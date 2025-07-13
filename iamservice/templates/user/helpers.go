@@ -3,7 +3,7 @@ package user
 import (
 	"fmt"
 	"github.com/mobiletoly/gokatana-samples/iamservice/internal/core/swagger"
-	openapi_types "github.com/oapi-codegen/runtime/types"
+	"github.com/oapi-codegen/runtime/types"
 	"time"
 )
 
@@ -11,7 +11,7 @@ import (
 // FORMATTING HELPER FUNCTIONS
 // ============================================================================
 
-func formatDate(date openapi_types.Date) string {
+func formatDate(date types.Date) string {
 	return date.Format("January 2, 2006")
 }
 
@@ -23,7 +23,7 @@ func formatInt64(value int64) string {
 	return fmt.Sprintf("%d", value)
 }
 
-func formatDateForInput(date openapi_types.Date) string {
+func formatDateForInput(date types.Date) string {
 	return date.Format("2006-01-02")
 }
 

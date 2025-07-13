@@ -10,12 +10,12 @@ import (
 	"github.com/mobiletoly/gokatana-samples/iamservice/internal/core/swagger"
 )
 
-// SwaggerSignupRequestToAuthUserEntity converts swagger.SignupRequest to repo.AuthUserEntity
-func SwaggerSignupRequestToAuthUserEntity(req *swagger.SignupRequest, userID string, hashedPassword string, tenantID string) *repo.AuthUserEntity {
+// SwaggerSignUpRequestToAuthUserEntity converts swagger.SignUpRequest to repo.AuthUserEntity
+func SwaggerSignUpRequestToAuthUserEntity(req *swagger.SignUpRequest, userID string, hashedPassword string, tenantID string) *repo.AuthUserEntity {
 	now := time.Now()
 
 	return repo.NewAuthUserEntityBuilder().
-		ID(&userID).
+		ID(userID).
 		Email(string(req.Email)).
 		PasswordHash(hashedPassword).
 		FirstName(req.FirstName).
@@ -30,7 +30,7 @@ func SwaggerSignupRequestToAuthUserEntity(req *swagger.SignupRequest, userID str
 
 func AuthUserEntityToAuthUserModel(entity *repo.AuthUserEntity) *model.AuthUser {
 	return model.NewAuthUserBuilder().
-		ID(*entity.ID).
+		ID(entity.ID).
 		Email(entity.Email).
 		PasswordHash(entity.PasswordHash).
 		FirstName(entity.FirstName).
@@ -104,10 +104,33 @@ func UserProfileEntityToSwagger(entity *repo.UserProfileEntity) *swagger.UserPro
 		CreatedAt(entity.CreatedAt).
 		Gender(gender).
 		Height(entity.Height).
-		Id(*entity.ID).
 		IsMetric(entity.IsMetric).
 		UpdatedAt(entity.UpdatedAt).
 		UserId(entity.UserID).
 		Weight(entity.Weight).
+		Build()
+}
+
+// RefreshTokenModelToRefreshTokenEntity converts model.RefreshToken to repo.RefreshTokenEntity
+func RefreshTokenModelToRefreshTokenEntity(token *model.RefreshToken) *repo.RefreshTokenEntity {
+	return repo.NewRefreshTokenEntityBuilder().
+		ID(token.ID).
+		UserID(token.UserID).
+		TokenHash(token.TokenHash).
+		IssuedAt(token.IssuedAt).
+		ExpiresAt(token.ExpiresAt).
+		Revoked(token.Revoked).
+		Build()
+}
+
+// RefreshTokenEntityToRefreshTokenModel converts repo.RefreshTokenEntity to model.RefreshToken
+func RefreshTokenEntityToRefreshTokenModel(entity *repo.RefreshTokenEntity) *model.RefreshToken {
+	return model.NewRefreshTokenBuilder().
+		ID(entity.ID).
+		UserID(entity.UserID).
+		TokenHash(entity.TokenHash).
+		IssuedAt(entity.IssuedAt).
+		ExpiresAt(entity.ExpiresAt).
+		Revoked(entity.Revoked).
 		Build()
 }

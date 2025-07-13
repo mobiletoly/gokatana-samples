@@ -69,7 +69,7 @@ func apiRoutes(e *echo.Echo, uc *usecase.UseCases) {
 	auth.POST("/signin", signinHandler(uc.Auth))
 	auth.POST("/signout", signoutHandler(uc.Auth), authLock)
 	auth.POST("/refresh", refreshTokenHandler(uc.Auth))
-	auth.GET("/confirm-email", confirmEmailHandler(uc.Auth))
+	auth.POST("/confirm-email", confirmEmailHandler(uc.Auth))
 
 	// User profile routes (basic authentication required)
 	api.GET("/users/me", getMyUserHandler(uc.UserMgm), authLock)
@@ -81,6 +81,7 @@ func apiRoutes(e *echo.Echo, uc *usecase.UseCases) {
 	users := api.Group("/users", authLock)
 	users.GET("", listAllUsersByTenantHandler(uc.UserMgm))                                     // GET /api/v1/users
 	users.GET("/:userId", getUserByIdHandler(uc.UserMgm))                                      // GET /api/v1/users/{userId}
+	users.PUT("/:userId", updateAuthUserHandler(uc.UserMgm))                                   // PUT /api/v1/users/{userId}
 	users.GET("/:userId/profile", getUserProfileHandler(uc.UserProfileMgm))                    // GET /api/v1/users/{userId}/profile
 	users.PUT("/:userId/profile", updateUserProfileHandler(uc.UserProfileMgm))                 // PUT /api/v1/users/{userId}/profile
 	users.GET("/:userId/roles", getUserRolesHandler(uc.UserMgm))                               // GET /api/v1/users/{userId}/roles

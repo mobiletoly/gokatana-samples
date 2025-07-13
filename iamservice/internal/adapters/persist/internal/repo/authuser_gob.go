@@ -18,7 +18,7 @@ type AuthUserEntity_Builder_Email struct {
 	root *AuthUserEntity
 }
 
-func (b AuthUserEntity_Builder_ID) ID(arg *string) AuthUserEntity_Builder_Email {
+func (b AuthUserEntity_Builder_ID) ID(arg string) AuthUserEntity_Builder_Email {
 	b.root.ID = arg
 	return AuthUserEntity_Builder_Email{root: b.root}
 }
@@ -231,6 +231,72 @@ func (b TenantEntity_Builder_UpdatedAt) UpdatedAt(arg time.Time) TenantEntity_Bu
 }
 
 func (b TenantEntity_Builder_GobFinalizer) Build() *TenantEntity {
+	return b.root
+}
+
+func NewRefreshTokenEntityBuilder() RefreshTokenEntity_Builder_ID {
+	return RefreshTokenEntity_Builder_ID{root: &RefreshTokenEntity{}}
+}
+
+type RefreshTokenEntity_Builder_ID struct {
+	root *RefreshTokenEntity
+}
+
+type RefreshTokenEntity_Builder_UserID struct {
+	root *RefreshTokenEntity
+}
+
+func (b RefreshTokenEntity_Builder_ID) ID(arg string) RefreshTokenEntity_Builder_UserID {
+	b.root.ID = arg
+	return RefreshTokenEntity_Builder_UserID{root: b.root}
+}
+
+type RefreshTokenEntity_Builder_TokenHash struct {
+	root *RefreshTokenEntity
+}
+
+func (b RefreshTokenEntity_Builder_UserID) UserID(arg string) RefreshTokenEntity_Builder_TokenHash {
+	b.root.UserID = arg
+	return RefreshTokenEntity_Builder_TokenHash{root: b.root}
+}
+
+type RefreshTokenEntity_Builder_IssuedAt struct {
+	root *RefreshTokenEntity
+}
+
+func (b RefreshTokenEntity_Builder_TokenHash) TokenHash(arg string) RefreshTokenEntity_Builder_IssuedAt {
+	b.root.TokenHash = arg
+	return RefreshTokenEntity_Builder_IssuedAt{root: b.root}
+}
+
+type RefreshTokenEntity_Builder_ExpiresAt struct {
+	root *RefreshTokenEntity
+}
+
+func (b RefreshTokenEntity_Builder_IssuedAt) IssuedAt(arg time.Time) RefreshTokenEntity_Builder_ExpiresAt {
+	b.root.IssuedAt = arg
+	return RefreshTokenEntity_Builder_ExpiresAt{root: b.root}
+}
+
+type RefreshTokenEntity_Builder_Revoked struct {
+	root *RefreshTokenEntity
+}
+
+func (b RefreshTokenEntity_Builder_ExpiresAt) ExpiresAt(arg time.Time) RefreshTokenEntity_Builder_Revoked {
+	b.root.ExpiresAt = arg
+	return RefreshTokenEntity_Builder_Revoked{root: b.root}
+}
+
+type RefreshTokenEntity_Builder_GobFinalizer struct {
+	root *RefreshTokenEntity
+}
+
+func (b RefreshTokenEntity_Builder_Revoked) Revoked(arg bool) RefreshTokenEntity_Builder_GobFinalizer {
+	b.root.Revoked = arg
+	return RefreshTokenEntity_Builder_GobFinalizer{root: b.root}
+}
+
+func (b RefreshTokenEntity_Builder_GobFinalizer) Build() *RefreshTokenEntity {
 	return b.root
 }
 
