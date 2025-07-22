@@ -39,6 +39,7 @@ func Start(ctx context.Context, uc *usecase.UseCases) *echo.Echo {
 				WithTraceID:   true,
 			}
 			e.Use(slogecho.NewWithConfig(logger, config))
+			e.Use(kathttp_echo.GuessHTTPErrorMiddleware)
 			apiRoutes(e, uc)
 		})
 	return server
